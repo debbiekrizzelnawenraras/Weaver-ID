@@ -77,16 +77,15 @@ body {
 .app-header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
-  padding: 16px 20px 24px;
+  padding: 20px 20px 24px;
   position: sticky;
   top: 0;
   z-index: 40;
 }
 .app-header-top {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  margin-bottom: 16px;
 }
 .app-header-top h1 {
   font-size: 1.1rem;
@@ -96,28 +95,6 @@ body {
   gap: 8px;
 }
 .app-header-top h1 i { color: var(--accent-light); }
-.app-header-top .menu-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  border: none;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.user-role-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.15);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
 
 /* SCAN SCREEN */
 .scan-container {
@@ -528,7 +505,7 @@ body {
   gap: 12px;
   margin-bottom: 24px;
 }
-.quick-action {
+.quick-actions .quick-action {
   background: var(--card);
   border-radius: 16px;
   padding: 20px;
@@ -587,7 +564,6 @@ body {
 </head>
 <body>
 
-<!-- PHONE FRAME -->
 <div class="phone-frame">
   <div class="phone-notch"></div>
 
@@ -602,19 +578,12 @@ body {
 
   <div class="phone-screen">
 
-    <!-- APP HEADER -->
     <div class="app-header">
       <div class="app-header-top">
         <h1><i class="fas fa-fingerprint"></i> Weaver-ID</h1>
-        <button class="menu-btn"><i class="fas fa-bars"></i></button>
-      </div>
-      <div class="user-role-badge">
-        <i class="fas fa-shield-alt" style="font-size: 0.7rem;"></i>
-        <span>Consumer / Enforcer Mode</span>
       </div>
     </div>
 
-    <!-- HOME SCREEN -->
     <div class="home-screen active" id="screen-home">
       <div class="welcome-card">
         <h2>Verify Authentic Weaves</h2>
@@ -652,7 +621,6 @@ body {
       </div>
     </div>
 
-    <!-- SCAN SCREEN -->
     <div class="home-screen" id="screen-scan">
       <div class="scan-container">
         <div class="scan-illustration">
@@ -676,7 +644,6 @@ body {
       </div>
     </div>
 
-    <!-- AUTHENTICATED RESULT -->
     <div class="result-screen" id="result-authenticated">
       <div class="result-header success">
         <div class="result-icon"><i class="fas fa-check"></i></div>
@@ -733,7 +700,6 @@ body {
       </div>
     </div>
 
-    <!-- UNREGISTERED RESULT -->
     <div class="result-screen" id="result-unregistered">
       <div class="result-header unregistered">
         <div class="result-icon"><i class="fas fa-question"></i></div>
@@ -783,7 +749,6 @@ body {
       </div>
     </div>
 
-    <!-- SUSPICIOUS RESULT -->
     <div class="result-screen" id="result-suspicious">
       <div class="result-header suspicious">
         <div class="result-icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -821,7 +786,7 @@ body {
         </div>
 
         <div class="info-card" style="margin-top: 16px; background: #fef2f2;">
-          <h4 style="color: var(#dc2626);"><i class="fas fa-shield-alt"></i> Enforcement Action</h4>
+          <h4 style="color: #dc2626;"><i class="fas fa-shield-alt"></i> Enforcement Action</h4>
           <p>This product has been flagged in our system. As an enforcement officer, you may:</p>
           <ul style="margin-left: 16px; margin-top: 8px; font-size: 0.82rem; color: var(--text-light); line-height: 1.8;">
             <li>Document the finding</li>
@@ -837,7 +802,6 @@ body {
       </div>
     </div>
 
-    <!-- SCAN HISTORY -->
     <div class="home-screen" id="screen-history">
       <div style="padding: 20px;">
         <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;">Scan History</h2>
@@ -894,7 +858,6 @@ body {
 
   </div>
 
-  <!-- BOTTOM NAVIGATION -->
   <div class="bottom-nav">
     <button class="nav-btn" onclick="goHome()">
       <i class="fas fa-home"></i>
