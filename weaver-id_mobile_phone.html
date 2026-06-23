@@ -77,7 +77,7 @@ body {
 .app-header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
-  padding: 16px 20px 24px;
+  padding: 20px 20px 24px;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -86,38 +86,15 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }
 .app-header-top h1 {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .app-header-top h1 i { color: var(--accent-light); }
-.app-header-top .menu-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  border: none;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.user-role-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.15);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
 
 /* SCAN SCREEN */
 .scan-container {
@@ -588,11 +565,6 @@ body {
     <div class="app-header">
       <div class="app-header-top">
         <h1><i class="fas fa-fingerprint"></i> Weaver-ID</h1>
-        <button class="menu-btn"><i class="fas fa-bars"></i></button>
-      </div>
-      <div class="user-role-badge">
-        <i class="fas fa-shield-alt" style="font-size: 0.7rem;"></i>
-        <span>Consumer / Enforcer Mode</span>
       </div>
     </div>
 
@@ -796,7 +768,7 @@ body {
 
         <div class="info-card" style="margin-top: 16px; background: #fef2f2;">
           <h4 style="color: var(#dc2626);"><i class="fas fa-shield-alt"></i> Enforcement Action</h4>
-          <p>This product has been flagged in our system. As an enforcement officer, you may:</p>
+          <p>This product has been flagged in our system. You may:</p>
           <ul style="margin-left: 16px; margin-top: 8px; font-size: 0.82rem; color: var(--text-light); line-height: 1.8;">
             <li>Document the finding</li>
             <li>Contact the seller for verification</li>
@@ -916,16 +888,6 @@ function showHistory() {
 function updateNav(active) {
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 }
-
-// Restoring proper header elements originally included
-document.querySelector('.app-header-top').innerHTML = `
-  <h1><i class="fas fa-fingerprint"></i> Weaver-ID</h1>
-  <button class="menu-btn"><i class="fas fa-bars"></i></button>
-`;
-const originalBadge = document.createElement('div');
-originalBadge.className = 'user-role-badge';
-originalBadge.innerHTML = `<i class="fas fa-shield-alt" style="font-size: 0.7rem;"></i> <span>Consumer / Enforcer Mode</span>`;
-document.querySelector('.app-header').appendChild(originalBadge);
 
 function simulateScan() {
   const btn = document.getElementById('scan-btn');
