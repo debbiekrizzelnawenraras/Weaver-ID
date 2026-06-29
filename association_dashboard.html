@@ -3,1185 +3,1663 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weaver-ID | Association Portal</title>
+    <title>Weaver-ID - Association Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #1a5f2a;
-            --primary-light: #2d8a3e;
-            --primary-dark: #0d3d18;
-            --secondary: #c9a227;
-            --danger: #c0392b;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --info: #3498db;
-            --bg: #f0f4f0;
-            --card-bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #5a6c7d;
-            --border: #e0e6e0;
-            --shadow: 0 2px 8px rgba(0,0,0,0.08);
-            --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            --primary-green: #1a5c3a;
+            --dark-green: #0f3d26;
+            --light-green: #2d7a52;
+            --accent-green: #4ade80;
+            --bg-light: #f0f2f5;
+            --white: #ffffff;
+            --text-dark: #1f2937;
+            --text-gray: #6b7280;
+            --text-light: #9ca3af;
+            --border-color: #e5e7eb;
+            --gold: #d4a017;
+            --red: #dc2626;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
             min-height: 100vh;
         }
-        
-        /* ===== SIDEBAR (Desktop) ===== */
+
+        /* Sidebar */
         .sidebar {
+            width: 260px;
+            background: var(--primary-green);
+            color: var(--white);
             position: fixed;
             left: 0;
             top: 0;
-            width: 260px;
-            height: 100vh;
-            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 20px 0;
+            bottom: 0;
             z-index: 1000;
+            transition: transform 0.3s ease;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
+
         .sidebar-header {
-            padding: 0 20px 20px;
+            padding: 30px 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .sidebar-logo {
-            width: 60px; height: 60px;
-            background: white;
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--white);
             border-radius: 50%;
-            margin: 0 auto 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0 auto 15px;
             font-size: 28px;
+            color: var(--primary-green);
         }
-        .sidebar-header h2 { font-size: 18px; }
-        .sidebar-header p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
-        .assoc-info {
-            padding: 15px;
-            background: rgba(255,255,255,0.1);
-            margin: 15px;
-            border-radius: 10px;
-        }
-        .assoc-info h4 { font-size: 14px; margin-bottom: 4px; }
-        .assoc-info span { font-size: 12px; opacity: 0.8; }
-        .nav-menu { list-style: none; padding: 10px 0; }
-        .nav-menu li {
-            padding: 12px 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 3px solid transparent;
-            transition: all 0.2s;
-        }
-        .nav-menu li:hover, .nav-menu li.active {
-            background: rgba(255,255,255,0.1);
-            border-left-color: var(--secondary);
-        }
-        .nav-menu li .nav-icon { font-size: 20px; width: 24px; text-align: center; }
-        .nav-menu li span { font-size: 14px; }
-        
-        /* ===== MAIN CONTENT ===== */
-        .main-content {
-            margin-left: 260px;
-            min-height: 100vh;
-        }
-        .top-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .top-header h1 { font-size: 24px; }
-        .top-header p { font-size: 14px; opacity: 0.85; margin-top: 4px; }
-        .header-actions { display: flex; gap: 12px; align-items: center; }
-        .header-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            position: relative;
-        }
-        .badge-count {
-            position: absolute;
-            top: -2px; right: -2px;
-            background: var(--danger);
-            color: white;
-            font-size: 10px;
+
+        .logo-text {
+            font-size: 20px;
             font-weight: 700;
-            width: 18px; height: 18px;
+            margin-bottom: 4px;
+        }
+
+        .logo-sub {
+            font-size: 12px;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .org-card {
+            margin: 20px 15px;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .org-name {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .org-location {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 6px;
+        }
+
+        .org-meta {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+            color: var(--white);
+            opacity: 0.85;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            opacity: 1;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.12);
+            border-left-color: var(--accent-green);
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--primary-green);
+            color: var(--white);
+            align-items: center;
+            padding: 0 16px;
+            z-index: 999;
+            justify-content: space-between;
+        }
+
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .mobile-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--white);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--primary-green);
+            font-size: 18px;
         }
-        
-        .content-area { padding: 24px 30px; padding-bottom: 40px; }
-        
-        /* ===== STATS ===== */
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 24px;
         }
+
         .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
+            background: var(--white);
             border-radius: 16px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--primary);
+            padding: 24px;
+            border-left: 4px solid var(--accent-green);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
-        .stat-card:nth-child(2) { border-left-color: var(--secondary); }
-        .stat-card:nth-child(3) { border-left-color: var(--success); }
-        .stat-card:nth-child(4) { border-left-color: var(--warning); }
-        .stat-card h3 { font-size: 32px; font-weight: 800; }
-        .stat-card p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-        .stat-card .trend {
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .stat-card:nth-child(2) { border-left-color: var(--gold); }
+        .stat-card:nth-child(3) { border-left-color: var(--accent-green); }
+        .stat-card:nth-child(4) { border-left-color: var(--gold); }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-gray);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .stat-trend {
             font-size: 12px;
-            margin-top: 8px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        .trend.up { color: var(--success); }
-        .trend.down { color: var(--danger); }
-        
-        /* ===== SCAN SECTION ===== */
-        .scan-section {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 40px;
+
+        .stat-trend.up {
+            color: var(--accent-green);
+        }
+
+        .stat-trend.down {
+            color: var(--red);
+        }
+
+        .stat-trend.alert {
+            color: var(--red);
+        }
+
+        /* NFC Section */
+        .nfc-section {
+            background: var(--primary-green);
             border-radius: 20px;
-            margin-bottom: 24px;
+            padding: 60px 40px;
             text-align: center;
+            color: var(--white);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
         }
-        .scan-section .scan-icon-big {
-            width: 100px; height: 100px;
-            border: 3px dashed rgba(255,255,255,0.3);
+
+        .nfc-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
             border-radius: 50%;
-            margin: 0 auto 20px;
+        }
+
+        .nfc-icon-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .nfc-pulse {
+            position: absolute;
+            inset: -20px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .nfc-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
-            animation: pulse 2s infinite;
+            font-size: 28px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .scan-section h2 { font-size: 24px; margin-bottom: 8px; }
-        .scan-section p { opacity: 0.9; margin-bottom: 20px; }
-        .btn-scan-big {
-            background: white;
-            color: var(--primary);
-            border: none;
-            padding: 16px 40px;
-            border-radius: 12px;
-            font-size: 16px;
+
+        .nfc-title {
+            font-size: 24px;
             font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nfc-desc {
+            font-size: 14px;
+            opacity: 0.85;
+            max-width: 500px;
+            margin: 0 auto 28px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nfc-btn {
+            background: var(--white);
+            color: var(--primary-green);
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
-        .btn-scan-big:hover { transform: translateY(-2px); }
-        
-        /* ===== CONTENT GRID ===== */
-        .two-col {
+
+        .nfc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .nfc-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Bottom Cards */
+        .bottom-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        .card {
-            background: var(--card-bg);
+
+        .panel-card {
+            background: var(--white);
             border-radius: 16px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .card-header {
+
+        .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
-        .card-header h3 { font-size: 16px; font-weight: 700; }
-        .card-header a {
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .view-all {
             font-size: 13px;
-            color: var(--primary);
+            color: var(--primary-green);
             text-decoration: none;
             font-weight: 600;
-        }
-        
-        /* Table */
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th {
-            text-align: left;
-            padding: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            border-bottom: 2px solid var(--border);
-        }
-        .data-table td {
-            padding: 12px;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border);
-        }
-        .data-table tr:hover { background: var(--bg); }
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-        .badge-auth { background: #d4edda; color: #155724; }
-        .badge-pending { background: #fff3cd; color: #856404; }
-        .badge-unreg { background: #f8d7da; color: #721c24; }
-        
-        /* Scan items */
-        .scan-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
+            gap: 4px;
+            transition: gap 0.2s;
         }
-        .scan-item:last-child { border-bottom: none; }
-        .scan-icon-sm {
-            width: 40px; height: 40px;
-            border-radius: 50%;
+
+        .view-all:hover {
+            gap: 8px;
+        }
+
+        .product-item, .scan-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 8px;
+            padding-left: 12px;
+            padding-right: 12px;
+            margin: 0 -12px;
+        }
+
+        .product-item:hover, .scan-item:hover {
+            background: var(--bg-light);
+        }
+
+        .product-item:last-child, .scan-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--bg-light);
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-right: 14px;
             font-size: 18px;
             flex-shrink: 0;
         }
-        .scan-icon-sm.success { background: #d4edda; color: var(--success); }
-        .scan-icon-sm.fail { background: #f8d7da; color: var(--danger); }
-        .scan-detail { flex: 1; }
-        .scan-detail h4 { font-size: 13px; font-weight: 700; }
-        .scan-detail p { font-size: 12px; color: var(--text-secondary); }
-        .scan-time { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
-        
-        /* Product cards */
-        .product-row {
-            display: flex;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
         }
-        .product-row:last-child { border-bottom: none; }
-        .product-img-sm {
-            width: 50px; height: 50px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+
+        .item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .item-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
             flex-shrink: 0;
         }
-        .product-info { flex: 1; }
-        .product-info h4 { font-size: 14px; font-weight: 700; }
-        .product-info p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-        .product-meta { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
-        
-        /* Weaver cards */
-        .weaver-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px;
-            background: var(--card-bg);
+
+        .status-verified {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Page Content */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            background: var(--white);
             border-radius: 16px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow);
-            cursor: pointer;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .weaver-avatar {
-            width: 50px; height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
-            flex-shrink: 0;
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .weaver-info { flex: 1; }
-        .weaver-info h4 { font-size: 15px; font-weight: 700; }
-        .weaver-info p { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
-        .weaver-count { text-align: right; }
-        .weaver-count span { font-size: 22px; font-weight: 800; color: var(--primary); }
-        .weaver-count p { font-size: 12px; color: var(--text-secondary); }
-        
-        /* NFC cards */
-        .nfc-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px;
-            background: var(--card-bg);
-            border-radius: 16px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--border);
+
+        .data-table th {
+            background: var(--bg-light);
+            padding: 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .nfc-row.available { border-left-color: var(--success); }
-        .nfc-row.used { border-left-color: var(--primary); }
-        .nfc-row.damaged { border-left-color: var(--danger); }
-        .nfc-icon {
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
+
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
         }
-        .nfc-info { flex: 1; }
-        .nfc-info h4 { font-size: 14px; font-weight: 700; font-family: monospace; }
-        .nfc-info p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-        
-        /* Buttons */
+
+        .data-table tr:hover td {
+            background: var(--bg-light);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Action Buttons */
         .btn {
             padding: 10px 20px;
-            border: none;
             border-radius: 10px;
+            border: none;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s;
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-light); }
-        .btn-success { background: var(--success); color: white; }
-        .btn-secondary { background: var(--bg); color: var(--text); }
-        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
-        
-        /* Modal overlay */
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--light-green);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .search-bar i {
+            color: var(--text-light);
+            margin-right: 12px;
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 14px;
+            font-family: inherit;
+            background: transparent;
+        }
+
+        /* Modal */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
             display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
             padding: 20px;
         }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: var(--card-bg);
-            border-radius: 20px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 30px;
-            animation: modalIn 0.3s;
+
+        .modal-overlay.active {
+            display: flex;
         }
+
+        .modal {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            animation: modalIn 0.3s ease;
+        }
+
         @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.95); }
+            from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
         }
-        .modal-header { text-align: center; margin-bottom: 20px; }
-        .modal-result-icon {
-            width: 80px; height: 80px;
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            margin: 0 auto 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            margin: 0 auto 20px;
+            font-size: 32px;
         }
-        .modal-result-icon.success { background: #d4edda; color: var(--success); }
-        .modal-result-icon.fail { background: #f8d7da; color: var(--danger); }
-        .modal-header h2 { font-size: 22px; font-weight: 800; }
-        .modal-header p { color: var(--text-secondary); margin-top: 4px; }
-        
-        .detail-list {
-            background: var(--bg);
-            border-radius: 16px;
-            padding: 8px 20px;
-            margin: 16px 0;
+
+        .modal-icon.success {
+            background: #dcfce7;
+            color: #166534;
         }
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-row .label { font-size: 13px; color: var(--text-secondary); }
-        .detail-row .value { font-size: 13px; font-weight: 700; text-align: right; max-width: 50%; }
-        .detail-row .value.success { color: var(--success); }
-        .detail-row .value.fail { color: var(--danger); }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-actions .btn { flex: 1; justify-content: center; }
-        
-        /* Forms */
-        .form-group { margin-bottom: 16px; }
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-secondary);
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 15px;
-            font-family: inherit;
-        }
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        /* Loading */
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2500;
-            gap: 20px;
-        }
-        .loading-overlay.active { display: flex; }
-        .spinner {
-            width: 80px; height: 80px;
-            border: 4px solid rgba(255,255,255,0.2);
-            border-top-color: white;
-            border-radius: 50%;
+
+        .modal-icon.scanning {
+            background: #e0f2fe;
+            color: #0369a1;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-overlay p { color: white; font-size: 18px; font-weight: 600; }
-        
-        /* Toast */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--text);
-            color: white;
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 3000;
-            opacity: 0;
-            transform: translateX(100px);
-            transition: all 0.3s;
-            box-shadow: var(--shadow-lg);
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { background: var(--success); }
-        .toast.error { background: var(--danger); }
-        
-        /* Empty state */
-        .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
-        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
-        .empty-state p { font-size: 13px; }
-        
-        /* Page sections */
-        .page-section { display: none; }
-        .page-section.active { display: block; }
-        
-        /* Action bar */
-        .action-bar {
+
+        .modal h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .modal p {
+            color: var(--text-gray);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            gap: 12px;
+            justify-content: center;
         }
-        .action-bar h2 { font-size: 20px; font-weight: 700; }
-        
-        /* ===== MOBILE RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .two-col { grid-template-columns: 1fr; }
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; }
-            .stats-grid {
-                display: flex;
-                gap: 12px;
-                overflow-x: auto;
-                padding-bottom: 8px;
-            }
-            .stat-card { min-width: 140px; flex-shrink: 0; }
-            .top-header { padding: 16px 20px; }
-            .top-header h1 { font-size: 20px; }
-            .content-area { padding: 16px; padding-bottom: 100px; }
-            .scan-section { padding: 30px 20px; }
-            .action-bar { flex-direction: column; gap: 12px; align-items: stretch; }
-            .action-bar .btn { width: 100%; justify-content: center; }
-        }
-        
-        /* Mobile bottom nav */
-        .mobile-nav {
-            display: none;
+
+        /* Toast */
+        .toast-container {
             position: fixed;
-            bottom: 0;
-            left: 0; right: 0;
-            background: var(--card-bg);
-            padding: 8px 0 12px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
-            z-index: 1000;
-            border-top: 1px solid var(--border);
-        }
-        .mobile-nav-item {
-            flex: 1;
+            top: 24px;
+            right: 24px;
+            z-index: 3000;
             display: flex;
             flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
             align-items: center;
-            gap: 3px;
-            padding: 4px;
-            border: none;
-            background: none;
-            color: var(--text-secondary);
-            font-size: 11px;
-            cursor: pointer;
+            gap: 12px;
+            min-width: 300px;
+            animation: toastIn 0.3s ease;
+            border-left: 4px solid var(--accent-green);
         }
-        .mobile-nav-item.active { color: var(--primary); }
-        .mobile-nav-item .icon { font-size: 22px; }
-        
+
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { background: #dcfce7; color: #166534; }
+        .toast.error .toast-icon { background: #fee2e2; color: #991b1b; }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .toast-msg {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
-            .mobile-nav { display: flex; }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 16px 24px;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nfc-section {
+                padding: 40px 24px;
+            }
+
+            .nfc-title {
+                font-size: 20px;
+            }
+
+            .page-header h1 {
+                font-size: 22px;
+            }
+
+            .data-table {
+                overflow-x: auto;
+            }
+
+            .page-actions {
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .toast-container {
+                left: 16px;
+                right: 16px;
+                top: 70px;
+            }
+
+            .toast {
+                min-width: auto;
+                width: 100%;
+            }
         }
-        
-        /* FAB for mobile */
-        .fab {
+
+        @media (max-width: 480px) {
+            .stat-card {
+                padding: 18px;
+            }
+
+            .stat-number {
+                font-size: 26px;
+            }
+
+            .panel-card {
+                padding: 18px;
+            }
+        }
+
+        /* NFC Scan Animation */
+        .scanning-overlay {
             display: none;
             position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            border: none;
-            font-size: 28px;
-            box-shadow: 0 4px 15px rgba(26,95,42,0.4);
-            z-index: 999;
-            cursor: pointer;
-            animation: pulse 2s infinite;
+            inset: 0;
+            background: var(--primary-green);
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
         }
-        @media (max-width: 768px) {
-            .fab { display: flex; align-items: center; justify-content: center; }
+
+        .scanning-overlay.active {
+            display: flex;
+        }
+
+        .scan-circle {
+            width: 200px;
+            height: 200px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .scan-circle::before,
+        .scan-circle::after {
+            content: '';
+            position: absolute;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            animation: scanPulse 2s infinite;
+        }
+
+        .scan-circle::before {
+            width: 280px;
+            height: 280px;
+            animation-delay: 0s;
+        }
+
+        .scan-circle::after {
+            width: 360px;
+            height: 360px;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes scanPulse {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+
+        .scan-icon {
+            font-size: 60px;
+            z-index: 1;
+        }
+
+        .scan-text {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .scan-sub {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .scan-cancel {
+            margin-top: 40px;
+            padding: 12px 32px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: var(--white);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .scan-cancel:hover {
+            background: rgba(255,255,255,0.3);
         }
     </style>
 </head>
 <body>
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
-    
-    <!-- Loading -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p>Scanning NFC Tag...</p>
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="mobile-logo">
+            <div class="mobile-logo-icon">
+                <i class="fas fa-spool"></i>
+            </div>
+            Weaver-ID
+        </div>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
-    
-    <!-- ===== SIDEBAR (Desktop) ===== -->
-    <aside class="sidebar">
+
+    <!-- Overlay -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo">🧵</div>
-            <h2>Weaver-ID</h2>
-            <p>Association Portal</p>
+            <div class="logo-icon">
+                <i class="fas fa-spool"></i>
+            </div>
+            <div class="logo-text">Weaver-ID</div>
+            <div class="logo-sub">Association Portal</div>
         </div>
-        <div class="assoc-info">
-            <h4>Barangay Caneo Women's Weavers</h4>
-            <span>Bontoc, Mountain Province</span><br>
-            <span>32 Members • Est. 2018</span>
+
+        <div class="org-card">
+            <div class="org-name">Barangay Caneo Women's Weavers</div>
+            <div class="org-location">Bontoc, Mountain Province</div>
+            <div class="org-meta">32 Members • Est. 2018</div>
         </div>
-        <ul class="nav-menu">
-            <li class="active" onclick="showPage('dashboard')">
-                <span class="nav-icon">📊</span>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard', this)">
+                <i class="fas fa-chart-pie"></i>
                 <span>Dashboard</span>
-            </li>
-            <li onclick="showPage('weavers')">
-                <span class="nav-icon">👥</span>
+            </a>
+            <a href="#" class="nav-item" data-page="weavers" onclick="navigateTo('weavers', this)">
+                <i class="fas fa-users"></i>
                 <span>My Weavers</span>
-            </li>
-            <li onclick="showPage('products')">
-                <span class="nav-icon">🧶</span>
+            </a>
+            <a href="#" class="nav-item" data-page="products" onclick="navigateTo('products', this)">
+                <i class="fas fa-box-open"></i>
                 <span>Products</span>
-            </li>
-            <li onclick="openScanModal()">
-                <span class="nav-icon">📱</span>
+            </a>
+            <a href="#" class="nav-item" data-page="scan" onclick="navigateTo('scan', this)">
+                <i class="fas fa-mobile-alt"></i>
                 <span>Scan & Verify</span>
-            </li>
-            <li onclick="showPage('nfc')">
-                <span class="nav-icon">🏷️</span>
+            </a>
+            <a href="#" class="nav-item" data-page="nfc" onclick="navigateTo('nfc', this)">
+                <i class="fas fa-tag"></i>
                 <span>NFC Tags</span>
-            </li>
-            <li onclick="showPage('settings')">
-                <span class="nav-icon">⚙️</span>
+            </a>
+            <a href="#" class="nav-item" data-page="settings" onclick="navigateTo('settings', this)">
+                <i class="fas fa-cog"></i>
                 <span>Settings</span>
-            </li>
-        </ul>
+            </a>
+        </nav>
     </aside>
-    
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="main-content">
-        <!-- Header -->
-        <header class="top-header">
-            <div>
-                <h1 id="pageTitle">Dashboard</h1>
-                <p id="pageSubtitle">Barangay Caneo Women's Weavers</p>
-            </div>
-            <div class="header-actions">
-                <button class="header-btn" onclick="showNotifications()">🔔<span class="badge-count">3</span></button>
-                <button class="header-btn" onclick="showPage('settings')">👤</button>
-            </div>
-        </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
         
-        <div class="content-area">
-            
-            <!-- ===== DASHBOARD PAGE ===== -->
-            <div class="page-section active" id="page-dashboard">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3 id="statWeavers">28</h3>
-                        <p>Registered Weavers</p>
-                        <div class="trend up">↑ 3 new this month</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="statProducts">156</h3>
-                        <p>Authenticated Products</p>
-                        <div class="trend up">↑ 12 this week</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="statScans">1,247</h3>
-                        <p>Total Scans</p>
-                        <div class="trend up">↑ 89 this week</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="statTags">42</h3>
-                        <p>NFC Tags Available</p>
-                        <div class="trend down">Request more from DTI</div>
+        <!-- DASHBOARD PAGE -->
+        <div class="page-content active" id="page-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card" onclick="navigateTo('weavers', document.querySelector('[data-page=weavers]'))">
+                    <div class="stat-number">28</div>
+                    <div class="stat-label">Registered Weavers</div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i> 3 new this month
                     </div>
                 </div>
-                
-                <div class="scan-section">
-                    <div class="scan-icon-big">📱</div>
-                    <h2>Verify Product Authenticity</h2>
-                    <p>Tap your NFC-enabled smartphone against the product tag to instantly verify its authenticity.</p>
-                    <button class="btn-scan-big" onclick="openScanModal()">📱 Scan NFC Tag Now</button>
+                <div class="stat-card" onclick="navigateTo('products', document.querySelector('[data-page=products]'))">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Authenticated Products</div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i> 12 this week
+                    </div>
                 </div>
-                
-                <div class="two-col">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Recent Products</h3>
-                            <a href="#" onclick="showPage('products')">View All →</a>
+                <div class="stat-card">
+                    <div class="stat-number">1,247</div>
+                    <div class="stat-label">Total Scans</div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i> 89 this week
+                    </div>
+                </div>
+                <div class="stat-card" onclick="showToast('Request sent to DTI for more NFC tags', 'success')">
+                    <div class="stat-number">42</div>
+                    <div class="stat-label">NFC Tags Available</div>
+                    <div class="stat-trend alert">
+                        <i class="fas fa-exclamation-circle"></i> Request more from DTI
+                    </div>
+                </div>
+            </div>
+
+            <div class="nfc-section">
+                <div class="nfc-icon-wrapper">
+                    <div class="nfc-pulse"></div>
+                    <div class="nfc-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                </div>
+                <h2 class="nfc-title">Verify Product Authenticity</h2>
+                <p class="nfc-desc">Tap your NFC-enabled smartphone against the product tag to instantly verify its authenticity.</p>
+                <button class="nfc-btn" onclick="startScan()">
+                    <i class="fas fa-wifi"></i> Scan NFC Tag Now
+                </button>
+            </div>
+
+            <div class="bottom-grid">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Recent Products</h3>
+                        <a href="#" class="view-all" onclick="navigateTo('products', document.querySelector('[data-page=products]'))">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="product-item" onclick="showProductDetail('Traditional Woven Bag')">
+                        <div class="item-avatar" style="background: #fef3c7;">
+                            <i class="fas fa-shopping-bag" style="color: #92400e;"></i>
                         </div>
-                        <div id="recentProducts"></div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Recent Scan Activity</h3>
-                            <a href="#">View All →</a>
+                        <div class="item-info">
+                            <div class="item-name">Traditional Woven Bag</div>
+                            <div class="item-meta">Maria Santos • Jun 26, 2026</div>
                         </div>
-                        <div id="recentScans"></div>
+                        <span class="item-status status-verified">Verified</span>
+                    </div>
+                    <div class="product-item" onclick="showProductDetail('Mountain Pattern Scarf')">
+                        <div class="item-avatar" style="background: #dbeafe;">
+                            <i class="fas fa-ribbon" style="color: #1e40af;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Mountain Pattern Scarf</div>
+                            <div class="item-meta">Ana Cruz • Jun 25, 2026</div>
+                        </div>
+                        <span class="item-status status-verified">Verified</span>
+                    </div>
+                    <div class="product-item" onclick="showProductDetail('Caneo Table Runner')">
+                        <div class="item-avatar" style="background: #fce7f3;">
+                            <i class="fas fa-table" style="color: #9d174d;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Caneo Table Runner</div>
+                            <div class="item-meta">Linda Bawer • Jun 24, 2026</div>
+                        </div>
+                        <span class="item-status status-pending">Pending</span>
+                    </div>
+                    <div class="product-item" onclick="showProductDetail('Heritage Wall Hanging')">
+                        <div class="item-avatar" style="background: #d1fae5;">
+                            <i class="fas fa-image" style="color: #065f46;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Heritage Wall Hanging</div>
+                            <div class="item-meta">Grace Fomocod • Jun 23, 2026</div>
+                        </div>
+                        <span class="item-status status-verified">Verified</span>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Recent Scan Activity</h3>
+                        <a href="#" class="view-all" onclick="navigateTo('scan', document.querySelector('[data-page=scan]'))">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="scan-item" onclick="showScanDetail('Bag-2847')">
+                        <div class="item-avatar" style="background: #dcfce7;">
+                            <i class="fas fa-check" style="color: #166534;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Bag-2847</div>
+                            <div class="item-meta">Verified by customer • Manila</div>
+                        </div>
+                        <span class="item-status status-verified">2m ago</span>
+                    </div>
+                    <div class="scan-item" onclick="showScanDetail('Scarf-1923')">
+                        <div class="item-avatar" style="background: #dcfce7;">
+                            <i class="fas fa-check" style="color: #166534;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Scarf-1923</div>
+                            <div class="item-meta">Verified by customer • Baguio</div>
+                        </div>
+                        <span class="item-status status-verified">15m ago</span>
+                    </div>
+                    <div class="scan-item" onclick="showScanDetail('Runner-4451')">
+                        <div class="item-avatar" style="background: #fef3c7;">
+                            <i class="fas fa-exclamation" style="color: #92400e;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Runner-4451</div>
+                            <div class="item-meta">Failed verification • Unknown</div>
+                        </div>
+                        <span class="item-status status-pending">1h ago</span>
+                    </div>
+                    <div class="scan-item" onclick="showScanDetail('Hanging-7782')">
+                        <div class="item-avatar" style="background: #dcfce7;">
+                            <i class="fas fa-check" style="color: #166534;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Hanging-7782</div>
+                            <div class="item-meta">Verified by customer • Cebu</div>
+                        </div>
+                        <span class="item-status status-verified">3h ago</span>
                     </div>
                 </div>
             </div>
-            
-            <!-- ===== WEAVERS PAGE ===== -->
-            <div class="page-section" id="page-weavers">
-                <div class="action-bar">
-                    <h2>My Weavers</h2>
-                    <button class="btn btn-primary" onclick="openAddWeaverModal()">➕ Add Weaver</button>
-                </div>
-                <div id="weaversList"></div>
+        </div>
+
+        <!-- WEAVERS PAGE -->
+        <div class="page-content" id="page-weavers">
+            <div class="page-header">
+                <h1>My Weavers</h1>
+                <p>Manage and view all registered weavers in your association</p>
             </div>
-            
-            <!-- ===== PRODUCTS PAGE ===== -->
-            <div class="page-section" id="page-products">
-                <div class="action-bar">
-                    <h2>All Products</h2>
-                    <button class="btn btn-primary" onclick="openAddProductModal()">➕ Add Product</button>
-                </div>
-                <div id="productsList"></div>
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="showToast('Add Weaver form opened', 'success')">
+                    <i class="fas fa-plus"></i> Add Weaver
+                </button>
+                <button class="btn btn-outline" onclick="showToast('Export started...', 'success')">
+                    <i class="fas fa-download"></i> Export
+                </button>
             </div>
-            
-            <!-- ===== NFC TAGS PAGE ===== -->
-            <div class="page-section" id="page-nfc">
-                <div class="action-bar">
-                    <h2>NFC Tag Inventory</h2>
-                    <button class="btn btn-outline" onclick="requestTags()">📦 Request More</button>
-                </div>
-                <div id="nfcList"></div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search weavers by name..." onkeyup="filterTable(this, 'weavers-table')">
             </div>
-            
-            <!-- ===== SETTINGS PAGE ===== -->
-            <div class="page-section" id="page-settings">
-                <div class="action-bar">
-                    <h2>Settings</h2>
-                </div>
-                <div class="card">
-                    <div class="detail-list">
-                        <div class="detail-row"><span class="label">Association Name</span><span class="value">Barangay Caneo Women's Weavers</span></div>
-                        <div class="detail-row"><span class="label">Municipality</span><span class="value">Bontoc</span></div>
-                        <div class="detail-row"><span class="label">Barangay</span><span class="value">Caneo</span></div>
-                        <div class="detail-row"><span class="label">Members</span><span class="value">32</span></div>
-                        <div class="detail-row"><span class="label">President</span><span class="value">Maria Lumas-e</span></div>
-                        <div class="detail-row"><span class="label">Contact</span><span class="value">0917-123-4567</span></div>
-                        <div class="detail-row"><span class="label">DTI Registration</span><span class="value success">✓ Active</span></div>
+            <div class="data-table">
+                <table id="weavers-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Specialty</th>
+                            <th>Products</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="showToast('Viewing Maria Santos profile', 'success')">
+                            <td><strong>Maria Santos</strong></td>
+                            <td>Traditional Bags</td>
+                            <td>42</td>
+                            <td><span class="item-status status-verified">Active</span></td>
+                            <td>Jan 2023</td>
+                        </tr>
+                        <tr onclick="showToast('Viewing Ana Cruz profile', 'success')">
+                            <td><strong>Ana Cruz</strong></td>
+                            <td>Scarves & Wraps</td>
+                            <td>38</td>
+                            <td><span class="item-status status-verified">Active</span></td>
+                            <td>Mar 2023</td>
+                        </tr>
+                        <tr onclick="showToast('Viewing Linda Bawer profile', 'success')">
+                            <td><strong>Linda Bawer</strong></td>
+                            <td>Home Decor</td>
+                            <td>27</td>
+                            <td><span class="item-status status-verified">Active</span></td>
+                            <td>Jun 2023</td>
+                        </tr>
+                        <tr onclick="showToast('Viewing Grace Fomocod profile', 'success')">
+                            <td><strong>Grace Fomocod</strong></td>
+                            <td>Wall Hangings</td>
+                            <td>31</td>
+                            <td><span class="item-status status-verified">Active</span></td>
+                            <td>Aug 2023</td>
+                        </tr>
+                        <tr onclick="showToast('Viewing Elena Pacya profile', 'success')">
+                            <td><strong>Elena Pacya</strong></td>
+                            <td>Accessories</td>
+                            <td>18</td>
+                            <td><span class="item-status status-pending">Pending</span></td>
+                            <td>Jun 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PRODUCTS PAGE -->
+        <div class="page-content" id="page-products">
+            <div class="page-header">
+                <h1>Products</h1>
+                <p>Manage authenticated products and NFC assignments</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="showToast('Register Product form opened', 'success')">
+                    <i class="fas fa-plus"></i> Register Product
+                </button>
+                <button class="btn btn-outline" onclick="showToast('Filter options opened', 'success')">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search products..." onkeyup="filterTable(this, 'products-table')">
+            </div>
+            <div class="data-table">
+                <table id="products-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Weaver</th>
+                            <th>NFC Tag</th>
+                            <th>Status</th>
+                            <th>Scans</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="showProductDetail('Traditional Woven Bag')">
+                            <td><strong>Traditional Woven Bag</strong></td>
+                            <td>Maria Santos</td>
+                            <td>NFC-2847</td>
+                            <td><span class="item-status status-verified">Verified</span></td>
+                            <td>342</td>
+                        </tr>
+                        <tr onclick="showProductDetail('Mountain Pattern Scarf')">
+                            <td><strong>Mountain Pattern Scarf</strong></td>
+                            <td>Ana Cruz</td>
+                            <td>NFC-1923</td>
+                            <td><span class="item-status status-verified">Verified</span></td>
+                            <td>198</td>
+                        </tr>
+                        <tr onclick="showProductDetail('Caneo Table Runner')">
+                            <td><strong>Caneo Table Runner</strong></td>
+                            <td>Linda Bawer</td>
+                            <td>NFC-4451</td>
+                            <td><span class="item-status status-pending">Pending</span></td>
+                            <td>0</td>
+                        </tr>
+                        <tr onclick="showProductDetail('Heritage Wall Hanging')">
+                            <td><strong>Heritage Wall Hanging</strong></td>
+                            <td>Grace Fomocod</td>
+                            <td>NFC-7782</td>
+                            <td><span class="item-status status-verified">Verified</span></td>
+                            <td>156</td>
+                        </tr>
+                        <tr onclick="showProductDetail('Woven Belt')">
+                            <td><strong>Woven Belt</strong></td>
+                            <td>Elena Pacya</td>
+                            <td>NFC-9901</td>
+                            <td><span class="item-status status-verified">Verified</span></td>
+                            <td>89</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SCAN PAGE -->
+        <div class="page-content" id="page-scan">
+            <div class="page-header">
+                <h1>Scan & Verify</h1>
+                <p>Verify product authenticity using NFC tags</p>
+            </div>
+            <div class="nfc-section" style="margin-bottom: 24px;">
+                <div class="nfc-icon-wrapper">
+                    <div class="nfc-pulse"></div>
+                    <div class="nfc-icon">
+                        <i class="fas fa-mobile-alt"></i>
                     </div>
                 </div>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="logout()">🚪 Log Out</button>
+                <h2 class="nfc-title">Verify Product Authenticity</h2>
+                <p class="nfc-desc">Tap your NFC-enabled smartphone against the product tag to instantly verify its authenticity.</p>
+                <button class="nfc-btn" onclick="startScan()">
+                    <i class="fas fa-wifi"></i> Scan NFC Tag Now
+                </button>
+            </div>
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h3 class="panel-title">Scan History</h3>
+                    <a href="#" class="view-all" onclick="showToast('Full history exported', 'success')">
+                        Export <i class="fas fa-download"></i>
+                    </a>
+                </div>
+                <div class="data-table" style="box-shadow: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Location</th>
+                                <th>Result</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Bag-2847</strong></td>
+                                <td>Manila</td>
+                                <td><span class="item-status status-verified">Verified</span></td>
+                                <td>2 minutes ago</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scarf-1923</strong></td>
+                                <td>Baguio</td>
+                                <td><span class="item-status status-verified">Verified</span></td>
+                                <td>15 minutes ago</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Runner-4451</strong></td>
+                                <td>Unknown</td>
+                                <td><span class="item-status status-pending">Failed</span></td>
+                                <td>1 hour ago</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Hanging-7782</strong></td>
+                                <td>Cebu</td>
+                                <td><span class="item-status status-verified">Verified</span></td>
+                                <td>3 hours ago</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- NFC TAGS PAGE -->
+        <div class="page-content" id="page-nfc">
+            <div class="page-header">
+                <h1>NFC Tags</h1>
+                <p>Manage and request NFC tags from DTI</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="showToast('Request sent to DTI', 'success')">
+                    <i class="fas fa-paper-plane"></i> Request from DTI
+                </button>
+                <button class="btn btn-outline" onclick="showToast('Inventory updated', 'success')">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+            <div class="stats-grid" style="margin-bottom: 24px;">
+                <div class="stat-card">
+                    <div class="stat-number">42</div>
+                    <div class="stat-label">Available Tags</div>
+                    <div class="stat-trend up">Ready to assign</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Assigned Tags</div>
+                    <div class="stat-trend up">Active products</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Pending Requests</div>
+                    <div class="stat-trend down">Awaiting DTI</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">201</div>
+                    <div class="stat-label">Total Tags</div>
+                    <div class="stat-trend up">Since 2018</div>
+                </div>
+            </div>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tag ID</th>
+                            <th>Product</th>
+                            <th>Status</th>
+                            <th>Assigned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="showToast('Tag NFC-2847 details', 'success')">
+                            <td><strong>NFC-2847</strong></td>
+                            <td>Traditional Woven Bag</td>
+                            <td><span class="item-status status-verified">Active</span></td>
+                            <td>Jun 15, 2026</td>
+                        </tr>
+                        <tr onclick="showToast('Tag NFC-1923 details', 'success')">
+                            <td><strong>NFC-1923</strong></td>
+                            <td>Mountain Pattern Scarf</td>
+                            <td><span class="item-status status-verified">Active</span></td>
+                            <td>Jun 14, 2026</td>
+                        </tr>
+                        <tr onclick="showToast('Tag NFC-4451 details', 'success')">
+                            <td><strong>NFC-4451</strong></td>
+                            <td>Caneo Table Runner</td>
+                            <td><span class="item-status status-pending">Unassigned</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr onclick="showToast('Tag NFC-7782 details', 'success')">
+                            <td><strong>NFC-7782</strong></td>
+                            <td>Heritage Wall Hanging</td>
+                            <td><span class="item-status status-verified">Active</span></td>
+                            <td>Jun 10, 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SETTINGS PAGE -->
+        <div class="page-content" id="page-settings">
+            <div class="page-header">
+                <h1>Settings</h1>
+                <p>Manage your association portal preferences</p>
+            </div>
+            <div class="panel-card" style="margin-bottom: 20px;">
+                <div class="panel-header">
+                    <h3 class="panel-title">Association Profile</h3>
+                </div>
+                <div style="display: grid; gap: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-gray); margin-bottom: 6px; text-transform: uppercase;">Association Name</label>
+                        <input type="text" value="Barangay Caneo Women's Weavers" style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-family: inherit;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-gray); margin-bottom: 6px; text-transform: uppercase;">Location</label>
+                        <input type="text" value="Bontoc, Mountain Province" style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-family: inherit;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-gray); margin-bottom: 6px; text-transform: uppercase;">Contact Email</label>
+                        <input type="email" value="caneo.weavers@email.com" style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-family: inherit;">
+                    </div>
+                    <button class="btn btn-primary" style="width: fit-content;" onclick="showToast('Profile saved successfully', 'success')">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h3 class="panel-title">Notifications</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">New Product Alerts</div>
+                            <div style="font-size: 12px; color: var(--text-gray);">Get notified when new products are registered</div>
+                        </div>
+                        <label class="toggle" style="position: relative; display: inline-block; width: 48px; height: 26px;">
+                            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;" onchange="showToast(this.checked ? 'Notifications enabled' : 'Notifications disabled', 'success')">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--accent-green); border-radius: 26px; transition: 0.3s;"></span>
+                            <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; transform: translateX(22px);"></span>
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">Scan Alerts</div>
+                            <div style="font-size: 12px; color: var(--text-gray);">Receive alerts for failed verifications</div>
+                        </div>
+                        <label class="toggle" style="position: relative; display: inline-block; width: 48px; height: 26px;">
+                            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;" onchange="showToast(this.checked ? 'Scan alerts enabled' : 'Scan alerts disabled', 'success')">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--accent-green); border-radius: 26px; transition: 0.3s;"></span>
+                            <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; transform: translateX(22px);"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
-    
-    <!-- Mobile FAB -->
-    <button class="fab" onclick="openScanModal()">📱</button>
-    
-    <!-- Mobile Bottom Nav -->
-    <nav class="mobile-nav">
-        <button class="mobile-nav-item active" onclick="showPage('dashboard')">
-            <span class="icon">🏠</span>
-            <span>Home</span>
-        </button>
-        <button class="mobile-nav-item" onclick="showPage('weavers')">
-            <span class="icon">👥</span>
-            <span>Weavers</span>
-        </button>
-        <button class="mobile-nav-item" onclick="showPage('products')">
-            <span class="icon">🧶</span>
-            <span>Products</span>
-        </button>
-        <button class="mobile-nav-item" onclick="showPage('nfc')">
-            <span class="icon">🏷️</span>
-            <span>Tags</span>
-        </button>
-        <button class="mobile-nav-item" onclick="showPage('settings')">
-            <span class="icon">⚙️</span>
-            <span>More</span>
-        </button>
-    </nav>
-    
-    <!-- ===== SCAN RESULT MODAL ===== -->
-    <div class="modal-overlay" id="scanModal" onclick="if(event.target===this)closeScanModal()">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-result-icon success" id="scanResultIcon">✓</div>
-                <h2 id="scanResultTitle">Product Authenticated</h2>
-                <p id="scanResultSubtitle">This product is verified as genuine handwoven.</p>
-            </div>
-            <div class="detail-list" id="scanDetails"></div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeScanModal()">Close</button>
-                <button class="btn btn-primary" onclick="shareResult()">📤 Share</button>
-            </div>
+
+    <!-- Scanning Overlay -->
+    <div class="scanning-overlay" id="scanningOverlay">
+        <div class="scan-circle">
+            <i class="fas fa-wifi scan-icon"></i>
+        </div>
+        <div class="scan-text">Scanning for NFC Tag...</div>
+        <div class="scan-sub">Hold your device near the product tag</div>
+        <button class="scan-cancel" onclick="stopScan()">Cancel</button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <!-- Dynamic content -->
         </div>
     </div>
-    
-    <!-- ===== ADD WEAVER MODAL ===== -->
-    <div class="modal-overlay" id="addWeaverModal" onclick="if(event.target===this)closeAddWeaverModal()">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h2>Add New Weaver</h2>
-                <p>Register a new weaver to your association</p>
-            </div>
-            <form onsubmit="submitWeaver(event)">
-                <div class="form-group">
-                    <label>Full Name *</label>
-                    <input type="text" id="weaverName" placeholder="Enter full name" required>
-                </div>
-                <div class="form-group">
-                    <label>Barangay *</label>
-                    <input type="text" id="weaverBarangay" placeholder="e.g., Caneo" required>
-                </div>
-                <div class="form-group">
-                    <label>Contact Number *</label>
-                    <input type="tel" id="weaverContact" placeholder="09XX-XXX-XXXX" required>
-                </div>
-                <div class="form-group">
-                    <label>Years of Experience</label>
-                    <input type="number" id="weaverExperience" placeholder="e.g., 15" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Specialization (patterns)</label>
-                    <input type="text" id="weaverSpecialization" placeholder="e.g., Binakol, Inammata">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddWeaverModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">✓ Register Weaver</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- ===== ADD PRODUCT MODAL ===== -->
-    <div class="modal-overlay" id="addProductModal" onclick="if(event.target===this)closeAddProductModal()">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h2>Add New Product</h2>
-                <p>Register a new woven product</p>
-            </div>
-            <form onsubmit="submitProduct(event)">
-                <div class="form-group">
-                    <label>Product Name *</label>
-                    <input type="text" id="productName" placeholder="e.g., Traditional Tapis" required>
-                </div>
-                <div class="form-group">
-                    <label>Weaver *</label>
-                    <select id="productWeaver" required>
-                        <option value="">Select weaver</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Product Type *</label>
-                    <select id="productType" required>
-                        <option value="">Select type</option>
-                        <option value="Tapis">Tapis</option>
-                        <option value="Wanes">Wanes</option>
-                        <option value="Bag">Bag</option>
-                        <option value="Blanket">Blanket</option>
-                        <option value="Accessory">Accessory</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Pattern Name *</label>
-                    <input type="text" id="productPattern" placeholder="e.g., Binakol" required>
-                </div>
-                <div class="form-group">
-                    <label>Dimensions</label>
-                    <input type="text" id="productDimensions" placeholder="e.g., 120cm x 60cm">
-                </div>
-                <div class="form-group">
-                    <label>Price (PHP)</label>
-                    <input type="number" id="productPrice" placeholder="e.g., 1500" min="0">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddProductModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">✓ Register Product</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
-        // ===== DATA =====
-        let data = {
-            weavers: [
-                { id: 1, name: "Maria Lumas-e", barangay: "Caneo", contact: "0917-123-4567", experience: 20, specialization: "Binakol, Inammata", products: 12 },
-                { id: 2, name: "Anna Fagyan", barangay: "Caneo", contact: "0918-234-5678", experience: 15, specialization: "Inammata", products: 8 },
-                { id: 3, name: "Rosa Bay-oc", barangay: "Samoki", contact: "0919-345-6789", experience: 25, specialization: "Kinagabag", products: 15 },
-                { id: 4, name: "Linda Tanggac", barangay: "Caneo", contact: "0917-456-7890", experience: 10, specialization: "Binakol", products: 6 },
-                { id: 5, name: "Carmen Fiang", barangay: "Balili", contact: "0918-567-8901", experience: 18, specialization: "Traditional", products: 9 }
-            ],
-            products: [
-                { id: 1, name: "Traditional Tapis", weaverId: 1, type: "Tapis", pattern: "Binakol", dimensions: "120cm x 60cm", price: 1500, date: "2026-06-25", status: "authenticated", nfcUid: "04:A2:8B:1F:3C:7E:90" },
-                { id: 2, name: "Woven Bag (Kayabang)", weaverId: 2, type: "Bag", pattern: "Inammata", dimensions: "40cm x 30cm", price: 800, date: "2026-06-24", status: "authenticated", nfcUid: "04:B3:9C:2G:4D:8F:01" },
-                { id: 3, name: "Men's Wanes", weaverId: 3, type: "Wanes", pattern: "Kinagabag", dimensions: "100cm x 50cm", price: 1200, date: "2026-06-22", status: "pending", nfcUid: null },
-                { id: 4, name: "Wall Hanging", weaverId: 4, type: "Accessory", pattern: "Binakol", dimensions: "80cm x 80cm", price: 2000, date: "2026-06-20", status: "authenticated", nfcUid: "04:D5:0E:4I:6K:0H:23" },
-                { id: 5, name: "Shoulder Bag", weaverId: 5, type: "Bag", pattern: "Traditional", dimensions: "35cm x 25cm", price: 950, date: "2026-06-18", status: "authenticated", nfcUid: "04:E6:1F:5J:7L:1I:34" }
-            ],
-            scans: [
-                { id: 1, productId: 1, type: "success", location: "Bontoc Public Market", time: "2 min ago" },
-                { id: 2, productId: 2, type: "success", location: "Tourist (Manila)", time: "15 min ago" },
-                { id: 3, productId: null, type: "fail", location: "Sagada Weaving Center", time: "1 hr ago" },
-                { id: 4, productId: 3, type: "success", location: "LGU Enforcement Officer", time: "3 hrs ago" },
-                { id: 5, productId: 4, type: "success", location: "Am-among Festival", time: "5 hrs ago" }
-            ],
-            nfcTags: [
-                { uid: "04:A2:8B:1F:3C:7E:90", status: "used", productId: 1 },
-                { uid: "04:B3:9C:2G:4D:8F:01", status: "used", productId: 2 },
-                { uid: "04:D5:0E:4I:6K:0H:23", status: "used", productId: 4 },
-                { uid: "04:E6:1F:5J:7L:1I:34", status: "used", productId: 5 },
-                { uid: "04:F7:2G:6K:8M:2J:45", status: "available", productId: null },
-                { uid: "04:G8:3H:7L:9N:3K:56", status: "available", productId: null },
-                { uid: "04:H9:4I:8M:0O:4L:67", status: "damaged", productId: null }
-            ]
-        };
-        
-        // ===== NAVIGATION =====
-        function showPage(page) {
-            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-menu li').forEach(l => l.classList.remove('active'));
-            document.querySelectorAll('.mobile-nav-item').forEach(m => m.classList.remove('active'));
+        // Navigation
+        function navigateTo(page, element) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             
-            const pages = {
-                dashboard: { title: 'Dashboard', subtitle: 'Barangay Caneo Women\\'s Weavers', section: 'page-dashboard' },
-                weavers: { title: 'My Weavers', subtitle: 'Manage association members', section: 'page-weavers' },
-                products: { title: 'Products', subtitle: 'All registered products', section: 'page-products' },
-                nfc: { title: 'NFC Tags', subtitle: 'Tag inventory management', section: 'page-nfc' },
-                settings: { title: 'Settings', subtitle: 'Association profile', section: 'page-settings' }
-            };
-            
-            const p = pages[page];
-            if (p) {
-                document.getElementById(p.section).classList.add('active');
-                document.getElementById('pageTitle').textContent = p.title;
-                document.getElementById('pageSubtitle').textContent = p.subtitle;
+            // Show target page
+            const targetPage = document.getElementById('page-' + page);
+            if (targetPage) {
+                targetPage.classList.add('active');
             }
             
-            // Update sidebar active
-            const navItems = ['dashboard', 'weavers', 'products', 'nfc', 'settings'];
-            const idx = navItems.indexOf(page);
-            if (idx >= 0) {
-                document.querySelectorAll('.nav-menu li')[idx]?.classList.add('active');
-                document.querySelectorAll('.mobile-nav-item')[Math.min(idx, 4)]?.classList.add('active');
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (element) {
+                element.classList.add('active');
             }
             
-            if (page === 'weavers') renderWeavers();
-            if (page === 'products') renderProducts();
-            if (page === 'nfc') renderNFC();
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.querySelector('.overlay').classList.remove('active');
+            }
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        
-        // ===== RENDER =====
-        function renderRecentProducts() {
-            const container = document.getElementById('recentProducts');
-            const recent = [...data.products].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-            container.innerHTML = recent.map(p => {
-                const w = data.weavers.find(x => x.id === p.weaverId);
-                const bc = p.status === 'authenticated' ? 'badge-auth' : p.status === 'pending' ? 'badge-pending' : 'badge-unreg';
-                const st = p.status === 'authenticated' ? 'Authenticated' : p.status === 'pending' ? 'Pending DTI' : 'Unregistered';
-                return `<div class="product-row" onclick="viewProduct(${p.id})">
-                    <div class="product-img-sm">${getEmoji(p.type)}</div>
-                    <div class="product-info">
-                        <h4>${p.name}</h4>
-                        <p>${w?.name || 'Unknown'} • ${p.pattern}</p>
-                        <div class="product-meta"><span class="badge ${bc}">${st}</span><span style="font-size:12px;color:var(--text-secondary)">₱${p.price}</span></div>
-                    </div>
-                </div>`;
-            }).join('');
+
+        // Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
         }
-        
-        function renderRecentScans() {
-            const container = document.getElementById('recentScans');
-            container.innerHTML = data.scans.slice(0, 5).map(s => {
-                const p = s.productId ? data.products.find(x => x.id === s.productId) : null;
-                return `<div class="scan-item" onclick="${s.productId ? `viewProduct(${s.productId})` : ''}">
-                    <div class="scan-icon-sm ${s.type}">${s.type === 'success' ? '✓' : '✗'}</div>
-                    <div class="scan-detail"><h4>${p ? `Authenticated: ${p.name}` : 'Unregistered Tag Detected'}</h4><p>${s.location}</p></div>
-                    <span class="scan-time">${s.time}</span>
-                </div>`;
-            }).join('');
-        }
-        
-        function renderWeavers() {
-            const container = document.getElementById('weaversList');
-            container.innerHTML = data.weavers.map(w => `<div class="weaver-row" onclick="viewWeaver(${w.id})">
-                <div class="weaver-avatar">${w.name.charAt(0)}</div>
-                <div class="weaver-info"><h4>${w.name}</h4><p>${w.barangay} • ${w.experience} years exp. • ${w.specialization}</p></div>
-                <div class="weaver-count"><span>${w.products}</span><p>products</p></div>
-            </div>`).join('');
-        }
-        
-        function renderProducts() {
-            const container = document.getElementById('productsList');
-            container.innerHTML = data.products.map(p => {
-                const w = data.weavers.find(x => x.id === p.weaverId);
-                const bc = p.status === 'authenticated' ? 'badge-auth' : p.status === 'pending' ? 'badge-pending' : 'badge-unreg';
-                const st = p.status === 'authenticated' ? 'Authenticated' : p.status === 'pending' ? 'Pending DTI' : 'Unregistered';
-                return `<div class="product-row" onclick="viewProduct(${p.id})">
-                    <div class="product-img-sm">${getEmoji(p.type)}</div>
-                    <div class="product-info">
-                        <h4>${p.name}</h4>
-                        <p>${w?.name || 'Unknown'} • ${p.pattern} • ${p.dimensions}</p>
-                        <div class="product-meta"><span class="badge ${bc}">${st}</span><span style="font-size:12px;color:var(--text-secondary)">₱${p.price}</span></div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-        
-        function renderNFC() {
-            const container = document.getElementById('nfcList');
-            container.innerHTML = data.nfcTags.map(t => {
-                const p = t.productId ? data.products.find(x => x.id === t.productId) : null;
-                return `<div class="nfc-row ${t.status}">
-                    <div class="nfc-icon">🏷️</div>
-                    <div class="nfc-info">
-                        <h4>${t.uid}</h4>
-                        <p>${t.status.toUpperCase()}${p ? ' • ' + p.name : ''}</p>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-        
-        function getEmoji(type) {
-            const map = { 'Tapis': '👘', 'Wanes': '🩳', 'Bag': '👜', 'Blanket': '🛏️', 'Accessory': '🎀' };
-            return map[type] || '🧶';
-        }
-        
-        // ===== SCAN =====
-        function openScanModal() {
-            document.getElementById('loadingOverlay').classList.add('active');
+
+        // NFC Scan
+        function startScan() {
+            document.getElementById('scanningOverlay').classList.add('active');
+            
+            // Simulate scan completion after 3 seconds
             setTimeout(() => {
-                document.getElementById('loadingOverlay').classList.remove('active');
-                const isAuth = Math.random() > 0.3;
-                const modal = document.getElementById('scanModal');
-                const icon = document.getElementById('scanResultIcon');
-                const title = document.getElementById('scanResultTitle');
-                const sub = document.getElementById('scanResultSubtitle');
-                const details = document.getElementById('scanDetails');
-                
-                if (isAuth) {
-                    const authProducts = data.products.filter(p => p.status === 'authenticated');
-                    const product = authProducts[Math.floor(Math.random() * authProducts.length)];
-                    const w = data.weavers.find(x => x.id === product.weaverId);
-                    icon.className = 'modal-result-icon success';
-                    icon.textContent = '✓';
-                    title.textContent = 'Product Authenticated';
-                    title.style.color = 'var(--success)';
-                    sub.textContent = 'This product is verified as genuine handwoven.';
-                    details.innerHTML = `
-                        <div class="detail-row"><span class="label">Product</span><span class="value">${product.name}</span></div>
-                        <div class="detail-row"><span class="label">Weaver</span><span class="value">${w.name}</span></div>
-                        <div class="detail-row"><span class="label">Association</span><span class="value">Barangay Caneo Women's Weavers</span></div>
-                        <div class="detail-row"><span class="label">Municipality</span><span class="value">Bontoc</span></div>
-                        <div class="detail-row"><span class="label">Pattern</span><span class="value">${product.pattern}</span></div>
-                        <div class="detail-row"><span class="label">Dimensions</span><span class="value">${product.dimensions}</span></div>
-                        <div class="detail-row"><span class="label">Price</span><span class="value">₱${product.price}</span></div>
-                        <div class="detail-row"><span class="label">NFC UID</span><span class="value" style="font-family:monospace;font-size:11px;">${product.nfcUid}</span></div>
-                        <div class="detail-row"><span class="label">Status</span><span class="value success">✓ AUTHENTICATED</span></div>
-                    `;
-                    data.scans.unshift({ id: Date.now(), productId: product.id, type: 'success', location: 'Mobile Scan', time: 'Just now' });
-                } else {
-                    icon.className = 'modal-result-icon fail';
-                    icon.textContent = '✗';
-                    title.textContent = 'Unregistered Product';
-                    title.style.color = 'var(--danger)';
-                    sub.textContent = 'This NFC tag is not found in the Weaver-ID database.';
-                    details.innerHTML = `
-                        <div class="detail-row"><span class="label">NFC UID</span><span class="value" style="font-family:monospace;font-size:11px;">04:XX:XX:XX:XX:XX:XX</span></div>
-                        <div class="detail-row"><span class="label">Status</span><span class="value fail">✗ NOT REGISTERED</span></div>
-                        <div class="detail-row"><span class="label">Action</span><span class="value" style="color:var(--warning)">Possible counterfeit</span></div>
-                    `;
-                    data.scans.unshift({ id: Date.now(), productId: null, type: 'fail', location: 'Mobile Scan', time: 'Just now' });
+                if (document.getElementById('scanningOverlay').classList.contains('active')) {
+                    stopScan();
+                    showModal('success', 'Product Verified!', 'Traditional Woven Bag (NFC-2847) has been successfully authenticated. This is an original product from Barangay Caneo Women\'s Weavers.', 'OK');
                 }
-                renderRecentScans();
-                updateStat('statScans', parseInt(document.getElementById('statScans').textContent.replace(/,/g, '')) + 1);
-                modal.classList.add('active');
-            }, 2000);
+            }, 3000);
         }
-        
-        function closeScanModal() {
-            document.getElementById('scanModal').classList.remove('active');
+
+        function stopScan() {
+            document.getElementById('scanningOverlay').classList.remove('active');
         }
-        
-        // ===== ADD WEAVER =====
-        function openAddWeaverModal() {
-            document.getElementById('addWeaverModal').classList.add('active');
+
+        // Modal
+        function showModal(type, title, message, buttonText) {
+            const overlay = document.getElementById('modalOverlay');
+            const content = document.getElementById('modalContent');
+            
+            const iconClass = type === 'success' ? 'success' : 'scanning';
+            const icon = type === 'success' ? 'fa-check' : 'fa-spinner';
+            
+            content.innerHTML = `
+                <div class="modal-icon ${iconClass}">
+                    <i class="fas ${icon}"></i>
+                </div>
+                <h2>${title}</h2>
+                <p>${message}</p>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="closeModal()">${buttonText}</button>
+                </div>
+            `;
+            
+            overlay.classList.add('active');
         }
-        function closeAddWeaverModal() {
-            document.getElementById('addWeaverModal').classList.remove('active');
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
         }
-        function submitWeaver(e) {
-            e.preventDefault();
-            const newWeaver = {
-                id: Date.now(),
-                name: document.getElementById('weaverName').value,
-                barangay: document.getElementById('weaverBarangay').value,
-                contact: document.getElementById('weaverContact').value,
-                experience: parseInt(document.getElementById('weaverExperience').value) || 0,
-                specialization: document.getElementById('weaverSpecialization').value,
-                products: 0
-            };
-            data.weavers.push(newWeaver);
-            updateStat('statWeavers', data.weavers.length);
-            renderWeavers();
-            closeAddWeaverModal();
-            showToast('Weaver registered successfully!', 'success');
-            e.target.reset();
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas ${icon}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${type === 'success' ? 'Success' : 'Error'}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
-        
-        // ===== ADD PRODUCT =====
-        function openAddProductModal() {
-            const select = document.getElementById('productWeaver');
-            select.innerHTML = '<option value="">Select weaver</option>' + data.weavers.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-            document.getElementById('addProductModal').classList.add('active');
+
+        // Product Detail
+        function showProductDetail(name) {
+            showModal('success', name, `Viewing details for ${name}. This product is authenticated and registered under the Weaver-ID system.`, 'Close');
         }
-        function closeAddProductModal() {
-            document.getElementById('addProductModal').classList.remove('active');
+
+        // Scan Detail
+        function showScanDetail(id) {
+            showModal('success', 'Scan Details', `Product ID: ${id}<br>Location: Various<br>Status: Authenticated<br>Last scanned: Recently`, 'Close');
         }
-        function submitProduct(e) {
-            e.preventDefault();
-            const wid = parseInt(document.getElementById('productWeaver').value);
-            const newProduct = {
-                id: Date.now(),
-                name: document.getElementById('productName').value,
-                weaverId: wid,
-                type: document.getElementById('productType').value,
-                pattern: document.getElementById('productPattern').value,
-                dimensions: document.getElementById('productDimensions').value,
-                price: parseInt(document.getElementById('productPrice').value) || 0,
-                date: new Date().toISOString().split('T')[0],
-                status: 'pending',
-                nfcUid: null
-            };
-            data.products.push(newProduct);
-            const w = data.weavers.find(x => x.id === wid);
-            if (w) w.products++;
-            updateStat('statProducts', data.products.length);
-            renderProducts();
-            renderRecentProducts();
-            closeAddProductModal();
-            showToast('Product registered! Awaiting DTI authentication.', 'success');
-            e.target.reset();
+
+        // Table Filter
+        function filterTable(input, tableId) {
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? '' : 'none';
+            }
         }
-        
-        // ===== UTILITIES =====
-        function updateStat(id, val) {
-            document.getElementById(id).textContent = val.toLocaleString();
-        }
-        function showToast(msg, type) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = 'toast ' + type;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-        function viewProduct(id) { showToast('Product ID: ' + id, 'success'); }
-        function viewWeaver(id) { showToast('Weaver ID: ' + id, 'success'); }
-        function requestTags() { showToast('Tag request sent to DTI!', 'success'); }
-        function shareResult() { showToast('Result shared!', 'success'); }
-        function showNotifications() { showToast('3 new notifications', 'success'); }
-        function logout() { if(confirm('Log out?')) showToast('Logged out', 'success'); }
-        
-        // ===== INIT =====
-        document.addEventListener('DOMContentLoaded', () => {
-            renderRecentProducts();
-            renderRecentScans();
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.querySelector('.overlay').classList.remove('active');
+            }
         });
     </script>
 </body>
