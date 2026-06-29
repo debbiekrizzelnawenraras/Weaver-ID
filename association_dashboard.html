@@ -986,7 +986,7 @@
             </a>
             <a href="#" class="nav-item" data-page="scan" onclick="navigateTo('scan', this)">
                 <i class="fas fa-mobile-alt"></i>
-                <span>Scan & Verify</span>
+                <span>Input Details</span>
             </a>
             <a href="#" class="nav-item" data-page="nfc" onclick="navigateTo('nfc', this)">
                 <i class="fas fa-tag"></i>
@@ -1003,37 +1003,7 @@
     <main class="main-content" id="mainContent">
         
         <!-- DASHBOARD PAGE -->
-        <div class="page-content active" id="page-dashboard">
-            <div class="stats-grid">
-                <div class="stat-card" onclick="navigateTo('weavers', document.querySelector('[data-page=weavers]'))">
-                    <div class="stat-number">28</div>
-                    <div class="stat-label">Registered Weavers</div>
-                    <div class="stat-trend up">
-                        <i class="fas fa-arrow-up"></i> 3 new this month
-                    </div>
-                </div>
-                <div class="stat-card" onclick="navigateTo('products', document.querySelector('[data-page=products]'))">
-                    <div class="stat-number">156</div>
-                    <div class="stat-label">Authenticated Products</div>
-                    <div class="stat-trend up">
-                        <i class="fas fa-arrow-up"></i> 12 this week
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">1,247</div>
-                    <div class="stat-label">Total Scans</div>
-                    <div class="stat-trend up">
-                        <i class="fas fa-arrow-up"></i> 89 this week
-                    </div>
-                </div>
-                <div class="stat-card" onclick="showToast('Request sent to DTI for more NFC tags', 'success')">
-                    <div class="stat-number">42</div>
-                    <div class="stat-label">NFC Tags Available</div>
-                    <div class="stat-trend alert">
-                        <i class="fas fa-exclamation-circle"></i> Request more from DTI
-                    </div>
-                </div>
-            </div>
+        
 
             <div class="nfc-section">
                 <div class="nfc-icon-wrapper">
@@ -1043,8 +1013,7 @@
                     </div>
                 </div>
                 <h2 class="nfc-title">Verify Product Authenticity</h2>
-                <p class="nfc-desc">Tap your NFC-enabled smartphone against the product tag to instantly verify its authenticity.</p>
-                <button class="nfc-btn" onclick="startScan()">
+                    <button class="nfc-btn" onclick="startScan()">
                     <i class="fas fa-wifi"></i> Scan NFC Tag Now
                 </button>
             </div>
