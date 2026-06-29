@@ -2,822 +2,1349 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weaver-ID | Association Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a5f2a">
+    <title>Weaver-ID | Association Portal</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
             --primary: #1a5f2a;
             --primary-light: #2d8a3e;
+            --primary-dark: #0d3d18;
             --secondary: #c9a227;
             --danger: #c0392b;
             --success: #27ae60;
             --warning: #f39c12;
-            --bg: #f5f7fa;
+            --info: #3498db;
+            --bg: #f0f4f0;
             --card-bg: #ffffff;
-            --text: #2c3e50;
-            --text-light: #7f8c8d;
-            --border: #e0e6ed;
+            --text: #1a1a1a;
+            --text-secondary: #5a6c7d;
+            --border: #e0e6e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
         }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
         
-        /* Sidebar */
-        .sidebar {
+        /* Mobile Bottom Navigation */
+        .bottom-nav {
             position: fixed;
+            bottom: 0;
             left: 0;
-            top: 0;
-            width: 260px;
-            height: 100vh;
-            background: linear-gradient(180deg, var(--primary) 0%, #0d3d18 100%);
-            color: white;
-            padding: 20px 0;
+            right: 0;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 12px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
             z-index: 1000;
-            transition: transform 0.3s;
+            border-top: 1px solid var(--border);
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 4px 12px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        .bottom-nav-item.active { color: var(--primary); }
+        .bottom-nav-item .icon {
+            font-size: 22px;
+            line-height: 1;
         }
         
-        .sidebar-header {
-            padding: 0 20px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-        }
-        
-        .sidebar-header .logo {
+        /* FAB Scan Button */
+        .fab-scan {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
             width: 60px;
             height: 60px;
-            background: white;
             border-radius: 50%;
-            margin: 0 auto 10px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            font-size: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-        }
-        
-        .sidebar-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .sidebar-header p {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-        
-        .association-info {
-            padding: 15px 20px;
-            background: rgba(255,255,255,0.1);
-            margin: 15px;
-            border-radius: 10px;
-        }
-        
-        .association-info h4 {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        
-        .association-info span {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        
-        .nav-menu {
-            list-style: none;
-            padding: 15px 0;
-        }
-        
-        .nav-menu li {
-            padding: 12px 20px;
+            box-shadow: 0 4px 15px rgba(26, 95, 42, 0.4);
+            z-index: 999;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(26,95,42,0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 25px rgba(26,95,42,0.5); }
         }
         
-        .nav-menu li:hover, .nav-menu li.active {
-            background: rgba(255,255,255,0.1);
-            border-left-color: var(--secondary);
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 16px 20px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        
-        .nav-menu li i {
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
-        }
-        
-        .nav-menu li span {
-            font-size: 14px;
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: 260px;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .top-bar {
+        .app-header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 12px;
         }
-        
-        .top-bar h1 {
-            font-size: 24px;
-            color: var(--primary);
+        .app-header h1 {
+            font-size: 20px;
+            font-weight: 700;
         }
-        
-        .top-bar .actions {
+        .app-header .subtitle {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .header-actions {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 12px;
         }
-        
-        .btn {
-            padding: 10px 20px;
+        .header-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: inline-flex;
+            color: white;
+            font-size: 18px;
+            display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
         }
-        
-        .btn-primary {
-            background: var(--primary);
+        .badge-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger);
             color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .btn-primary:hover {
-            background: var(--primary-light);
-        }
-        
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-        
-        .btn-scan {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            padding: 14px 28px;
-            font-size: 16px;
-            box-shadow: 0 4px 15px rgba(26, 95, 42, 0.3);
-        }
-        
-        .btn-scan:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 95, 42, 0.4);
+        /* Main Content Area */
+        .main-content {
+            padding: 16px;
+            padding-bottom: 100px;
         }
         
         /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
+        .stats-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0 12px;
+            margin: 0 -4px;
+            scrollbar-width: none;
         }
-        
+        .stats-scroll::-webkit-scrollbar { display: none; }
         .stat-card {
+            min-width: 140px;
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
             border-left: 4px solid var(--primary);
+            flex-shrink: 0;
         }
-        
         .stat-card:nth-child(2) { border-left-color: var(--secondary); }
         .stat-card:nth-child(3) { border-left-color: var(--success); }
         .stat-card:nth-child(4) { border-left-color: var(--warning); }
-        
         .stat-card h3 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 4px;
         }
-        
         .stat-card p {
-            font-size: 13px;
-            color: var(--text-light);
-        }
-        
-        .stat-card .trend {
             font-size: 12px;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
-        
+        .stat-card .trend {
+            font-size: 11px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
         .trend.up { color: var(--success); }
         .trend.down { color: var(--danger); }
         
-        /* Quick Scan Section */
-        .scan-section {
-            background: linear-gradient(135deg, var(--primary) 0%, #0d3d18 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        
-        .scan-section h2 {
-            font-size: 22px;
-            margin-bottom: 10px;
-        }
-        
-        .scan-section p {
-            opacity: 0.9;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .scan-animation {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-            border: 3px dashed rgba(255,255,255,0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-        }
-        
-        /* Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-        
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .card-header {
+        /* Section Headers */
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin: 20px 0 12px;
         }
-        
-        .card-header h3 {
+        .section-header h2 {
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
         }
-        
-        .card-header a {
+        .section-header a {
             font-size: 13px;
             color: var(--primary);
             text-decoration: none;
-        }
-        
-        /* Table */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .data-table th {
-            text-align: left;
-            padding: 12px;
-            font-size: 12px;
             font-weight: 600;
-            color: var(--text-light);
-            text-transform: uppercase;
-            border-bottom: 2px solid var(--border);
         }
         
-        .data-table td {
-            padding: 12px;
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .quick-action-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
             font-size: 13px;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            touch-action: manipulation;
+        }
+        .quick-action-btn .icon {
+            font-size: 32px;
+        }
+        .quick-action-btn.secondary {
+            background: var(--card-bg);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        /* Product Cards */
+        .product-card {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
             border-bottom: 1px solid var(--border);
         }
-        
-        .data-table tr:hover {
-            background: var(--bg);
+        .product-card:last-child { border-bottom: none; }
+        .product-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        .product-info { flex: 1; }
+        .product-info h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .product-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .product-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
         
+        /* Badges */
         .badge {
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 11px;
-            font-weight: 500;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .badge-authenticated {
+        .badge-auth {
             background: #d4edda;
             color: #155724;
         }
-        
         .badge-pending {
             background: #fff3cd;
             color: #856404;
         }
-        
-        .badge-unregistered {
+        .badge-unreg {
             background: #f8d7da;
             color: #721c24;
         }
         
-        /* Scan Log */
-        .scan-log-item {
+        /* Scan Log Items */
+        .scan-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 0;
             border-bottom: 1px solid var(--border);
         }
-        
-        .scan-log-item:last-child {
-            border-bottom: none;
-        }
-        
+        .scan-item:last-child { border-bottom: none; }
         .scan-icon {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 20px;
             flex-shrink: 0;
         }
-        
         .scan-icon.success {
             background: #d4edda;
             color: var(--success);
         }
-        
         .scan-icon.fail {
             background: #f8d7da;
             color: var(--danger);
         }
-        
-        .scan-info h4 {
+        .scan-icon.warning {
+            background: #fff3cd;
+            color: var(--warning);
+        }
+        .scan-detail { flex: 1; }
+        .scan-detail h4 {
             font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 3px;
+            font-weight: 700;
+            margin-bottom: 2px;
         }
-        
-        .scan-info p {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-        
-        .scan-time {
-            margin-left: auto;
+        .scan-detail p {
             font-size: 11px;
-            color: var(--text-light);
+            color: var(--text-secondary);
+        }
+        .scan-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
         }
         
-        /* Modal */
+        /* Modals */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
             display: none;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
             z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        
         .modal-overlay.active {
             display: flex;
+            opacity: 1;
         }
-        
-        .modal {
-            background: white;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
-            padding: 30px;
-            animation: slideUp 0.3s;
+        .modal-sheet {
+            background: var(--card-bg);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            padding: 24px 20px 40px;
         }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
         }
-        
         .modal-header {
             text-align: center;
             margin-bottom: 20px;
         }
-        
-        .modal-header .scan-result-icon {
+        .modal-drag {
+            width: 40px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            margin: 0 auto 16px;
+        }
+        .scan-result-icon {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            margin: 0 auto 15px;
+            margin: 0 auto 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 40px;
         }
-        
-        .modal-header .scan-result-icon.authenticated {
+        .scan-result-icon.success {
             background: #d4edda;
             color: var(--success);
         }
-        
-        .modal-header .scan-result-icon.unregistered {
+        .scan-result-icon.fail {
             background: #f8d7da;
             color: var(--danger);
         }
-        
         .modal-header h2 {
             font-size: 20px;
-            margin-bottom: 5px;
+            font-weight: 800;
         }
-        
         .modal-header p {
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-size: 14px;
+            margin-top: 4px;
         }
         
-        .product-details {
+        /* Detail Rows */
+        .detail-list {
             background: var(--bg);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
+            border-radius: 16px;
+            padding: 8px 16px;
+            margin: 16px 0;
         }
-        
         .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid var(--border);
         }
-        
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-        
-        .detail-row span:first-child {
-            color: var(--text-light);
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .label {
             font-size: 13px;
+            color: var(--text-secondary);
         }
-        
-        .detail-row span:last-child {
-            font-weight: 600;
+        .detail-row .value {
             font-size: 13px;
+            font-weight: 700;
+            text-align: right;
+            max-width: 60%;
         }
+        .detail-row .value.success { color: var(--success); }
+        .detail-row .value.fail { color: var(--danger); }
         
+        /* Modal Actions */
         .modal-actions {
             display: flex;
             gap: 10px;
             margin-top: 20px;
         }
-        
-        .modal-actions .btn {
+        .btn {
             flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            gap: 8px;
+            touch-action: manipulation;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
         }
         
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            background: var(--card-bg);
+            -webkit-appearance: none;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
         }
         
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .main-content {
-                margin-left: 0;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .empty-state h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .empty-state p {
+            font-size: 13px;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--text);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-lg);
+            white-space: nowrap;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        
+        /* Page Sections (hidden by default) */
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        
+        /* Weaver List */
+        .weaver-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+        }
+        .weaver-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .weaver-info { flex: 1; }
+        .weaver-info h4 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .weaver-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .weaver-count {
+            text-align: right;
+        }
+        .weaver-count span {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .weaver-count p {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        /* NFC Tag Cards */
+        .nfc-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--border);
+        }
+        .nfc-card.available { border-left-color: var(--success); }
+        .nfc-card.used { border-left-color: var(--primary); }
+        .nfc-card.damaged { border-left-color: var(--danger); }
+        .nfc-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .nfc-info { flex: 1; }
+        .nfc-info h4 {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        .nfc-info p {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .loading-overlay.active { display: flex; }
+        .nfc-animation {
+            width: 120px;
+            height: 120px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay p {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .loading-overlay .sub {
+            font-size: 13px;
+            opacity: 0.8;
+            font-weight: 400;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">🧵</div>
-            <h2>Weaver-ID</h2>
-            <p>Association Portal</p>
-        </div>
-        
-        <div class="association-info">
-            <h4>Barangay Caneo Women's Weaving Association</h4>
-            <span>Bontoc, Mountain Province</span><br>
-            <span>32 Members | Est. 2018</span>
-        </div>
-        
-        <ul class="nav-menu">
-            <li class="active" onclick="showPage('dashboard')">
-                <i>📊</i>
-                <span>Dashboard</span>
-            </li>
-            <li onclick="showPage('weavers')">
-                <i>👥</i>
-                <span>My Weavers</span>
-            </li>
-            <li onclick="showPage('products')">
-                <i>🧶</i>
-                <span>Products</span>
-            </li>
-            <li onclick="showPage('scan')">
-                <i>📱</i>
-                <span>Scan & Verify</span>
-            </li>
-            <li onclick="showPage('nfc')">
-                <i>🏷️</i>
-                <span>NFC Tags</span>
-            </li>
-            <li onclick="showPage('reports')">
-                <i>📈</i>
-                <span>Reports</span>
-            </li>
-            <li onclick="showPage('settings')">
-                <i>⚙️</i>
-                <span>Settings</span>
-            </li>
-        </ul>
-    </aside>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
     
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Top Bar -->
-        <div class="top-bar">
-            <h1>Association Dashboard</h1>
-            <div class="actions">
-                <span style="font-size: 13px; color: var(--text-light);">Welcome, President Maria</span>
-                <button class="btn btn-primary" onclick="openScanModal()">📱 Quick Scan</button>
+    <!-- Loading Overlay for Scan -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="nfc-animation"></div>
+        <p>Scanning NFC Tag...</p>
+        <p class="sub">Hold your phone near the tag</p>
+    </div>
+    
+    <!-- App Header -->
+    <header class="app-header" id="appHeader">
+        <div class="app-header-top">
+            <div>
+                <h1 id="pageTitle">Dashboard</h1>
+                <p class="subtitle" id="pageSubtitle">Barangay Caneo Women's Weavers</p>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" onclick="showNotifications()">🔔<span class="badge-count">3</span></button>
+                <button class="header-btn" onclick="showProfile()">👤</button>
             </div>
         </div>
+    </header>
+    
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content" id="mainContent">
         
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>28</h3>
-                <p>Registered Weavers</p>
-                <div class="trend up">↑ 3 new this month</div>
-            </div>
-            <div class="stat-card">
-                <h3>156</h3>
-                <p>Authenticated Products</p>
-                <div class="trend up">↑ 12 this week</div>
-            </div>
-            <div class="stat-card">
-                <h3>1,247</h3>
-                <p>Total Scans</p>
-                <div class="trend up">↑ 89 this week</div>
-            </div>
-            <div class="stat-card">
-                <h3>42</h3>
-                <p>NFC Tags Available</p>
-                <div class="trend down">↓ Request more from DTI</div>
-            </div>
-        </div>
-        
-        <!-- Quick Scan Section -->
-        <div class="scan-section">
-            <div class="scan-animation">📱</div>
-            <h2>Verify Product Authenticity</h2>
-            <p>Tap your NFC-enabled smartphone against the product tag to instantly verify its authenticity and view weaver information.</p>
-            <button class="btn btn-scan" onclick="openScanModal()">Scan NFC Tag Now</button>
-        </div>
-        
-        <!-- Content Grid -->
-        <div class="content-grid">
-            <!-- Recent Products -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Recent Authenticated Products</h3>
-                    <a href="#">View All →</a>
+        <!-- ===== DASHBOARD PAGE ===== -->
+        <div class="page-section active" id="page-dashboard">
+            <!-- Stats -->
+            <div class="stats-scroll">
+                <div class="stat-card">
+                    <h3 id="statWeavers">28</h3>
+                    <p>Weavers</p>
+                    <div class="trend up">↑ 3 new</div>
                 </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Weaver</th>
-                            <th>Pattern</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Traditional Tapis</td>
-                            <td>Maria Lumas-e</td>
-                            <td>Binakol</td>
-                            <td>Jun 25, 2026</td>
-                            <td><span class="badge badge-authenticated">Authenticated</span></td>
-                        </tr>
-                        <tr>
-                            <td>Woven Bag (Kayabang)</td>
-                            <td>Anna Fagyan</td>
-                            <td>Inammata</td>
-                            <td>Jun 24, 2026</td>
-                            <td><span class="badge badge-authenticated">Authenticated</span></td>
-                        </tr>
-                        <tr>
-                            <td>Men's Wanes</td>
-                            <td>Rosa Bay-oc</td>
-                            <td>Kinagabag</td>
-                            <td>Jun 22, 2026</td>
-                            <td><span class="badge badge-pending">Pending DTI</span></td>
-                        </tr>
-                        <tr>
-                            <td>Wall Hanging</td>
-                            <td>Linda Tanggac</td>
-                            <td>Binakol</td>
-                            <td>Jun 20, 2026</td>
-                            <td><span class="badge badge-authenticated">Authenticated</span></td>
-                        </tr>
-                        <tr>
-                            <td>Shoulder Bag</td>
-                            <td>Carmen Fiang</td>
-                            <td>Traditional</td>
-                            <td>Jun 18, 2026</td>
-                            <td><span class="badge badge-authenticated">Authenticated</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="stat-card">
+                    <h3 id="statProducts">156</h3>
+                    <p>Products</p>
+                    <div class="trend up">↑ 12 this week</div>
+                </div>
+                <div class="stat-card">
+                    <h3 id="statScans">1,247</h3>
+                    <p>Scans</p>
+                    <div class="trend up">↑ 89 this week</div>
+                </div>
+                <div class="stat-card">
+                    <h3 id="statTags">42</h3>
+                    <p>Tags Left</p>
+                    <div class="trend down">Request more</div>
+                </div>
             </div>
             
-            <!-- Recent Scan Activity -->
+            <!-- Quick Actions -->
+            <div class="section-header">
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="openScanModal()">
+                    <span class="icon">📱</span>
+                    Scan & Verify
+                </button>
+                <button class="quick-action-btn secondary" onclick="showPage('weavers')">
+                    <span class="icon">➕</span>
+                    Add Weaver
+                </button>
+            </div>
+            
+            <!-- Recent Products -->
+            <div class="section-header">
+                <h2>Recent Products</h2>
+                <a href="#" onclick="showPage('products')">View All</a>
+            </div>
+            <div class="card" id="recentProducts">
+                <!-- Populated by JS -->
+            </div>
+            
+            <!-- Recent Scans -->
+            <div class="section-header">
+                <h2>Recent Scan Activity</h2>
+                <a href="#">View All</a>
+            </div>
+            <div class="card" id="recentScans">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        
+        <!-- ===== WEAVERS PAGE ===== -->
+        <div class="page-section" id="page-weavers">
+            <div class="section-header">
+                <h2>My Weavers</h2>
+                <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="openAddWeaverModal()">+ Add Weaver</button>
+            </div>
+            <div id="weaversList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        
+        <!-- ===== PRODUCTS PAGE ===== -->
+        <div class="page-section" id="page-products">
+            <div class="section-header">
+                <h2>All Products</h2>
+                <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="openAddProductModal()">+ Add Product</button>
+            </div>
+            <div id="productsList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        
+        <!-- ===== NFC TAGS PAGE ===== -->
+        <div class="page-section" id="page-nfc">
+            <div class="section-header">
+                <h2>NFC Tag Inventory</h2>
+                <button class="btn btn-outline" style="padding: 8px 16px; font-size: 13px;" onclick="requestTags()">📦 Request More</button>
+            </div>
+            <div id="nfcList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        
+        <!-- ===== REPORTS PAGE ===== -->
+        <div class="page-section" id="page-reports">
+            <div class="section-header">
+                <h2>Reports</h2>
+            </div>
             <div class="card">
-                <div class="card-header">
-                    <h3>Recent Scan Activity</h3>
-                    <a href="#">View All →</a>
-                </div>
-                <div class="scan-log-item">
-                    <div class="scan-icon success">✓</div>
-                    <div class="scan-info">
-                        <h4>Authenticated: Traditional Tapis</h4>
-                        <p>Scanned at Bontoc Public Market</p>
-                    </div>
-                    <span class="scan-time">2 min ago</span>
-                </div>
-                <div class="scan-log-item">
-                    <div class="scan-icon success">✓</div>
-                    <div class="scan-info">
-                        <h4>Authenticated: Woven Bag</h4>
-                        <p>Scanned by Tourist (Manila)</p>
-                    </div>
-                    <span class="scan-time">15 min ago</span>
-                </div>
-                <div class="scan-log-item">
-                    <div class="scan-icon fail">✗</div>
-                    <div class="scan-info">
-                        <h4>Unregistered Tag Detected</h4>
-                        <p>Flagged at Sagada Weaving Center</p>
-                    </div>
-                    <span class="scan-time">1 hr ago</span>
-                </div>
-                <div class="scan-log-item">
-                    <div class="scan-icon success">✓</div>
-                    <div class="scan-info">
-                        <h4>Authenticated: Men's Wanes</h4>
-                        <p>Scanned by LGU Enforcement Officer</p>
-                    </div>
-                    <span class="scan-time">3 hrs ago</span>
-                </div>
-                <div class="scan-log-item">
-                    <div class="scan-icon success">✓</div>
-                    <div class="scan-info">
-                        <h4>Authenticated: Blanket (Kinagabag)</h4>
-                        <p>Scanned at Am-among Festival Booth</p>
-                    </div>
-                    <span class="scan-time">5 hrs ago</span>
+                <div class="empty-state">
+                    <div class="icon">📊</div>
+                    <h3>Reports Coming Soon</h3>
+                    <p>Detailed analytics and exportable reports will be available after pilot phase.</p>
                 </div>
             </div>
+        </div>
+        
+        <!-- ===== SETTINGS PAGE ===== -->
+        <div class="page-section" id="page-settings">
+            <div class="section-header">
+                <h2>Settings</h2>
+            </div>
+            <div class="card">
+                <div class="detail-list">
+                    <div class="detail-row">
+                        <span class="label">Association Name</span>
+                        <span class="value">Barangay Caneo Women's Weavers</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Municipality</span>
+                        <span class="value">Bontoc</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Members</span>
+                        <span class="value">32</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">President</span>
+                        <span class="value">Maria Lumas-e</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Contact</span>
+                        <span class="value">0917-XXX-XXXX</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="logout()">🚪 Log Out</button>
         </div>
     </main>
     
-    <!-- Scan Result Modal -->
-    <div class="modal-overlay" id="scanModal">
-        <div class="modal">
+    <!-- SCAN RESULT MODAL -->
+    <div class="modal-overlay" id="scanModal" onclick="if(event.target===this)closeScanModal()">
+        <div class="modal-sheet">
+            <div class="modal-drag"></div>
             <div class="modal-header">
-                <div class="scan-result-icon authenticated" id="resultIcon">✓</div>
-                <h2 id="resultTitle">Product Authenticated</h2>
-                <p id="resultSubtitle">This product is verified as genuine handwoven.</p>
+                <div class="scan-result-icon success" id="scanResultIcon">✓</div>
+                <h2 id="scanResultTitle">Product Authenticated</h2>
+                <p id="scanResultSubtitle">This product is verified as genuine handwoven.</p>
             </div>
-            
-            <div class="product-details" id="productDetails">
-                <div class="detail-row">
-                    <span>Product Name</span>
-                    <span>Traditional Tapis</span>
-                </div>
-                <div class="detail-row">
-                    <span>Weaver</span>
-                    <span>Maria Lumas-e</span>
-                </div>
-                <div class="detail-row">
-                    <span>Association</span>
-                    <span>Barangay Caneo Women's Weavers</span>
-                </div>
-                <div class="detail-row">
-                    <span>Municipality</span>
-                    <span>Bontoc</span>
-                </div>
-                <div class="detail-row">
-                    <span>Pattern</span>
-                    <span>Binakol (Whirlwind)</span>
-                </div>
-                <div class="detail-row">
-                    <span>Dimensions</span>
-                    <span>120cm x 60cm</span>
-                </div>
-                <div class="detail-row">
-                    <span>Date Registered</span>
-                    <span>June 25, 2026</span>
-                </div>
-                <div class="detail-row">
-                    <span>NFC Tag UID</span>
-                    <span>04:A2:8B:1F:3C:7E:90</span>
-                </div>
-                <div class="detail-row">
-                    <span>Authentication Status</span>
-                    <span style="color: var(--success); font-weight: 700;">✓ AUTHENTICATED</span>
-                </div>
+            <div class="detail-list" id="scanDetails">
+                <!-- Populated by JS -->
             </div>
-            
             <div class="modal-actions">
-                <button class="btn" style="background: var(--bg); color: var(--text);" onclick="closeScanModal()">Close</button>
-                <button class="btn btn-primary" onclick="downloadCertificate()">📄 Download Certificate</button>
-                <button class="btn btn-success" onclick="shareResult()">📤 Share</button>
+                <button class="btn btn-secondary" onclick="closeScanModal()">Close</button>
+                <button class="btn btn-primary" onclick="shareResult()">📤 Share</button>
             </div>
         </div>
     </div>
     
+    <!-- ADD WEAVER MODAL -->
+    <div class="modal-overlay" id="addWeaverModal" onclick="if(event.target===this)closeAddWeaverModal()">
+        <div class="modal-sheet">
+            <div class="modal-drag"></div>
+            <div class="modal-header">
+                <h2>Add New Weaver</h2>
+                <p>Register a new weaver to your association</p>
+            </div>
+            <form onsubmit="submitWeaver(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="weaverName" placeholder="Enter weaver's full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Barangay</label>
+                    <input type="text" id="weaverBarangay" placeholder="e.g., Caneo" required>
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="tel" id="weaverContact" placeholder="09XX-XXX-XXXX" required>
+                </div>
+                <div class="form-group">
+                    <label>Years of Experience</label>
+                    <input type="number" id="weaverExperience" placeholder="e.g., 15" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <input type="text" id="weaverSpecialization" placeholder="e.g., Binakol, Inammata">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddWeaverModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">✓ Register Weaver</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- ADD PRODUCT MODAL -->
+    <div class="modal-overlay" id="addProductModal" onclick="if(event.target===this)closeAddProductModal()">
+        <div class="modal-sheet">
+            <div class="modal-drag"></div>
+            <div class="modal-header">
+                <h2>Add New Product</h2>
+                <p>Register a new woven product</p>
+            </div>
+            <form onsubmit="submitProduct(event)">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="productName" placeholder="e.g., Traditional Tapis" required>
+                </div>
+                <div class="form-group">
+                    <label>Weaver</label>
+                    <select id="productWeaver" required>
+                        <option value="">Select weaver</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Product Type</label>
+                    <select id="productType" required>
+                        <option value="">Select type</option>
+                        <option value="Tapis">Tapis</option>
+                        <option value="Wanes">Wanes</option>
+                        <option value="Bag">Bag</option>
+                        <option value="Blanket">Blanket</option>
+                        <option value="Accessory">Accessory</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pattern Name</label>
+                    <input type="text" id="productPattern" placeholder="e.g., Binakol" required>
+                </div>
+                <div class="form-group">
+                    <label>Dimensions</label>
+                    <input type="text" id="productDimensions" placeholder="e.g., 120cm x 60cm">
+                </div>
+                <div class="form-group">
+                    <label>Price (PHP)</label>
+                    <input type="number" id="productPrice" placeholder="e.g., 1500" min="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddProductModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">✓ Register Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- FAB SCAN BUTTON -->
+    <button class="fab-scan" onclick="openScanModal()">📱</button>
+    
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="bottom-nav-item active" onclick="showPage('dashboard')">
+            <span class="icon">🏠</span>
+            <span>Home</span>
+        </button>
+        <button class="bottom-nav-item" onclick="showPage('weavers')">
+            <span class="icon">👥</span>
+            <span>Weavers</span>
+        </button>
+        <button class="bottom-nav-item" onclick="showPage('products')">
+            <span class="icon">🧶</span>
+            <span>Products</span>
+        </button>
+        <button class="bottom-nav-item" onclick="showPage('nfc')">
+            <span class="icon">🏷️</span>
+            <span>Tags</span>
+        </button>
+        <button class="bottom-nav-item" onclick="showPage('settings')">
+            <span class="icon">⚙️</span>
+            <span>More</span>
+        </button>
+    </nav>
+    
     <script>
+        // ===== DATA STORE =====
+        let data = {
+            weavers: [
+                { id: 1, name: "Maria Lumas-e", barangay: "Caneo", contact: "0917-123-4567", experience: 20, specialization: "Binakol, Inammata", products: 12 },
+                { id: 2, name: "Anna Fagyan", barangay: "Caneo", contact: "0918-234-5678", experience: 15, specialization: "Inammata", products: 8 },
+                { id: 3, name: "Rosa Bay-oc", barangay: "Samoki", contact: "0919-345-6789", experience: 25, specialization: "Kinagabag", products: 15 },
+                { id: 4, name: "Linda Tanggac", barangay: "Caneo", contact: "0917-456-7890", experience: 10, specialization: "Binakol", products: 6 },
+                { id: 5, name: "Carmen Fiang", barangay: "Balili", contact: "0918-567-8901", experience: 18, specialization: "Traditional", products: 9 }
+            ],
+            products: [
+                { id: 1, name: "Traditional Tapis", weaverId: 1, type: "Tapis", pattern: "Binakol", dimensions: "120cm x 60cm", price: 1500, date: "2026-06-25", status: "authenticated", nfcUid: "04:A2:8B:1F:3C:7E:90" },
+                { id: 2, name: "Woven Bag (Kayabang)", weaverId: 2, type: "Bag", pattern: "Inammata", dimensions: "40cm x 30cm", price: 800, date: "2026-06-24", status: "authenticated", nfcUid: "04:B3:9C:2G:4D:8F:01" },
+                { id: 3, name: "Men's Wanes", weaverId: 3, type: "Wanes", pattern: "Kinagabag", dimensions: "100cm x 50cm", price: 1200, date: "2026-06-22", status: "pending", nfcUid: null },
+                { id: 4, name: "Wall Hanging", weaverId: 4, type: "Accessory", pattern: "Binakol", dimensions: "80cm x 80cm", price: 2000, date: "2026-06-20", status: "authenticated", nfcUid: "04:D5:0E:4I:6K:0H:23" },
+                { id: 5, name: "Shoulder Bag", weaverId: 5, type: "Bag", pattern: "Traditional", dimensions: "35cm x 25cm", price: 950, date: "2026-06-18", status: "authenticated", nfcUid: "04:E6:1F:5J:7L:1I:34" }
+            ],
+            scans: [
+                { id: 1, productId: 1, type: "success", location: "Bontoc Public Market", time: "2 min ago", timestamp: new Date(Date.now() - 120000) },
+                { id: 2, productId: 2, type: "success", location: "Tourist (Manila)", time: "15 min ago", timestamp: new Date(Date.now() - 900000) },
+                { id: 3, productId: null, type: "fail", location: "Sagada Weaving Center", time: "1 hr ago", timestamp: new Date(Date.now() - 3600000) },
+                { id: 4, productId: 3, type: "success", location: "LGU Enforcement Officer", time: "3 hrs ago", timestamp: new Date(Date.now() - 10800000) },
+                { id: 5, productId: 4, type: "success", location: "Am-among Festival", time: "5 hrs ago", timestamp: new Date(Date.now() - 18000000) }
+            ],
+            nfcTags: [
+                { uid: "04:A2:8B:1F:3C:7E:90", status: "used", productId: 1, dateAssigned: "2026-06-25" },
+                { uid: "04:B3:9C:2G:4D:8F:01", status: "used", productId: 2, dateAssigned: "2026-06-24" },
+                { uid: "04:D5:0E:4I:6K:0H:23", status: "used", productId: 4, dateAssigned: "2026-06-20" },
+                { uid: "04:E6:1F:5J:7L:1I:34", status: "used", productId: 5, dateAssigned: "2026-06-18" },
+                { uid: "04:F7:2G:6K:8M:2J:45", status: "available", productId: null, dateAssigned: null },
+                { uid: "04:G8:3H:7L:9N:3K:56", status: "available", productId: null, dateAssigned: null },
+                { uid: "04:H9:4I:8M:0O:4L:67", status: "damaged", productId: null, dateAssigned: null }
+            ]
+        };
+        
+        // ===== PAGE NAVIGATION =====
         function showPage(page) {
-            document.querySelectorAll('.nav-menu li').forEach(li => li.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            // In real implementation, this would route to different views
-            alert('Navigating to: ' + page);
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+            
+            const pageMap = {
+                'dashboard': { section: 'page-dashboard', title: 'Dashboard', subtitle: 'Barangay Caneo Women\\'s Weavers', nav: 0 },
+                'weavers': { section: 'page-weavers', title: 'My Weavers', subtitle: 'Manage association members', nav: 1 },
+                'products': { section: 'page-products', title: 'Products', subtitle: 'All registered products', nav: 2 },
+                'nfc': { section: 'page-nfc', title: 'NFC Tags', subtitle: 'Tag inventory management', nav: 3 },
+                'reports': { section: 'page-reports', title: 'Reports', subtitle: 'Analytics & insights', nav: 4 },
+                'settings': { section: 'page-settings', title: 'Settings', subtitle: 'Association profile', nav: 4 }
+            };
+            
+            const p = pageMap[page];
+            if (p) {
+                document.getElementById(p.section).classList.add('active');
+                document.getElementById('pageTitle').textContent = p.title;
+                document.getElementById('pageSubtitle').textContent = p.subtitle;
+                document.querySelectorAll('.bottom-nav-item')[p.nav].classList.add('active');
+            }
+            
+            if (page === 'weavers') renderWeavers();
+            if (page === 'products') renderProducts();
+            if (page === 'nfc') renderNFC();
         }
         
+        // ===== RENDER FUNCTIONS =====
+        function renderRecentProducts() {
+            const container = document.getElementById('recentProducts');
+            const recent = [...data.products].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            
+            container.innerHTML = recent.map(p => {
+                const weaver = data.weavers.find(w => w.id === p.weaverId);
+                const statusClass = p.status === 'authenticated' ? 'badge-auth' : p.status === 'pending' ? 'badge-pending' : 'badge-unreg';
+                const statusText = p.status === 'authenticated' ? 'Authenticated' : p.status === 'pending' ? 'Pending DTI' : 'Unregistered';
+                return `
+                    <div class="product-card" onclick="viewProduct(${p.id})">
+                        <div class="product-img">${getProductEmoji(p.type)}</div>
+                        <div class="product-info">
+                            <h4>${p.name}</h4>
+                            <p>${weaver ? weaver.name : 'Unknown'} • ${p.pattern}</p>
+                            <div class="product-meta">
+                                <span class="badge ${statusClass}">${statusText}</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">₱${p.price}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderRecentScans() {
+            const container = document.getElementById('recentScans');
+            const recent = data.scans.slice(0, 5);
+            
+            container.innerHTML = recent.map(s => {
+                const product = s.productId ? data.products.find(p => p.id === s.productId) : null;
+                const icon = s.type === 'success' ? '✓' : '✗';
+                const iconClass = s.type === 'success' ? 'success' : 'fail';
+                const title = product ? `Authenticated: ${product.name}` : 'Unregistered Tag Detected';
+                return `
+                    <div class="scan-item" onclick="${s.productId ? `viewProduct(${s.productId})` : ''}">
+                        <div class="scan-icon ${iconClass}">${icon}</div>
+                        <div class="scan-detail">
+                            <h4>${title}</h4>
+                            <p>${s.location}</p>
+                        </div>
+                        <span class="scan-time">${s.time}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderWeavers() {
+            const container = document.getElementById('weaversList');
+            container.innerHTML = data.weavers.map(w => `
+                <div class="weaver-card" onclick="viewWeaver(${w.id})">
+                    <div class="weaver-avatar">${w.name.charAt(0)}</div>
+                    <div class="weaver-info">
+                        <h4>${w.name}</h4>
+                        <p>${w.barangay} • ${w.experience} years exp.</p>
+                    </div>
+                    <div class="weaver-count">
+                        <span>${w.products}</span>
+                        <p>products</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderProducts() {
+            const container = document.getElementById('productsList');
+            if (data.products.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">🧶</div><h3>No Products Yet</h3><p>Add your first woven product to get started.</p></div>';
+                return;
+            }
+            container.innerHTML = data.products.map(p => {
+                const weaver = data.weavers.find(w => w.id === p.weaverId);
+                const statusClass = p.status === 'authenticated' ? 'badge-auth' : p.status === 'pending' ? 'badge-pending' : 'badge-unreg';
+                const statusText = p.status === 'authenticated' ? 'Authenticated' : p.status === 'pending' ? 'Pending DTI' : 'Unregistered';
+                return `
+                    <div class="product-card" onclick="viewProduct(${p.id})">
+                        <div class="product-img">${getProductEmoji(p.type)}</div>
+                        <div class="product-info">
+                            <h4>${p.name}</h4>
+                            <p>${weaver ? weaver.name : 'Unknown'} • ${p.pattern} • ${p.dimensions}</p>
+                            <div class="product-meta">
+                                <span class="badge ${statusClass}">${statusText}</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">₱${p.price}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderNFC() {
+            const container = document.getElementById('nfcList');
+            container.innerHTML = data.nfcTags.map(t => {
+                const statusClass = t.status === 'available' ? 'available' : t.status === 'used' ? 'used' : 'damaged';
+                const statusText = t.status === 'available' ? 'Available' : t.status === 'used' ? 'Assigned' : 'Damaged';
+                const product = t.productId ? data.products.find(p => p.id === t.productId) : null;
+                return `
+                    <div class="nfc-card ${statusClass}">
+                        <div class="nfc-icon">🏷️</div>
+                        <div class="nfc-info">
+                            <h4>${t.uid}</h4>
+                            <p>${statusText}${product ? ' • ' + product.name : ''}${t.dateAssigned ? ' • ' + t.dateAssigned : ''}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getProductEmoji(type) {
+            const map = { 'Tapis': '👘', 'Wanes': '🩳', 'Bag': '👜', 'Blanket': '🛏️', 'Accessory': '🎀' };
+            return map[type] || '🧶';
+        }
+        
+        // ===== SCAN FUNCTIONALITY =====
         function openScanModal() {
-            document.getElementById('scanModal').classList.add('active');
+            document.getElementById('loadingOverlay').classList.add('active');
+            
             // Simulate NFC scan delay
             setTimeout(() => {
-                console.log('NFC scan simulated');
-            }, 500);
+                document.getElementById('loadingOverlay').classList.remove('active');
+                
+                // Randomly show authenticated or unregistered
+                const isAuthenticated = Math.random() > 0.3;
+                const modal = document.getElementById('scanModal');
+                const icon = document.getElementById('scanResultIcon');
+                const title = document.getElementById('scanResultTitle');
+                const subtitle = document.getElementById('scanResultSubtitle');
+                const details = document.getElementById('scanDetails');
+                
+                if (isAuthenticated) {
+                    const product = data.products[Math.floor(Math.random() * data.products.filter(p => p.status === 'authenticated').length)];
+                    const weaver = data.weavers.find(w => w.id === product.weaverId);
+                    
+                    icon.className = 'scan-result-icon success';
+                    icon.textContent = '✓';
+                    title.textContent = 'Product Authenticated';
+                    title.style.color = 'var(--success)';
+                    subtitle.textContent = 'This product is verified as genuine handwoven.';
+                    
+                    details.innerHTML = `
+                        <div class="detail-row"><span class="label">Product</span><span class="value">${product.name}</span></div>
+                        <div class="detail-row"><span class="label">Weaver</span><span class="value">${weaver.name}</span></div>
+                        <div class="detail-row"><span class="label">Association</span><span class="value">Barangay Caneo Women's Weavers</span></div>
+                        <div class="detail-row"><span class="label">Municipality</span><span class="value">Bontoc</span></div>
+                        <div class="detail-row"><span class="label">Pattern</span><span class="value">${product.pattern}</span></div>
+                        <div class="detail-row"><span class="label">Dimensions</span><span class="value">${product.dimensions}</span></div>
+                        <div class="detail-row"><span class="label">Price</span><span class="value">₱${product.price}</span></div>
+                        <div class="detail-row"><span class="label">NFC UID</span><span class="value" style="font-family:monospace;font-size:11px;">${product.nfcUid}</span></div>
+                        <div class="detail-row"><span class="label">Status</span><span class="value success">✓ AUTHENTICATED</span></div>
+                    `;
+                    
+                    // Add to scan log
+                    data.scans.unshift({
+                        id: Date.now(),
+                        productId: product.id,
+                        type: 'success',
+                        location: 'Mobile Scan',
+                        time: 'Just now',
+                        timestamp: new Date()
+                    });
+                    renderRecentScans();
+                    updateStat('statScans', parseInt(document.getElementById('statScans').textContent.replace(',','')) + 1);
+                    
+                } else {
+                    icon.className = 'scan-result-icon fail';
+                    icon.textContent = '✗';
+                    title.textContent = 'Unregistered Product';
+                    title.style.color = 'var(--danger)';
+                    subtitle.textContent = 'This NFC tag is not found in the Weaver-ID database.';
+                    
+                    details.innerHTML = `
+                        <div class="detail-row"><span class="label">NFC UID</span><span class="value" style="font-family:monospace;font-size:11px;">04:XX:XX:XX:XX:XX:XX</span></div>
+                        <div class="detail-row"><span class="label">Status</span><span class="value fail">✗ NOT REGISTERED</span></div>
+                        <div class="detail-row"><span class="label">Action</span><span class="value" style="color:var(--warning)">Possible counterfeit</span></div>
+                    `;
+                    
+                    data.scans.unshift({
+                        id: Date.now(),
+                        productId: null,
+                        type: 'fail',
+                        location: 'Mobile Scan',
+                        time: 'Just now',
+                        timestamp: new Date()
+                    });
+                    renderRecentScans();
+                }
+                
+                modal.classList.add('active');
+            }, 2000);
         }
         
         function closeScanModal() {
             document.getElementById('scanModal').classList.remove('active');
         }
         
-        function downloadCertificate() {
-            alert('Downloading authentication certificate...');
+        // ===== ADD WEAVER =====
+        function openAddWeaverModal() {
+            document.getElementById('addWeaverModal').classList.add('active');
+        }
+        function closeAddWeaverModal() {
+            document.getElementById('addWeaverModal').classList.remove('active');
+        }
+        function submitWeaver(e) {
+            e.preventDefault();
+            const newWeaver = {
+                id: Date.now(),
+                name: document.getElementById('weaverName').value,
+                barangay: document.getElementById('weaverBarangay').value,
+                contact: document.getElementById('weaverContact').value,
+                experience: parseInt(document.getElementById('weaverExperience').value) || 0,
+                specialization: document.getElementById('weaverSpecialization').value,
+                products: 0
+            };
+            data.weavers.push(newWeaver);
+            updateStat('statWeavers', data.weavers.length);
+            renderWeavers();
+            closeAddWeaverModal();
+            showToast('Weaver registered successfully!', 'success');
+            e.target.reset();
         }
         
+        // ===== ADD PRODUCT =====
+        function openAddProductModal() {
+            const select = document.getElementById('productWeaver');
+            select.innerHTML = '<option value="">Select weaver</option>' + 
+                data.weavers.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+            document.getElementById('addProductModal').classList.add('active');
+        }
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('active');
+        }
+        function submitProduct(e) {
+            e.preventDefault();
+            const weaverId = parseInt(document.getElementById('productWeaver').value);
+            const newProduct = {
+                id: Date.now(),
+                name: document.getElementById('productName').value,
+                weaverId: weaverId,
+                type: document.getElementById('productType').value,
+                pattern: document.getElementById('productPattern').value,
+                dimensions: document.getElementById('productDimensions').value,
+                price: parseInt(document.getElementById('productPrice').value) || 0,
+                date: new Date().toISOString().split('T')[0],
+                status: 'pending',
+                nfcUid: null
+            };
+            data.products.push(newProduct);
+            
+            const weaver = data.weavers.find(w => w.id === weaverId);
+            if (weaver) weaver.products++;
+            
+            updateStat('statProducts', data.products.length);
+            renderProducts();
+            renderRecentProducts();
+            closeAddProductModal();
+            showToast('Product registered! Awaiting DTI authentication.', 'success');
+            e.target.reset();
+        }
+        
+        // ===== UTILITIES =====
+        function updateStat(id, value) {
+            document.getElementById(id).textContent = value.toLocaleString();
+        }
+        
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        function viewProduct(id) {
+            showToast('Product details: ID ' + id, 'success');
+        }
+        function viewWeaver(id) {
+            showToast('Weaver profile: ID ' + id, 'success');
+        }
+        function requestTags() {
+            showToast('Tag request sent to DTI-Mountain Province!', 'success');
+        }
         function shareResult() {
-            alert('Sharing authentication result...');
+            showToast('Authentication result shared!', 'success');
+        }
+        function showNotifications() {
+            showToast('3 new notifications', 'info');
+        }
+        function showProfile() {
+            showPage('settings');
+        }
+        function logout() {
+            if (confirm('Log out of Weaver-ID?')) {
+                showToast('Logged out successfully', 'success');
+            }
         }
         
-        // Close modal on overlay click
-        document.getElementById('scanModal').addEventListener('click', function(e) {
-            if (e.target === this) closeScanModal();
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRecentProducts();
+            renderRecentScans();
         });
     </script>
 </body>
