@@ -148,7 +148,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
-        /* Bottom White Panels */
+        /* Bottom Panels */
         .panel-card {
             background: #ffffff;
             border-radius: 12px;
@@ -179,7 +179,7 @@
 </head>
 <body>
 
-<!-- Toast Alert for Live Actions -->
+<!-- Notification Toast -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
     <div id="actionToast" class="toast align-items-center text-bg-success border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -190,7 +190,7 @@
 </div>
 
 <div class="d-flex">
-    <!-- Left Navigation Sidebar -->
+    <!-- Navigation Sidebar -->
     <aside class="sidebar p-3 d-flex flex-column">
         <!-- Logo Header -->
         <div class="d-flex align-items-center gap-3 mb-4 ps-2">
@@ -210,10 +210,9 @@
             <span class="badge bg-success text-white fw-normal" style="font-size: 0.68rem;"><i class="bi bi-check-circle-fill me-1"></i>Active Hub</span>
         </div>
 
-        <!-- Clickable Navigation Links -->
+        <!-- Functional Navigation Menu -->
         <nav class="nav flex-column gap-1" id="sidebarNav">
             <a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-            <a class="nav-link" onclick="switchTab('msmeView', this)"><i class="bi bi-houses-fill"></i> MSME Associations</a>
             <a class="nav-link" onclick="switchTab('productsView', this)"><i class="bi bi-box-seam-fill"></i> Registered Products</a>
             <a class="nav-link" onclick="triggerNFCScan()"><i class="bi bi-phone-vibrate-fill"></i> Scan & Verify</a>
             <a class="nav-link" onclick="switchTab('tagsView', this)"><i class="bi bi-tags-fill"></i> DTI Tag Inventory</a>
@@ -221,54 +220,46 @@
         </nav>
     </aside>
 
-    <!-- Main Dynamic Content Area -->
+    <!-- Main Content Area -->
     <main class="flex-grow-1 p-4" style="overflow-y: auto; max-height: 100vh;">
 
         <!-- 1. DASHBOARD VIEW -->
         <section id="dashboard" class="view-tab active">
             <!-- Top Metric Cards -->
             <div class="row g-3 mb-4">
-                <div class="col-md-3 col-sm-6" onclick="switchTab('msmeView', document.querySelectorAll('.nav-link')[1])">
-                    <div class="kpi-card green">
-                        <div class="kpi-value" id="kpiMSMEs">4</div>
-                        <div class="kpi-title">Assisted MSMEs / Groups</div>
-                        <div class="kpi-subtext text-success">Mountain Province Wide</div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 col-sm-6" onclick="switchTab('productsView', document.querySelectorAll('.nav-link')[2])">
+                <div class="col-md-4 col-sm-6" onclick="switchTab('productsView', document.querySelectorAll('.nav-link')[1])">
                     <div class="kpi-card yellow">
                         <div class="kpi-value" id="kpiProducts">3</div>
                         <div class="kpi-title">Authenticated Products</div>
-                        <div class="kpi-subtext text-success">+1 registered today</div>
+                        <div class="kpi-subtext text-success">Live product catalog</div>
                     </div>
                 </div>
 
-                <div class="col-md-3 col-sm-6">
+                <div class="col-md-4 col-sm-6">
                     <div class="kpi-card emerald">
                         <div class="kpi-value" id="kpiScans">3,890</div>
                         <div class="kpi-title">Public Authentications</div>
-                        <div class="kpi-subtext text-success">Live verification feed</div>
+                        <div class="kpi-subtext text-success">Total verification scans</div>
                     </div>
                 </div>
 
-                <div class="col-md-3 col-sm-6" onclick="switchTab('tagsView', document.querySelectorAll('.nav-link')[4])">
+                <div class="col-md-4 col-sm-6" onclick="switchTab('tagsView', document.querySelectorAll('.nav-link')[3])">
                     <div class="kpi-card orange">
                         <div class="kpi-value" id="kpiTags">185</div>
                         <div class="kpi-title">NC Tag Stock Available</div>
-                        <div class="kpi-subtext text-muted">Ready for allocation</div>
+                        <div class="kpi-subtext text-muted">Ready for distribution</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Central Banner -->
+            <!-- Central Hero Banner -->
             <div class="hero-banner mb-4">
                 <div class="phone-icon-circle">
                     <i class="bi bi-phone-fill fs-3 text-info"></i>
                 </div>
                 <h3 class="fw-bold mb-2">Verify Product Authenticity</h3>
                 <p class="text-white-50 small mb-4" style="max-width: 580px; margin: 0 auto;">
-                    DTI Negosyo Center Verification Hub: Tap an NFC tag or trigger a simulated scan to inspect provenance, association records, and official DTI authenticity.
+                    DTI Negosyo Center Verification Hub: Tap an NFC tag or trigger a simulated scan to inspect provenance and official DTI authenticity certification.
                 </p>
                 <button class="scan-btn shadow-sm" onclick="triggerNFCScan()">
                     <i class="bi bi-phone me-1"></i> Scan NFC Tag Now
@@ -288,7 +279,6 @@
                                 <thead class="table-light text-secondary">
                                     <tr>
                                         <th>Item</th>
-                                        <th>MSME</th>
                                         <th>NFC UID</th>
                                         <th class="text-end">Action</th>
                                     </tr>
@@ -311,19 +301,10 @@
             </div>
         </section>
 
-        <!-- 2. MSME ASSOCIATIONS VIEW -->
-        <section id="msmeView" class="view-tab">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold mb-0 text-dark">Assisted MSME Associations</h4>
-                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addMsmeModal">+ Add Association</button>
-            </div>
-            <div class="row g-3" id="msmeCardsContainer"></div>
-        </section>
-
-        <!-- 3. PRODUCTS LIST VIEW -->
+        <!-- 2. PRODUCTS VIEW -->
         <section id="productsView" class="view-tab">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold mb-0 text-dark">All Registered Products</h4>
+                <h4 class="fw-bold mb-0 text-dark">Registered Products</h4>
                 <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">+ Register Product</button>
             </div>
             <div class="card border-0 shadow-sm">
@@ -332,7 +313,6 @@
                         <thead class="table-light text-secondary">
                             <tr>
                                 <th>Product Name</th>
-                                <th>MSME Group</th>
                                 <th>NFC UID</th>
                                 <th>Price</th>
                                 <th>Status</th>
@@ -345,7 +325,7 @@
             </div>
         </section>
 
-        <!-- 4. NFC TAG INVENTORY VIEW -->
+        <!-- 3. TAG INVENTORY VIEW -->
         <section id="tagsView" class="view-tab">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="fw-bold mb-0 text-dark">DTI Tag Inventory Allocation</h4>
@@ -368,15 +348,15 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm p-3">
-                        <small class="text-muted fw-bold">Total DTI Budgeted</small>
+                        <small class="text-muted fw-bold">Total DTI Allocation</small>
                         <h2 class="text-dark fw-bold my-1">500</h2>
-                        <small class="text-secondary">Fiscal Year Allocation</small>
+                        <small class="text-secondary">Fiscal Year Budget</small>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. SETTINGS VIEW -->
+        <!-- 4. SETTINGS VIEW -->
         <section id="settingsView" class="view-tab">
             <h4 class="fw-bold mb-3 text-dark">Negosyo Center Hub Settings</h4>
             <div class="card border-0 shadow-sm p-4" style="max-width: 600px;">
@@ -416,7 +396,7 @@
                     <span class="visually-hidden">Scanning...</span>
                 </div>
                 <h5 class="fw-bold text-dark mb-2">Hold NFC Tag Near Device</h5>
-                <p class="text-muted small mb-3">Bring the product's woven tag near your device's NFC sensor to verify provenance.</p>
+                <p class="text-muted small mb-3">Bring the product's tag near your device's NFC sensor to verify provenance.</p>
                 <div class="border-top pt-3">
                     <button type="button" class="btn btn-success btn-sm px-4" onclick="simulateScanSuccess()">Click to Simulate Scan Result</button>
                 </div>
@@ -425,7 +405,7 @@
     </div>
 </div>
 
-<!-- Modal: Product Details Viewer -->
+<!-- Modal: Product Detail Viewer -->
 <div class="modal fade" id="productDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -433,36 +413,28 @@
                 <h6 class="modal-title fw-bold"><i class="bi bi-patch-check-fill me-2 text-warning"></i>DTI Authenticity Certificate</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4 text-center" id="productDetailContent">
-                <!-- Dynamically filled -->
-            </div>
+            <div class="modal-body p-4 text-center" id="productDetailContent"></div>
         </div>
     </div>
 </div>
 
-<!-- Modal: Add / Register Product -->
+<!-- Modal: Register Product -->
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header text-white" style="background-color: var(--sidebar-green);">
-                <h6 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Register Textile Product</h6>
+                <h6 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Register Product</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addProductForm" onsubmit="saveProduct(event)">
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Textile / Craft Name</label>
-                        <input type="text" id="inputName" class="form-control form-control-sm" placeholder="e.g. Bontoc Traditional Woven Tapestry" required>
+                        <input type="text" id="inputName" class="form-control form-control-sm" placeholder="e.g. Bontoc Woven Tapestry" required>
                     </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">MSME / Association</label>
-                            <select id="inputAssociation" class="form-select form-select-sm" style="font-size: 0.85rem;" required></select>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Price (PHP)</label>
-                            <input type="number" id="inputPrice" class="form-control form-control-sm" placeholder="2500" required>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Price (PHP)</label>
+                        <input type="number" id="inputPrice" class="form-control form-control-sm" placeholder="2500" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Assigned NFC Tag UID</label>
@@ -481,54 +453,15 @@
     </div>
 </div>
 
-<!-- Modal: Add MSME Association -->
-<div class="modal fade" id="addMsmeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background-color: var(--sidebar-green);">
-                <h6 class="modal-title fw-bold"><i class="bi bi-building-add me-2"></i>Register New MSME Group</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form onsubmit="saveMsme(event)">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Association / Group Name</label>
-                        <input type="text" id="msmeName" class="form-control form-control-sm" placeholder="e.g. Sadanga Heritage Weavers" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Municipality / Location</label>
-                        <input type="text" id="msmeLoc" class="form-control form-control-sm" placeholder="e.g. Sadanga, Mountain Province" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Member Count</label>
-                        <input type="number" id="msmeMembers" class="form-control form-control-sm" placeholder="18" required>
-                    </div>
-                    <div class="text-end">
-                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success btn-sm">Register Group</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Bootstrap 5 JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // App State Data
-    let msmeGroups = [
-        { name: "Caneo Women's Weavers", loc: "Bontoc", members: 22 },
-        { name: "Sagada Weavers Association", loc: "Sagada", members: 35 },
-        { name: "Sabangan Textile Producers", loc: "Sabangan", members: 18 },
-        { name: "Barlig Heritage Crafts", loc: "Barlig", members: 15 }
-    ];
-
+    // State Data
     let products = [
-        { id: 1, name: "Caneo Heritage Wrap", assoc: "Caneo Women's Weavers", uid: "04:NC:88:C2", price: "₱2,200", status: "DTI Tagged" },
-        { id: 2, name: "Sagada Pinagpagan Blanket", assoc: "Sagada Weavers Association", uid: "04:NC:77:D9", price: "₱4,500", status: "DTI Tagged" },
-        { id: 3, name: "Sabangan Traditional Runner", assoc: "Sabangan Textile Producers", uid: "04:NC:12:E0", price: "₱1,850", status: "DTI Tagged" }
+        { id: 1, name: "Caneo Heritage Wrap", uid: "04:NC:88:C2", price: "₱2,200", status: "DTI Tagged" },
+        { id: 2, name: "Sagada Pinagpagan Blanket", uid: "04:NC:77:D9", price: "₱4,500", status: "DTI Tagged" },
+        { id: 3, name: "Sabangan Traditional Runner", uid: "04:NC:12:E0", price: "₱1,850", status: "DTI Tagged" }
     ];
 
     let scanActivity = [
@@ -550,7 +483,7 @@
         }
     }
 
-    // Render All Dynamic Sections
+    // Render Logic
     function renderApp() {
         // Render Dashboard Table
         const recentTable = document.getElementById('recentProductsTable');
@@ -559,7 +492,6 @@
             recentTable.innerHTML += `
                 <tr>
                     <td class="fw-semibold text-dark">${p.name}</td>
-                    <td class="text-secondary">${p.assoc}</td>
                     <td><span class="nfc-code">${p.uid}</span></td>
                     <td class="text-end">
                         <button class="btn btn-outline-success btn-sm py-0 px-2" onclick="viewDetails(${p.id})">Verify</button>
@@ -568,7 +500,7 @@
             `;
         });
 
-        // Render Recent Scans Log
+        // Render Recent Scans
         const scanList = document.getElementById('recentScansList');
         scanList.innerHTML = '';
         scanActivity.forEach(s => {
@@ -583,14 +515,13 @@
             `;
         });
 
-        // Render Full Products Table
+        // Render Products View Table
         const fullTable = document.getElementById('fullProductsTable');
         fullTable.innerHTML = '';
         products.forEach(p => {
             fullTable.innerHTML += `
                 <tr>
                     <td class="fw-semibold text-dark">${p.name}</td>
-                    <td>${p.assoc}</td>
                     <td><span class="nfc-code">${p.uid}</span></td>
                     <td class="fw-bold text-success">${p.price}</td>
                     <td><span class="badge bg-success">${p.status}</span></td>
@@ -602,41 +533,14 @@
             `;
         });
 
-        // Render MSME Cards
-        const msmeContainer = document.getElementById('msmeCardsContainer');
-        msmeContainer.innerHTML = '';
-        msmeGroups.forEach(m => {
-            msmeContainer.innerHTML += `
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="fw-bold mb-1 text-dark">${m.name}</h6>
-                                <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>${m.loc}, Mountain Province</small>
-                            </div>
-                            <span class="badge bg-success-subtle text-success">${m.members} Artisans</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        // Update Select Dropdowns
-        const assocSelect = document.getElementById('inputAssociation');
-        assocSelect.innerHTML = '';
-        msmeGroups.forEach(m => {
-            assocSelect.innerHTML += `<option value="${m.name}">${m.name}</option>`;
-        });
-
         // Update KPIs
-        document.getElementById('kpiMSMEs').innerText = msmeGroups.length;
         document.getElementById('kpiProducts').innerText = products.length;
         document.getElementById('kpiTags').innerText = tagStock;
         document.getElementById('inventoryStock').innerText = tagStock;
         document.getElementById('inventoryIssued').innerText = products.length;
     }
 
-    // Interactive Actions & NFC Simulation
+    // Actions & Scanning Simulation
     function triggerNFCScan() {
         const modal = new bootstrap.Modal(document.getElementById('scanModal'));
         modal.show();
@@ -670,10 +574,9 @@
             <h5 class="fw-bold text-dark mb-1">${item.name}</h5>
             <p class="text-success fw-bold mb-3">${item.price}</p>
             <div class="bg-light p-3 rounded mb-3 text-start small">
-                <div class="mb-1"><strong>MSME Producer:</strong> ${item.assoc}</div>
                 <div class="mb-1"><strong>NFC Tag UID:</strong> <span class="nfc-code">${item.uid}</span></div>
                 <div class="mb-1"><strong>DTI Registry:</strong> Mountain Province Certified</div>
-                <div><strong>Authenticity:</strong> 100% Genuine Indigenous Weave</div>
+                <div><strong>Authenticity:</strong> 100% Genuine Indigenous Craft</div>
             </div>
             <button class="btn btn-success btn-sm w-100" data-bs-dismiss="modal">Close Verification</button>
         `;
@@ -696,7 +599,6 @@
         const newProd = {
             id: Date.now(),
             name: document.getElementById('inputName').value,
-            assoc: document.getElementById('inputAssociation').value,
             uid: document.getElementById('inputNfcUid').value || "04:NC:99:FF",
             price: `₱${parseFloat(document.getElementById('inputPrice').value).toLocaleString()}`,
             status: "DTI Tagged"
@@ -708,20 +610,7 @@
         renderApp();
         bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
         document.getElementById('addProductForm').reset();
-        showToast("Product successfully registered & NFC tag issued!");
-    }
-
-    function saveMsme(e) {
-        e.preventDefault();
-        const newMsme = {
-            name: document.getElementById('msmeName').value,
-            loc: document.getElementById('msmeLoc').value,
-            members: parseInt(document.getElementById('msmeMembers').value)
-        };
-        msmeGroups.push(newMsme);
-        renderApp();
-        bootstrap.Modal.getInstance(document.getElementById('addMsmeModal')).hide();
-        showToast("New MSME Association registered!");
+        showToast("Product registered & NFC tag issued!");
     }
 
     function deleteProduct(id) {
@@ -748,7 +637,6 @@
         toast.show();
     }
 
-    // Initialize App
     document.addEventListener('DOMContentLoaded', () => {
         generateNFCUID();
         renderApp();
