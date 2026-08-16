@@ -272,7 +272,7 @@
                     <div class="panel-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2 text-success"></i>Recent Tagged Items</h6>
-                            <button class="btn btn-success btn-sm py-1 px-3" data-bs-toggle="modal" data-bs-target="#addProductModal">+ Add Product</button>
+                            <button class="btn btn-success btn-sm py-1 px-3" data-bs-toggle="modal" data-bs-target="#addProductModal" onclick="generateNFCUID()">+ Add Product</button>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
@@ -305,7 +305,7 @@
         <section id="productsView" class="view-tab">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="fw-bold mb-0 text-dark">Registered Products</h4>
-                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">+ Register Product</button>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal" onclick="generateNFCUID()">+ Register Product</button>
             </div>
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-0">
@@ -518,7 +518,6 @@
                 <tr>
                     <td class="fw-semibold text-dark">${p.name}</td>
                     <td><span class="nfc-code">${p.uid}</span></td>
-                    <td class="fw-bold text-success">${p.price}</td>
                     <td><span class="badge bg-success">${p.status}</span></td>
                     <td class="text-end">
                         <button class="btn btn-sm btn-outline-success py-0 me-1" onclick="viewDetails(${p.id})">Inspect</button>
@@ -546,6 +545,11 @@
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
 
+        if (products.length === 0) {
+            showToast("No products available to scan.");
+            return;
+        }
+
         const item = products[Math.floor(Math.random() * products.length)];
         scanActivity.unshift({
             item: item.name,
@@ -566,8 +570,7 @@
             <div class="mb-3">
                 <i class="bi bi-shield-check text-success fs-1"></i>
             </div>
-            <h5 class="fw-bold text-dark mb-1">${item.name}</h5>
-            <p class="text-success fw-bold mb-3">${item.price}</p>
+            <h5 class="fw-bold text-dark mb-3">${item.name}</h5>
             <div class="bg-light p-3 rounded mb-3 text-start small">
                 <div class="mb-1"><strong>NFC Tag UID:</strong> <span class="nfc-code">${item.uid}</span></div>
                 <div class="mb-1"><strong>DTI Registry:</strong> Mountain Province Certified</div>
