@@ -156,7 +156,7 @@
 </head>
 <body>
 
-  <!-- Desktop Dark Green Sidebar -->
+  <!-- Desktop Dark Green Sidebar Navigation -->
   <aside class="sidebar d-none d-lg-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-brand d-flex align-items-center gap-2">
@@ -185,7 +185,7 @@
     </div>
 
     <!-- Sidebar Admin Profile Footer -->
-    <div class="p-3 border-top border-white-10 d-flex align-items-center gap-2 style-footer" style="border-color: rgba(255,255,255,0.1) !important;">
+    <div class="p-3 border-top border-white-10 d-flex align-items-center gap-2" style="border-color: rgba(255,255,255,0.1) !important;">
       <div class="bg-warning text-dark rounded-circle fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-size: 0.85rem;">MR</div>
       <div class="overflow-hidden me-auto">
         <div class="fw-bold fs-7 text-white text-truncate">Maria Reyes</div>
@@ -237,7 +237,7 @@
   <!-- Main Content Area -->
   <main class="main-content">
     
-    <!-- Header Title & Top Controls Bar -->
+    <!-- Top Action Bar -->
     <div class="d-flex align-items-center justify-content-between mb-4">
       <div class="d-flex align-items-center gap-3">
         <button class="btn btn-light border d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
@@ -250,7 +250,6 @@
       </div>
       
       <div class="d-flex align-items-center gap-2">
-        <!-- Search Field Header -->
         <div class="input-group" style="max-width: 300px;">
           <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
           <input type="text" class="form-control border-start-0 ps-0" placeholder="Search weavers, products, NFC tag" id="adminSearchInput" onkeyup="filterDirectory()">
@@ -264,21 +263,18 @@
     <!-- 1. DASHBOARD VIEW -->
     <div id="view-dashboard" class="tab-view">
       
-      <!-- 4 KPI Metric Cards Grid matching Screenshot -->
       <div class="row g-3 mb-4">
-        <!-- Card 1 -->
         <div class="col-12 col-sm-6 col-xl-3">
           <div class="metric-card">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <div class="metric-icon icon-weavers"><i class="bi bi-people-fill"></i></div>
               <span class="stat-badge"><i class="bi bi-arrow-up-short"></i>12%</span>
             </div>
-            <h2 class="fw-bold mb-0" id="countWeavers">247</h2>
+            <h2 class="fw-bold mb-0" id="countWeavers">59</h2>
             <div class="text-muted fs-8 mt-1">Registered Weavers</div>
           </div>
         </div>
 
-        <!-- Card 2 -->
         <div class="col-12 col-sm-6 col-xl-3">
           <div class="metric-card">
             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -290,7 +286,6 @@
           </div>
         </div>
 
-        <!-- Card 3 -->
         <div class="col-12 col-sm-6 col-xl-3">
           <div class="metric-card">
             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -302,7 +297,6 @@
           </div>
         </div>
 
-        <!-- Card 4 -->
         <div class="col-12 col-sm-6 col-xl-3">
           <div class="metric-card">
             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -315,9 +309,7 @@
         </div>
       </div>
 
-      <!-- Main Section: Graph & Recent Scan Activity -->
       <div class="row g-3 mb-4">
-        <!-- Verification Trends Chart Card -->
         <div class="col-12 col-lg-7 col-xl-8">
           <div class="dashboard-card d-flex flex-column justify-content-between">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -330,18 +322,13 @@
           </div>
         </div>
 
-        <!-- Recent Scan Activity -->
         <div class="col-12 col-lg-5 col-xl-4">
           <div class="dashboard-card">
             <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Recent Scan Activity</h6>
-            
             <div class="d-flex flex-column gap-3">
-              <!-- Timeline Item 1 -->
               <div class="d-flex align-items-start justify-content-between">
-                <div class="d-flex align-items-start gap-25">
-                  <div class="scan-status-icon bg-success-subtle text-success me-2">
-                    <i class="bi bi-check-lg"></i>
-                  </div>
+                <div class="d-flex align-items-start gap-2">
+                  <div class="scan-status-icon bg-success-subtle text-success me-2"><i class="bi bi-check-lg"></i></div>
                   <div>
                     <div class="fw-bold fs-7">Authentic Product Verified</div>
                     <div class="text-muted fs-8">NFC: WVID-8842 | Traditional Blanket</div>
@@ -349,15 +336,10 @@
                 </div>
                 <span class="text-muted fs-8 text-nowrap">2 min ago</span>
               </div>
-
               <hr class="my-0 text-border">
-
-              <!-- Timeline Item 2 -->
               <div class="d-flex align-items-start justify-content-between">
-                <div class="d-flex align-items-start gap-25">
-                  <div class="scan-status-icon bg-warning-subtle text-warning me-2">
-                    <i class="bi bi-exclamation-lg"></i>
-                  </div>
+                <div class="d-flex align-items-start gap-2">
+                  <div class="scan-status-icon bg-warning-subtle text-warning me-2"><i class="bi bi-exclamation-lg"></i></div>
                   <div>
                     <div class="fw-bold fs-7">Unregistered Tag Scanned</div>
                     <div class="text-muted fs-8">NFC: Unknown | Location: Bauko Market</div>
@@ -365,37 +347,16 @@
                 </div>
                 <span class="text-muted fs-8 text-nowrap">15 min ago</span>
               </div>
-
               <hr class="my-0 text-border">
-
-              <!-- Timeline Item 3 -->
               <div class="d-flex align-items-start justify-content-between">
-                <div class="d-flex align-items-start gap-25">
-                  <div class="scan-status-icon bg-success-subtle text-success me-2">
-                    <i class="bi bi-check-lg"></i>
-                  </div>
+                <div class="d-flex align-items-start gap-2">
+                  <div class="scan-status-icon bg-success-subtle text-success me-2"><i class="bi bi-check-lg"></i></div>
                   <div>
                     <div class="fw-bold fs-7">Authentic Product Verified</div>
                     <div class="text-muted fs-8">NFC: WVID-7721 | Kalinga Weave Bag</div>
                   </div>
                 </div>
                 <span class="text-muted fs-8 text-nowrap">32 min ago</span>
-              </div>
-
-              <hr class="my-0 text-border">
-
-              <!-- Timeline Item 4 -->
-              <div class="d-flex align-items-start justify-content-between">
-                <div class="d-flex align-items-start gap-25">
-                  <div class="scan-status-icon bg-danger-subtle text-danger me-2">
-                    <i class="bi bi-x-lg"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold fs-7">Suspicious Item Detected</div>
-                    <div class="text-muted fs-8">NFC: Invalid Signature</div>
-                  </div>
-                </div>
-                <span class="text-muted fs-8 text-nowrap">1 hr ago</span>
               </div>
             </div>
           </div>
@@ -404,11 +365,11 @@
 
     </div>
 
-    <!-- 2. WEAVERS TAB VIEW -->
+    <!-- 2. REGISTERED WEAVERS TAB VIEW (ALL 59 RECORDS) -->
     <div id="view-weavers" class="tab-view d-none">
       <div class="dashboard-card p-0">
         <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-          <h6 class="fw-bold mb-0">Registered Weavers & Enterprises</h6>
+          <h6 class="fw-bold mb-0">Registered Weavers & Enterprises (59 Records)</h6>
           <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-plus-lg"></i> Add Weaver</button>
         </div>
         <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
@@ -426,8 +387,64 @@
             </thead>
             <tbody id="directoryTable">
               <tr><td>1</td><td class="fw-semibold">JOCELYN MIRANDA</td><td>JOCELYN MIRANDA</td><td>9128367338</td><td>DAGDAG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
-              <tr><td>2</td><td class="fw-semibold">JULIANA'S LOOM WEAVING</td><td>JULIANA WALISEN</td><td>9993761663</td><td>GUINZADAN NORTE</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
-              <tr><td>3</td><td class="fw-semibold">KINAYAN HANDLOOM WOVEN</td><td>FLORENCE ALIWENGWENG</td><td>—</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>2</td><td class="fw-semibold">JOSEPHINE FUCHADCHA</td><td>JOSEPHINE FUCHADCHA</td><td>—</td><td>—</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>3</td><td class="fw-semibold">JULIANA'S LOOM WEAVING MANUFACTURING</td><td>JULIANA WALISEN</td><td>9993761663</td><td>GUINZADAN NORTE</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>4</td><td class="fw-semibold">KAMOWAN SOUVENIRS</td><td>BRENDA ANONGOS</td><td>9194127474</td><td>PATAY</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>5</td><td class="fw-semibold">KINAYAN HANDLOOM WOVEN PRODUCTS</td><td>FLORENCE ALIWENGWENG</td><td>—</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>6</td><td class="fw-semibold">N/A</td><td>MARISA COTENG</td><td>9451644407</td><td>LAYLAYA</td><td>Besao</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>7</td><td class="fw-semibold">LANIE GAONGEN</td><td>LANIE GAONGEN</td><td>—</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>8</td><td class="fw-semibold">LETANG YOUNG MOTHERS</td><td>FELIPA TAGABAN</td><td>9457956160</td><td>TAPAPAN</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>9</td><td class="fw-semibold">LINA'S RUGS MANUFACTURING</td><td>LINA UNOS</td><td>—</td><td>TAMBOAN</td><td>Besao</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>10</td><td class="fw-semibold">LINGAYO'S HANDLOOM WOVEN PRODUCTS</td><td>ROSE ANN WANGDALI</td><td>9502033126</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>11</td><td class="fw-semibold">LOIDA BANIAGA</td><td>LOIDA BANIAGA</td><td>—</td><td>DAGDAG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>12</td><td class="fw-semibold">MARILYN'S WOVEN PRODUCTS</td><td>MARILYN DAO-ASEN</td><td>9466896101</td><td>GUINZADAN SUR</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>13</td><td class="fw-semibold">MARINA VARIETY STORE</td><td>MARINA BALANIYAN</td><td>09300907000</td><td>POBLACION</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>14</td><td class="fw-semibold">MARY'S WOVEN PRODUCTS</td><td>MARY TUKAKI</td><td>907E+09</td><td>GUINZADAN NORTE</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>15</td><td class="fw-semibold">MAY-ENG LOOM WEAVING MANUFACTURING</td><td>DAISY MAY-ENG</td><td>9061298652</td><td>AMBAGUIO</td><td>Besao</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>16</td><td class="fw-semibold">MIMYAH'S WOVEN PRODUCTS</td><td>HERMINIA PIAYAS</td><td>9668971195</td><td>CAN-EO</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>17</td><td class="fw-semibold">MODAWAN WOVEN PRODUCTS</td><td>MARY ANN MODAWAN</td><td>9484600525</td><td>GUINZADAN SUR</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>18</td><td class="fw-semibold">MONTAÑOSA WEAVERS ASSOCIATION</td><td>ROSE ANN WANGDALI</td><td>9502033126</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>19</td><td class="fw-semibold">N AND C GLASS AND ALUMINUM SUPPLY</td><td>CATHERINE CALINGLING</td><td>—</td><td>ABATAN</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>20</td><td class="fw-semibold">NEWLOOM WOVEN PRODUCTS</td><td>ROSE DULAY</td><td>9108700467</td><td>DAGDAG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>21</td><td class="fw-semibold">OCHASAN'S LOOM WEAVING</td><td>EVELYN OCHASAN</td><td>9354595908</td><td>CAN-EO</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>22</td><td class="fw-semibold">ONGA-ONG'S LOOM WEAVING PRODUCTS</td><td>KIMBERLY ONGA-ONG</td><td>9165633839</td><td>CAN-EO</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>23</td><td class="fw-semibold">OYAOY'S CLOTHING BOUTIQUE</td><td>RODILYN CHUMEL-ANG</td><td>9702091747</td><td>SAMOKI</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>24</td><td class="fw-semibold">PAMANA ORGANIZATION</td><td>CHRISTOPHER PINASEN</td><td>9128242841</td><td>MASLA</td><td>Tadian</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>25</td><td class="fw-semibold">Pangayapang Handicrafts Association</td><td>Julien Pineda</td><td>9467344884</td><td>POBLACION</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>26</td><td class="fw-semibold">PAULINA'S LOOM WEAVING MANUFACTURING</td><td>BRENDO CAYANGA</td><td>9502032739</td><td>AMBAGUIO</td><td>Besao</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>27</td><td class="fw-semibold">PIGACABUBA WEAVES ASSOCIATION</td><td>JOY ANOYAN</td><td>9398711035</td><td>CAMATAGAN</td><td>Sabangan</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>28</td><td class="fw-semibold">Pinagpagan Womens Workers Association</td><td>Virginia Omaweng</td><td>9978178644</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>29</td><td class="fw-semibold">PRAY'S KEENLYCRAFT SEWING SERVICE</td><td>PRAY KEEN BAN-ANG</td><td>9467509774</td><td>AMBASING</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>30</td><td class="fw-semibold">REGINA BALAGTAS</td><td>REGINA BALAGTAS</td><td>9812499300</td><td>KIN-IWAY</td><td>Besao</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>31</td><td class="fw-semibold">RIVER GREEN VARIETY SHOP</td><td>ALICE TAULI</td><td>9123798171</td><td>POBLACION</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>32</td><td class="fw-semibold">Rose Ann's Loom Art Gallery</td><td>ROSE ANN WANGDALI</td><td>9636113510</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>33</td><td class="fw-semibold">SABANGAN WEAVERS ASSOCIATION</td><td>RANNIE DAO</td><td>9101572596</td><td>POBLACION</td><td>Sabangan</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>34</td><td class="fw-semibold">SAGADA COLLECTIONS SOUVENIR SHOP</td><td>LUCIANO BAGYAN</td><td>9517475183</td><td>PATAY</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>35</td><td class="fw-semibold">SAGADA ETHNIC HANDICRAFTS MANUFACTURING</td><td>REGEELYN BACOLONG</td><td>—</td><td>DAGDAG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>36</td><td class="fw-semibold">SAGADA HAND LOOM WOVEN PRODUCT</td><td>ESTHER CACAY</td><td>—</td><td>DAGDAG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>37</td><td class="fw-semibold">SAGADA HANGINGVIEW SOUVENIR</td><td>JESSICA AGPAD</td><td>9608972889</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>38</td><td class="fw-semibold">SAGADA KOOL'TOUR ARTS AND CRAFTS MANUFACTURING</td><td>METHUSELAH KOLLIN</td><td>9079768758</td><td>AMBASING</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>39</td><td class="fw-semibold">SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING</td><td>AGNES CADIOGAN</td><td>9121527484</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>40</td><td class="fw-semibold">N/A</td><td>REBECCA CADIOGAN</td><td>—</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>41</td><td class="fw-semibold">SAGADA NORTH WEAVING</td><td>BANGIYAD BOLINGET</td><td>9061495265</td><td>AGUID</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>42</td><td class="fw-semibold">SAGADA SUNRISE HANDICRAFTS AND SOUVENIRS</td><td>PATRICIO MASLIYAN</td><td>9.07E+09</td><td>AMBASING</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>43</td><td class="fw-semibold">SAGADA WEAVING AND SOUVENIR SHOP</td><td>EZRA KIETHLEY ARANDUQUE</td><td>—</td><td>PATAY</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>44</td><td class="fw-semibold">N/A</td><td>FELIXA GEORGIA ARANDUQUE</td><td>—</td><td>PATAY</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>45</td><td class="fw-semibold">SEIGRID ANN POTTERY</td><td>SEIGRID ANN BANGYAY</td><td>9165426447</td><td>DAGDAG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>46</td><td class="fw-semibold">Solenn Stitches</td><td>Rufina Aluyen</td><td>9308144979</td><td>DEMANG</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>47</td><td class="fw-semibold">SOMETHING SAGADA SOUVENIRS KLEARING APPAREL MANUF</td><td>FLORENCE LIKIGAN</td><td>9562543413</td><td>PATAY</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>48</td><td class="fw-semibold">SUPHINA LOOM WEAVING MANUFACTURING</td><td>IRENE MARCONI</td><td>9150668685</td><td>LUBON</td><td>Tadian</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>49</td><td class="fw-semibold">SUTADA WEAVER'S ASSOCIATION</td><td>SALDY PUYONGAN</td><td>9151578041</td><td>SUPANG</td><td>Sabangan</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>50</td><td class="fw-semibold">SYDAL'G HANDLOOM WOVEN PRODUCTS</td><td>GLADYS WADINGAN</td><td>9957141183</td><td>CAN-EO</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>51</td><td class="fw-semibold">TANGAFAN ORGANIZATION INC</td><td>PAULA COFULAN</td><td>—</td><td>SAMOKI</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>52</td><td class="fw-semibold">TAWID CLOTHING SHOP</td><td>ELOIZA JEAN CHANGAT</td><td>09193106595</td><td>POBLACION</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>53</td><td class="fw-semibold">TAYNODAN HANDLOOM WOVEN PRODUCTS</td><td>PHOEBE AMOGAWEN</td><td>—</td><td>PATAY</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>54</td><td class="fw-semibold">TIRIZA'S HANDICRAFTS TRADING</td><td>MARIA TERESA ABAD</td><td>9391814622</td><td>PATAY</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>55</td><td class="fw-semibold">N/A</td><td>MARITES ABAD</td><td>9391814622</td><td>PATAY</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>56</td><td class="fw-semibold">Viewhill Womens Organization</td><td>Ruth Kathleen Codod</td><td>9085604319</td><td>GUINZADAN CENTRAL</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>57</td><td class="fw-semibold">YHUAN YHATZ BAGS AND ACCESSORIES SHOP</td><td>CAREN KIWANG</td><td>9108279230</td><td>SAMOKI</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>58</td><td class="fw-semibold">ZEPHYRA'S CLOSET ONLINE SHOP</td><td>KRYS IVONNE JOY SORIA</td><td>09151527501</td><td>POBLACION</td><td>Bontoc (Capital)</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <tr><td>59</td><td class="fw-semibold">ZK CLOTHING BOUTIQUE</td><td>MICHAEL IVAN JULIANO</td><td>9069220433</td><td>POBLACION</td><td>Paracelis</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
             </tbody>
           </table>
         </div>
@@ -451,24 +468,231 @@
             <tbody>
               <tr><td class="fw-semibold">Pinagpagan Pattern Blanket</td><td>Textile / Blanket</td><td>Sagada</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0">View Details</button></td></tr>
               <tr><td class="fw-semibold">Inabel Table Runner</td><td>Home Decor</td><td>Bontoc</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0">View Details</button></td></tr>
+              <tr><td class="fw-semibold">Suklang Woven Backpack</td><td>Bag / Accessory</td><td>Bauko</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0">View Details</button></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- OTHER VIEWS (STUBS FOR NAV) -->
-    <div id="view-associations" class="tab-view d-none"><div class="dashboard-card"><h6>Associations View</h6></div></div>
-    <div id="view-nfc" class="tab-view d-none"><div class="dashboard-card"><h6>NFC Tag Management</h6></div></div>
-    <div id="view-logs" class="tab-view d-none"><div class="dashboard-card"><h6>Scan Logs View</h6></div></div>
-    <div id="view-users" class="tab-view d-none"><div class="dashboard-card"><h6>User Management</h6></div></div>
-    <div id="view-reports" class="tab-view d-none"><div class="dashboard-card"><h6>System Reports</h6></div></div>
+    <!-- 4. WEAVER ASSOCIATIONS TAB VIEW (RESTORED) -->
+    <div id="view-associations" class="tab-view d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">Weaver Associations & Organizations</h6>
+        <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#addAssociationModal"><i class="bi bi-plus-lg"></i> Register Association</button>
+      </div>
+
+      <div class="row g-3">
+        <!-- Association Card 1 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="p-3 bg-success-subtle text-success rounded-3"><i class="bi bi-building fs-3"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Montañosa Weavers Association</h6>
+                <small class="text-muted fs-8"><i class="bi bi-geo-alt me-1"></i>Demang, Sagada</small>
+              </div>
+            </div>
+            <p class="fs-7 text-secondary mb-3">Provincial guild of traditional backstrap and handloom artisans specializing in authentic Cordilleran weaving patterns.</p>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2 fs-8">
+              <span class="text-muted">Head: <strong>Rose Ann Wangdali</strong></span>
+              <span class="badge bg-success-subtle text-success">Active Guild</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Association Card 2 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="p-3 bg-primary-subtle text-primary rounded-3"><i class="bi bi-building fs-3"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Sabangan Weavers Association</h6>
+                <small class="text-muted fs-8"><i class="bi bi-geo-alt me-1"></i>Poblacion, Sabangan</small>
+              </div>
+            </div>
+            <p class="fs-7 text-secondary mb-3">Community-based weaving cooperative producing traditional wearables, runners, and custom handloom textiles.</p>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2 fs-8">
+              <span class="text-muted">Head: <strong>Rannie Dao</strong></span>
+              <span class="badge bg-success-subtle text-success">Active Guild</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Association Card 3 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="p-3 bg-warning-subtle text-warning rounded-3"><i class="bi bi-building fs-3"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Pinagpagan Womens Workers Assoc.</h6>
+                <small class="text-muted fs-8"><i class="bi bi-geo-alt me-1"></i>Demang, Sagada</small>
+              </div>
+            </div>
+            <p class="fs-7 text-secondary mb-3">Grassroots women's collective preserving traditional ceremonial weaves and indigenous blanket motifs.</p>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2 fs-8">
+              <span class="text-muted">Head: <strong>Virginia Omaweng</strong></span>
+              <span class="badge bg-success-subtle text-success">Active Guild</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Association Card 4 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="p-3 bg-info-subtle text-info rounded-3"><i class="bi bi-building fs-3"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Pigacabuba Weaves Association</h6>
+                <small class="text-muted fs-8"><i class="bi bi-geo-alt me-1"></i>Camatagan, Sabangan</small>
+              </div>
+            </div>
+            <p class="fs-7 text-secondary mb-3">Artisan organization dedicated to high-grade handloom crafts and regional market distribution.</p>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2 fs-8">
+              <span class="text-muted">Head: <strong>Joy Anoyan</strong></span>
+              <span class="badge bg-success-subtle text-success">Active Guild</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Association Card 5 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="p-3 bg-secondary-subtle text-dark rounded-3"><i class="bi bi-building fs-3"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Sutada Weaver's Association</h6>
+                <small class="text-muted fs-8"><i class="bi bi-geo-alt me-1"></i>Supang, Sabangan</small>
+              </div>
+            </div>
+            <p class="fs-7 text-secondary mb-3">Rural weaver enterprise group focusing on scalable handwoven production and heritage conservation.</p>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2 fs-8">
+              <span class="text-muted">Head: <strong>Saldy Puyongan</strong></span>
+              <span class="badge bg-success-subtle text-success">Active Guild</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Association Card 6 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="p-3 bg-danger-subtle text-danger rounded-3"><i class="bi bi-building fs-3"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Tangafan Organization Inc.</h6>
+                <small class="text-muted fs-8"><i class="bi bi-geo-alt me-1"></i>Samoki, Bontoc</small>
+              </div>
+            </div>
+            <p class="fs-7 text-secondary mb-3">Registered cultural weaver group creating traditional Samoki pattern weaves and tribal apparel.</p>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2 fs-8">
+              <span class="text-muted">Head: <strong>Paula Cofulan</strong></span>
+              <span class="badge bg-success-subtle text-success">Active Guild</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. NFC TAGS VIEW -->
+    <div id="view-nfc" class="tab-view d-none">
+      <div class="dashboard-card">
+        <h6 class="fw-bold mb-3">NFC Tags Issued</h6>
+        <div class="table-responsive">
+          <table class="table table-hover fs-7 text-nowrap">
+            <thead class="table-light">
+              <tr>
+                <th>NFC ID</th>
+                <th>Assigned Item</th>
+                <th>Status</th>
+                <th class="text-end">Controls</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>WVID-8842</code></td><td>Suklang Woven Backpack</td><td><span class="badge bg-success">Active</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0">Unlink</button></td></tr>
+              <tr><td><code>WVID-7721</code></td><td>Pinagpagan Blanket</td><td><span class="badge bg-success">Active</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0">Unlink</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. AUDIT LOGS VIEW -->
+    <div id="view-logs" class="tab-view d-none">
+      <div class="dashboard-card">
+        <h6 class="fw-bold mb-3">Audit Logs</h6>
+        <div class="table-responsive">
+          <table class="table table-striped fs-7 text-nowrap">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Tag ID</th>
+                <th>Verification Status</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2m ago</td><td><code>WVID-8842</code></td><td><span class="text-success fw-bold">Verified</span></td><td>System Scan</td></tr>
+              <tr><td>15m ago</td><td><code>Unknown</code></td><td><span class="text-warning fw-bold">Unregistered</span></td><td>Bauko Market</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER & REPORTS PLACEHOLDERS -->
+    <div id="view-users" class="tab-view d-none"><div class="dashboard-card"><h6>User Management Module</h6></div></div>
+    <div id="view-reports" class="tab-view d-none"><div class="dashboard-card"><h6>Reports & Analytics Module</h6></div></div>
 
   </main>
 
+  <!-- Add Weaver Modal -->
+  <div class="modal fade" id="addWeaverModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Add Weaver Enterprise</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Enterprise / Business Name</label><input type="text" id="addBusiness" class="form-control" placeholder="e.g. Sabangan Loomweavers"></div>
+          <div class="mb-3"><label class="form-label">Artisan / Proprietor Name</label><input type="text" id="addProprietor" class="form-control" placeholder="e.g. Ana Cruz"></div>
+          <div class="mb-3"><label class="form-label">Contact Number</label><input type="text" id="addPhone" class="form-control" placeholder="e.g. 9123456789"></div>
+          <div class="mb-3"><label class="form-label">Barangay</label><input type="text" id="addBarangay" class="form-control" placeholder="e.g. Poblacion"></div>
+          <div class="mb-3"><label class="form-label">Municipality</label><input type="text" id="addMunicipality" class="form-control" placeholder="e.g. Sabangan"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-dti" onclick="saveWeaver()">Save Record</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Association Modal -->
+  <div class="modal fade" id="addAssociationModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Register Association</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Association Name</label><input type="text" class="form-control" placeholder="e.g. Cordillera Weavers Guild"></div>
+          <div class="mb-3"><label class="form-label">Head Representative</label><input type="text" class="form-control" placeholder="e.g. Maria Clara"></div>
+          <div class="mb-3"><label class="form-label">Location / Barangay</label><input type="text" class="form-control" placeholder="e.g. Poblacion, Bontoc"></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" rows="2" placeholder="Brief details about the organization"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-dti" data-bs-dismiss="modal">Register</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Tab Switching Navigation Logic
+    // Tab Navigation Switcher
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     const sectionTitle = document.getElementById('sectionTitle');
 
@@ -507,7 +731,7 @@
       });
     });
 
-    // Chart Setup
+    // Verification Trends Chart
     const ctx = document.getElementById('verificationTrendChart').getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 180);
     gradient.addColorStop(0, 'rgba(15, 76, 58, 0.25)');
@@ -539,6 +763,7 @@
       }
     });
 
+    // Directory Search Filter
     function filterDirectory() {
       const input = document.getElementById('adminSearchInput').value.toLowerCase();
       const rows = document.querySelectorAll('#directoryTable tr');
@@ -547,9 +772,42 @@
       });
     }
 
+    // Add Weaver
+    function saveWeaver() {
+      const biz = document.getElementById('addBusiness').value || 'N/A';
+      const prop = document.getElementById('addProprietor').value;
+      const phone = document.getElementById('addPhone').value || '—';
+      const brgy = document.getElementById('addBarangay').value || '—';
+      const muni = document.getElementById('addMunicipality').value || '—';
+
+      if (!prop) {
+        alert('Please fill in at least the proprietor/client name.');
+        return;
+      }
+
+      const table = document.getElementById('directoryTable');
+      const rowCount = table.rows.length + 1;
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td>${rowCount}</td>
+        <td class="fw-semibold">${biz}</td>
+        <td>${prop}</td>
+        <td>${phone}</td>
+        <td>${brgy}</td>
+        <td>${muni}</td>
+        <td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td>
+      `;
+
+      table.appendChild(tr);
+      document.getElementById('countWeavers').innerText = rowCount;
+      bootstrap.Modal.getInstance(document.getElementById('addWeaverModal')).hide();
+    }
+
     function deleteRow(btn) {
       if(confirm('Remove this weaver record?')) {
         btn.closest('tr').remove();
+        document.getElementById('countWeavers').innerText = document.querySelectorAll('#directoryTable tr').length;
       }
     }
 
