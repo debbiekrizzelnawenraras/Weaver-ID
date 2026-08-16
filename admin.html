@@ -4,17 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weaver-ID Admin Dashboard</title>
-  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --bg-canvas: #f6f8fa;
       --card-bg: #ffffff;
-      --card-radius: 16px;
+      --card-radius: 18px;
       --brand-green: #105a44;
       --text-dark: #1e293b;
       --text-muted: #64748b;
@@ -24,13 +21,13 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-canvas);
       color: var(--text-dark);
-      padding-bottom: 2.5rem;
+      padding-bottom: 2rem;
     }
 
-    /* Top Navigation Header */
+    /* Navigation Bar */
     .app-header {
       background-color: #ffffff;
-      padding: 0.75rem 1.5rem;
+      padding: 0.85rem 1.25rem;
       border-bottom: 1px solid #edf2f7;
     }
 
@@ -45,29 +42,24 @@
       background-color: #ffffff;
     }
 
-    .dashboard-container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    /* Cards & Components */
+    /* Cards */
     .metric-card, .dashboard-card {
       background-color: var(--card-bg);
       border-radius: var(--card-radius);
       padding: 1.25rem;
       border: 1px solid #edf2f7;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      height: 100%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
 
+    /* Icon Box Accents */
     .icon-box {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       margin-bottom: 0.75rem;
     }
 
@@ -76,6 +68,7 @@
     .icon-box-yellow { background-color: #fff8e1; color: #f57f17; }
     .icon-box-purple { background-color: #f3e5f5; color: #7b1fa2; }
 
+    /* Scan status indicator circles */
     .scan-icon {
       width: 40px;
       height: 40px;
@@ -89,7 +82,7 @@
     .scan-icon-success { background-color: #e8f5e9; color: #2e7d32; }
     .scan-icon-warning { background-color: #fff8e1; color: #f57f17; }
 
-    /* Drawer Links */
+    /* Offcanvas Sidebar */
     .offcanvas-nav .nav-link {
       padding: 0.75rem 1rem;
       border-radius: 10px;
@@ -98,7 +91,6 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      cursor: pointer;
     }
     .offcanvas-nav .nav-link.active {
       background-color: #e8f5e9;
@@ -106,13 +98,13 @@
       font-weight: 600;
     }
 
-    .fs-7 { font-size: 0.875rem; }
-    .fs-8 { font-size: 0.775rem; }
+    .fs-7 { font-size: 0.85rem; }
+    .fs-8 { font-size: 0.75rem; }
   </style>
 </head>
 <body>
 
-  <!-- Top App Bar -->
+  <!-- Top Navigation Bar -->
   <header class="app-header d-flex align-items-center justify-content-between sticky-top">
     <div class="d-flex align-items-center gap-3">
       <button class="btn btn-icon-square text-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#navDrawer">
@@ -125,7 +117,7 @@
     </button>
   </header>
 
-  <!-- Navigation Drawer -->
+  <!-- Navigation Drawer (Offcanvas Menu) -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="navDrawer" style="max-width: 280px;">
     <div class="offcanvas-header border-bottom">
       <h5 class="offcanvas-title fw-bold text-success"><i class="bi bi-shield-check me-2"></i>Weaver-ID</h5>
@@ -133,37 +125,40 @@
     </div>
     <div class="offcanvas-body">
       <nav class="nav flex-column offcanvas-nav gap-1">
-        <a class="nav-link active" onclick="switchTab('dashboard', 'Dashboard', this)"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a class="nav-link" onclick="switchTab('weavers', 'Registered Weavers (59)', this)"><i class="bi bi-people"></i> Registered Weavers</a>
-        <a class="nav-link" onclick="switchTab('associations', 'Associations (15)', this)"><i class="bi bi-building"></i> Associations</a>
+        <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers</a>
+        <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Cataloged Products</a>
+        <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
+        <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
+        <a class="nav-link" data-tab="logs"><i class="bi bi-journal-text"></i> Audit Logs</a>
       </nav>
     </div>
   </div>
 
-  <main class="dashboard-container p-3 p-md-4">
+  <main class="container-fluid px-3 pt-3">
     
     <!-- Search Bar -->
-    <div class="mb-4">
+    <div class="mb-3">
       <div class="input-group">
         <span class="input-group-text bg-white border-end-0 rounded-start-4 ps-3 text-muted"><i class="bi bi-search"></i></span>
-        <input type="text" id="searchInput" onkeyup="filterContent()" class="form-control border-start-0 rounded-end-4 bg-white py-2" placeholder="Search MSMEs, weavers, products...">
+        <input type="text" class="form-control border-start-0 rounded-end-4 bg-white py-2" placeholder="Search MSMEs, weavers, products..." id="searchInput" onkeyup="filterWeavers()">
       </div>
     </div>
 
-    <!-- 1. DASHBOARD TAB VIEW -->
+    <!-- 1. DASHBOARD TAB -->
     <div id="view-dashboard" class="tab-view">
       
-      <!-- Responsive Metric Grid -->
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
+      <!-- Metrics Grid -->
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="icon-box icon-box-green"><i class="bi bi-people-fill"></i></div>
-            <h2 class="fw-bold mb-0">59</h2>
+            <h2 class="fw-bold mb-0" id="totalWeaversCount">59</h2>
             <div class="text-muted fs-8">Registered Weavers</div>
           </div>
         </div>
 
-        <div class="col-6 col-lg-3">
+        <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="icon-box icon-box-blue"><i class="bi bi-box-seam-fill"></i></div>
             <h2 class="fw-bold mb-0">12</h2>
@@ -171,7 +166,7 @@
           </div>
         </div>
 
-        <div class="col-6 col-lg-3">
+        <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="icon-box icon-box-yellow"><i class="bi bi-wifi"></i></div>
             <h2 class="fw-bold mb-0">295</h2>
@@ -179,7 +174,7 @@
           </div>
         </div>
 
-        <div class="col-6 col-lg-3">
+        <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="icon-box icon-box-purple"><i class="bi bi-check-circle-fill"></i></div>
             <h2 class="fw-bold mb-0">841</h2>
@@ -188,18 +183,18 @@
         </div>
       </div>
 
-      <!-- Verification Trends Chart Card -->
-      <div class="dashboard-card mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+      <!-- Verification Trends Chart -->
+      <div class="dashboard-card mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="fw-bold mb-0">Verification Trends</h6>
           <button class="btn btn-sm btn-outline-secondary rounded-3 px-3 fs-8">Export</button>
         </div>
-        <div style="height: 220px; position: relative;">
+        <div style="height: 200px; position: relative;">
           <canvas id="trendsChart"></canvas>
         </div>
       </div>
 
-      <!-- Recent Scans List Card -->
+      <!-- Recent Scans List -->
       <div class="dashboard-card">
         <div class="d-flex align-items-center gap-2 mb-3">
           <i class="bi bi-clock-history fs-5 text-muted"></i>
@@ -218,7 +213,7 @@
             <span class="text-muted fs-8">2m ago</span>
           </div>
 
-          <hr class="my-0 opacity-10">
+          <hr class="my-0 text-black-50" style="opacity: 0.1;">
 
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
@@ -231,7 +226,7 @@
             <span class="text-muted fs-8">15m ago</span>
           </div>
 
-          <hr class="my-0 opacity-10">
+          <hr class="my-0 text-black-50" style="opacity: 0.1;">
 
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
@@ -248,230 +243,253 @@
 
     </div>
 
-    <!-- 2. REGISTERED WEAVERS TAB VIEW -->
+    <!-- 2. REGISTERED WEAVERS TAB (FULL 59 ENTRIES) -->
     <div id="view-weavers" class="tab-view d-none">
       <div class="dashboard-card p-0 overflow-hidden">
         <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
           <h6 class="fw-bold mb-0">Registered Weavers & Enterprises (59)</h6>
-          <span class="badge bg-success-subtle text-success fs-8">Active Directory</span>
+          <button class="btn btn-sm btn-success rounded-3" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-plus"></i> Add</button>
         </div>
-        <div class="table-responsive" style="max-height: 600px;">
-          <table class="table table-hover align-middle mb-0 fs-7">
+        <div class="table-responsive" style="max-height: 520px;">
+          <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
             <thead class="table-light sticky-top">
               <tr>
-                <th class="ps-3">#</th>
-                <th>Enterprise / Weaver Name</th>
-                <th>Proprietor / Lead</th>
+                <th>#</th>
+                <th>Business Name</th>
+                <th>Proprietor</th>
+                <th>Contact</th>
+                <th>Barangay</th>
                 <th>Municipality</th>
               </tr>
             </thead>
-            <tbody id="weaversTableBody">
-              <!-- Populated via JavaScript -->
+            <tbody id="weaverTableBody">
+              <tr><td>1</td><td class="fw-semibold">JOCELYN MIRANDA</td><td>JOCELYN MIRANDA</td><td>9128367338</td><td>DAGDAG</td><td>Sagada</td></tr>
+              <tr><td>2</td><td class="fw-semibold">JOSEPHINE FUCHADCHA</td><td>JOSEPHINE FUCHADCHA</td><td>—</td><td>—</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>3</td><td class="fw-semibold">JULIANA'S LOOM WEAVING MANUFACTURING</td><td>JULIANA WALISEN</td><td>9993761663</td><td>GUINZADAN NORTE</td><td>Bauko</td></tr>
+              <tr><td>4</td><td class="fw-semibold">KAMOWAN SOUVENIRS</td><td>BRENDA ANONGOS</td><td>9194127474</td><td>PATAY</td><td>Sagada</td></tr>
+              <tr><td>5</td><td class="fw-semibold">KINAYAN HANDLOOM WOVEN PRODUCTS</td><td>FLORENCE ALIWENGWENG</td><td>—</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>6</td><td class="fw-semibold">N/A</td><td>MARISA COTENG</td><td>9451644407</td><td>LAYLAYA</td><td>Besao</td></tr>
+              <tr><td>7</td><td class="fw-semibold">LANIE GAONGEN</td><td>LANIE GAONGEN</td><td>—</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>8</td><td class="fw-semibold">LETANG YOUNG MOTHERS</td><td>FELIPA TAGABAN</td><td>9457956160</td><td>TAPAPAN</td><td>Bauko</td></tr>
+              <tr><td>9</td><td class="fw-semibold">LINA'S RUGS MANUFACTURING</td><td>LINA UNOS</td><td>—</td><td>TAMBOAN</td><td>Besao</td></tr>
+              <tr><td>10</td><td class="fw-semibold">LINGAYO'S HANDLOOM WOVEN PRODUCTS</td><td>ROSE ANN WANGDALI</td><td>9502033126</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>11</td><td class="fw-semibold">LOIDA BANIAGA</td><td>LOIDA BANIAGA</td><td>—</td><td>DAGDAG</td><td>Sagada</td></tr>
+              <tr><td>12</td><td class="fw-semibold">MARILYN'S WOVEN PRODUCTS</td><td>MARILYN DAO-ASEN</td><td>9466896101</td><td>GUINZADAN SUR</td><td>Bauko</td></tr>
+              <tr><td>13</td><td class="fw-semibold">MARINA VARIETY STORE</td><td>MARINA BALANIYAN</td><td>09300907000</td><td>POBLACION</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>14</td><td class="fw-semibold">MARY'S WOVEN PRODUCTS</td><td>MARY TUKAKI</td><td>907E+09</td><td>GUINZADAN NORTE</td><td>Bauko</td></tr>
+              <tr><td>15</td><td class="fw-semibold">MAY-ENG LOOM WEAVING MANUFACTURING</td><td>DAISY MAY-ENG</td><td>9061298652</td><td>AMBAGUIO</td><td>Besao</td></tr>
+              <tr><td>16</td><td class="fw-semibold">MIMYAH'S WOVEN PRODUCTS</td><td>HERMINIA PIAYAS</td><td>9668971195</td><td>CAN-EO</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>17</td><td class="fw-semibold">MODAWAN WOVEN PRODUCTS</td><td>MARY ANN MODAWAN</td><td>9484600525</td><td>GUINZADAN SUR</td><td>Bauko</td></tr>
+              <tr><td>18</td><td class="fw-semibold">MONTAÑOSA WEAVERS ASSOCIATION</td><td>ROSE ANN WANGDALI</td><td>9502033126</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>19</td><td class="fw-semibold">N AND C GLASS AND ALUMINUM SUPPLY</td><td>CATHERINE CALINGLING</td><td>—</td><td>ABATAN</td><td>Bauko</td></tr>
+              <tr><td>20</td><td class="fw-semibold">NEWLOOM WOVEN PRODUCTS</td><td>ROSE DULAY</td><td>9108700467</td><td>DAGDAG</td><td>Sagada</td></tr>
+              <tr><td>21</td><td class="fw-semibold">OCHASAN'S LOOM WEAVING</td><td>EVELYN OCHASAN</td><td>9354595908</td><td>CAN-EO</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>22</td><td class="fw-semibold">ONGA-ONG'S LOOM WEAVING PRODUCTS</td><td>KIMBERLY ONGA-ONG</td><td>9165633839</td><td>CAN-EO</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>23</td><td class="fw-semibold">OYAOY'S CLOTHING BOUTIQUE</td><td>RODILYN CHUMEL-ANG</td><td>9702091747</td><td>SAMOKI</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>24</td><td class="fw-semibold">PAMANA ORGANIZATION</td><td>CHRISTOPHER PINASEN</td><td>9128242841</td><td>MASLA</td><td>Tadian</td></tr>
+              <tr><td>25</td><td class="fw-semibold">Pangayapang Handicrafts Association</td><td>Julien Pineda</td><td>9467344884</td><td>POBLACION</td><td>Bauko</td></tr>
+              <tr><td>26</td><td class="fw-semibold">PAULINA'S LOOM WEAVING MANUFACTURING</td><td>BRENDO CAYANGA</td><td>9502032739</td><td>AMBAGUIO</td><td>Besao</td></tr>
+              <tr><td>27</td><td class="fw-semibold">PIGACABUBA WEAVES ASSOCIATION</td><td>JOY ANOYAN</td><td>9398711035</td><td>CAMATAGAN</td><td>Sabangan</td></tr>
+              <tr><td>28</td><td class="fw-semibold">Pinagpagan Womens Workers Association</td><td>Virginia Omaweng</td><td>9978178644</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>29</td><td class="fw-semibold">PRAY'S KEENLYCRAFT SEWING SERVICE</td><td>PRAY KEEN BAN-ANG</td><td>9467509774</td><td>AMBASING</td><td>Sagada</td></tr>
+              <tr><td>30</td><td class="fw-semibold">REGINA BALAGTAS</td><td>REGINA BALAGTAS</td><td>9812499300</td><td>KIN-IWAY</td><td>Besao</td></tr>
+              <tr><td>31</td><td class="fw-semibold">RIVER GREEN VARIETY SHOP</td><td>ALICE TAULI</td><td>9123798171</td><td>POBLACION</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>32</td><td class="fw-semibold">Rose Ann's Loom Art Gallery</td><td>ROSE ANN WANGDALI</td><td>9636113510</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>33</td><td class="fw-semibold">SABANGAN WEAVERS ASSOCIATION</td><td>RANNIE DAO</td><td>9101572596</td><td>POBLACION</td><td>Sabangan</td></tr>
+              <tr><td>34</td><td class="fw-semibold">SAGADA COLLECTIONS SOUVENIR SHOP</td><td>LUCIANO BAGYAN</td><td>9517475183</td><td>PATAY</td><td>Sagada</td></tr>
+              <tr><td>35</td><td class="fw-semibold">SAGADA ETHNIC HANDICRAFTS MANUFACTURING</td><td>REGEELYN BACOLONG</td><td>—</td><td>DAGDAG</td><td>Sagada</td></tr>
+              <tr><td>36</td><td class="fw-semibold">SAGADA HAND LOOM WOVEN PRODUCT</td><td>ESTHER CACAY</td><td>—</td><td>DAGDAG</td><td>Sagada</td></tr>
+              <tr><td>37</td><td class="fw-semibold">SAGADA HANGINGVIEW SOUVENIR</td><td>JESSICA AGPAD</td><td>9608972889</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>38</td><td class="fw-semibold">SAGADA KOOL'TOUR ARTS AND CRAFTS MANUFACTURING</td><td>METHUSELAH KOLLIN</td><td>9079768758</td><td>AMBASING</td><td>Sagada</td></tr>
+              <tr><td>39</td><td class="fw-semibold">SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING</td><td>AGNES CADIOGAN</td><td>9121527484</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>40</td><td class="fw-semibold">N/A</td><td>REBECCA CADIOGAN</td><td>—</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>41</td><td class="fw-semibold">SAGADA NORTH WEAVING</td><td>BANGIYAD BOLINGET</td><td>9061495265</td><td>AGUID</td><td>Sagada</td></tr>
+              <tr><td>42</td><td class="fw-semibold">SAGADA SUNRISE HANDICRAFTS AND SOUVENIRS</td><td>PATRICIO MASLIYAN</td><td>9.07E+09</td><td>AMBASING</td><td>Sagada</td></tr>
+              <tr><td>43</td><td class="fw-semibold">SAGADA WEAVING AND SOUVENIR SHOP</td><td>EZRA KIETHLEY ARANDUQUE</td><td>—</td><td>PATAY</td><td>Sagada</td></tr>
+              <tr><td>44</td><td class="fw-semibold">N/A</td><td>FELIXA GEORGIA ARANDUQUE</td><td>—</td><td>PATAY</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>45</td><td class="fw-semibold">SEIGRID ANN POTTERY</td><td>SEIGRID ANN BANGYAY</td><td>9165426447</td><td>DAGDAG</td><td>Sagada</td></tr>
+              <tr><td>46</td><td class="fw-semibold">Solenn Stitches</td><td>Rufina Aluyen</td><td>9308144979</td><td>DEMANG</td><td>Sagada</td></tr>
+              <tr><td>47</td><td class="fw-semibold">SOMETHING SAGADA SOUVENIRS KLEARING APPAREL MANUF</td><td>FLORENCE LIKIGAN</td><td>9562543413</td><td>PATAY</td><td>Sagada</td></tr>
+              <tr><td>48</td><td class="fw-semibold">SUPHINA LOOM WEAVING MANUFACTURING</td><td>IRENE MARCONI</td><td>9150668685</td><td>LUBON</td><td>Tadian</td></tr>
+              <tr><td>49</td><td class="fw-semibold">SUTADA WEAVER'S ASSOCIATION</td><td>SALDY PUYONGAN</td><td>9151578041</td><td>SUPANG</td><td>Sabangan</td></tr>
+              <tr><td>50</td><td class="fw-semibold">SYDAL'G HANDLOOM WOVEN PRODUCTS</td><td>GLADYS WADINGAN</td><td>9957141183</td><td>CAN-EO</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>51</td><td class="fw-semibold">TANGAFAN ORGANIZATION INC</td><td>PAULA COFULAN</td><td>—</td><td>SAMOKI</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>52</td><td class="fw-semibold">TAWID CLOTHING SHOP</td><td>ELOIZA JEAN CHANGAT</td><td>09193106595</td><td>POBLACION</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>53</td><td class="fw-semibold">TAYNODAN HANDLOOM WOVEN PRODUCTS</td><td>PHOEBE AMOGAWEN</td><td>—</td><td>PATAY</td><td>Sagada</td></tr>
+              <tr><td>54</td><td class="fw-semibold">TIRIZA'S HANDICRAFTS TRADING</td><td>MARIA TERESA ABAD</td><td>9391814622</td><td>PATAY</td><td>Sagada</td></tr>
+              <tr><td>55</td><td class="fw-semibold">N/A</td><td>MARITES ABAD</td><td>9391814622</td><td>PATAY</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>56</td><td class="fw-semibold">Viewhill Womens Organization</td><td>Ruth Kathleen Codod</td><td>9085604319</td><td>GUINZADAN CENTRAL</td><td>Bauko</td></tr>
+              <tr><td>57</td><td class="fw-semibold">YHUAN YHATZ BAGS AND ACCESSORIES SHOP</td><td>CAREN KIWANG</td><td>9108279230</td><td>SAMOKI</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>58</td><td class="fw-semibold">ZEPHYRA'S CLOSET ONLINE SHOP</td><td>KRYS IVONNE JOY SORIA</td><td>09151527501</td><td>POBLACION</td><td>Bontoc (Capital)</td></tr>
+              <tr><td>59</td><td class="fw-semibold">ZK CLOTHING BOUTIQUE</td><td>MICHAEL IVAN JULIANO</td><td>9069220433</td><td>POBLACION</td><td>Paracelis</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- 3. ASSOCIATIONS TAB VIEW -->
+    <!-- 3. WEAVER ASSOCIATIONS TAB -->
     <div id="view-associations" class="tab-view d-none">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="fw-bold mb-0">Registered Associations & Cooperatives (15)</h6>
+        <h6 class="fw-bold mb-0">Registered Associations</h6>
       </div>
-      <div class="row g-3" id="associationsGrid">
-        <!-- Populated via JavaScript -->
+
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-box icon-box-green mb-0"><i class="bi bi-building"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Montañosa Weavers Association</h6>
+                <small class="text-muted">Demang, Sagada | Lead: Rose Ann Wangdali</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-box icon-box-blue mb-0"><i class="bi bi-building"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Sabangan Weavers Association</h6>
+                <small class="text-muted">Poblacion, Sabangan | Lead: Rannie Dao</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-box icon-box-yellow mb-0"><i class="bi bi-building"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Pinagpagan Womens Workers Assoc.</h6>
+                <small class="text-muted">Demang, Sagada | Lead: Virginia Omaweng</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-box icon-box-purple mb-0"><i class="bi bi-building"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Pigacabuba Weaves Association</h6>
+                <small class="text-muted">Camatagan, Sabangan | Lead: Joy Anoyan</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-box icon-box-green mb-0"><i class="bi bi-building"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Sutada Weaver's Association</h6>
+                <small class="text-muted">Supang, Sabangan | Lead: Saldy Puyongan</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-box icon-box-blue mb-0"><i class="bi bi-building"></i></div>
+              <div>
+                <h6 class="fw-bold mb-0">Tangafan Organization Inc.</h6>
+                <small class="text-muted">Samoki, Bontoc | Lead: Paula Cofulan</small>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- OTHER PLACEHOLDER VIEWS -->
+    <div id="view-products" class="tab-view d-none"><div class="dashboard-card"><h6>Cataloged Products View</h6></div></div>
+    <div id="view-nfc" class="tab-view d-none"><div class="dashboard-card"><h6>NFC Tags View</h6></div></div>
+    <div id="view-logs" class="tab-view d-none"><div class="dashboard-card"><h6>Audit Logs View</h6></div></div>
 
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // --- 1. FULL DATA ARRAYS ---
-    const associationsData = [
-      { name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
-      { name: "Sabangan Weavers Association", lead: "Rannie Dao", phone: "9101572596", location: "Poblacion, Sabangan" },
-      { name: "Pinagpagan Womens Workers Association", lead: "Virginia Omaweng", phone: "9978178644", location: "Demang, Sagada" },
-      { name: "Pigacabuba Weaves Association", lead: "Joy Anoyan", phone: "9398711035", location: "Camatagan, Sabangan" },
-      { name: "Sutada Weaver's Association", lead: "Saldy Puyongan", phone: "9151578041", location: "Supang, Sabangan" },
-      { name: "Tangafan Organization Inc", lead: "Paula Cofulan", phone: "N/A", location: "Samoki, Bontoc" },
-      { name: "Pangayapang Handicrafts Association", lead: "Julien Pineda", phone: "9467344884", location: "Poblacion, Bauko" },
-      { name: "Letang Young Mothers", lead: "Felipa Tagaban", phone: "9457956160", location: "Tapapan, Bauko" },
-      { name: "Pamana Organization", lead: "Christopher Pinasen", phone: "9128242841", location: "Masla, Tadian" },
-      { name: "Viewhill Womens Organization", lead: "Ruth Kathleen Codod", phone: "9085604319", location: "Guinzadan Central, Bauko" },
-      { name: "Juliana's Loom Weaving Manufacturing", lead: "Juliana Walisen", phone: "9993761663", location: "Guinzadan Norte, Bauko" },
-      { name: "Paulina's Loom Weaving Manufacturing", lead: "Brendo Cayanga", phone: "9502032739", location: "Ambaguio, Besao" },
-      { name: "Suphina Loom Weaving Manufacturing", lead: "Irene Marconi", phone: "9150668685", location: "Lubon, Tadian" },
-      { name: "Sagada Ethnic Handicrafts Manufacturing", lead: "Regeelyn Bacolong", phone: "N/A", location: "Dagdag, Sagada" },
-      { name: "Sagada Mountainside Handicrafts Manufacturing", lead: "Agnes Cadiogan", phone: "9121527484", location: "Demang, Sagada" }
-    ];
+    // Tab Navigation Switcher
+    const navLinks = document.querySelectorAll('.offcanvas-nav .nav-link');
+    const pageTitle = document.getElementById('pageTitle');
 
-    const weaversData = [
-      { id: 1, name: "JOCELYN MIRANDA", proprietor: "JOCELYN MIRANDA", municipality: "Sagada" },
-      { id: 2, name: "JOSEPHINE FUCHADCHA", proprietor: "JOSEPHINE FUCHADCHA", municipality: "Bontoc" },
-      { id: 3, name: "JULIANA'S LOOM WEAVING", proprietor: "JULIANA WALISEN", municipality: "Bauko" },
-      { id: 4, name: "KAMOWAN SOUVENIRS", proprietor: "BRENDA ANONGOS", municipality: "Sagada" },
-      { id: 5, name: "KINAYAN HANDLOOM", proprietor: "FLORENCE ALIWENGWENG", municipality: "Sagada" },
-      { id: 6, name: "LETANG YOUNG MOTHERS", proprietor: "FELIPA TAGABAN", municipality: "Bauko" },
-      { id: 7, name: "MONTAÑOSA WEAVERS ASSOCIATION", proprietor: "ROSE ANN WANGDALI", municipality: "Sagada" },
-      { id: 8, name: "PAMANA ORGANIZATION", proprietor: "CHRISTOPHER PINASEN", municipality: "Tadian" },
-      { id: 9, name: "PANGAYAPANG HANDICRAFTS ASSOCIATION", proprietor: "JULIEN PINEDA", municipality: "Bauko" },
-      { id: 10, name: "PAULINA'S LOOM WEAVING", proprietor: "BRENDO CAYANGA", municipality: "Besao" },
-      { id: 11, name: "PIGACABUBA WEAVES ASSOCIATION", proprietor: "JOY ANOYAN", municipality: "Sabangan" },
-      { id: 12, name: "PINAGPAGAN WOMENS WORKERS ASSOCIATION", proprietor: "VIRGINIA OMAWENG", municipality: "Sagada" },
-      { id: 13, name: "SABANGAN WEAVERS ASSOCIATION", proprietor: "RANNIE DAO", municipality: "Sabangan" },
-      { id: 14, name: "SAGADA ETHNIC HANDICRAFTS", proprietor: "REGEELYN BACOLONG", municipality: "Sagada" },
-      { id: 15, name: "SAGADA MOUNTAINSIDE HANDICRAFTS", proprietor: "AGNES CADIOGAN", municipality: "Sagada" },
-      { id: 16, name: "SUPHINA LOOM WEAVING", proprietor: "IRENE MARCONI", municipality: "Tadian" },
-      { id: 17, name: "SUTADA WEAVER'S ASSOCIATION", proprietor: "SALDY PUYONGAN", municipality: "Sabangan" },
-      { id: 18, name: "TANGAFAN ORGANIZATION INC", proprietor: "PAULA COFULAN", municipality: "Bontoc" },
-      { id: 19, name: "VIEWHILL WOMENS ORGANIZATION", proprietor: "RUTH KATHLEEN CODOD", municipality: "Bauko" },
-      { id: 20, name: "ABATAN WEAVERS", proprietor: "GRACE CODOD", municipality: "Bauko" },
-      { id: 21, name: "BAGNEN WEAVERS GUILD", proprietor: "MARY CAPUYAN", municipality: "Bauko" },
-      { id: 22, name: "BALILI ETHNIC CRAFTS", proprietor: "SARAH BALILI", municipality: "Bontoc" },
-      { id: 23, name: "BESAO LOOM WEAVERS", proprietor: "HELEN DOMOGO", municipality: "Besao" },
-      { id: 24, name: "BILIG WEAVERS", proprietor: "JANE BILIG", municipality: "Sagada" },
-      { id: 25, name: "BONTOC WEAVING CENTER", proprietor: "CLARA FAELDON", municipality: "Bontoc" },
-      { id: 26, name: "CAMATAGAN WEAVERS", proprietor: "RITA ANOYAN", municipality: "Sabangan" },
-      { id: 27, name: "CENTRAL BAUKO LOOM WEAVERS", proprietor: "ROSE BOSAING", municipality: "Bauko" },
-      { id: 28, name: "DAGDAG WEAVING ENTERPRISE", proprietor: "EVELYN BACOLONG", municipality: "Sagada" },
-      { id: 29, name: "DEMANG WEAVERS CIRCLE", proprietor: "MARIA WANGDALI", municipality: "Sagada" },
-      { id: 30, name: "FIDELISAN LOOM CRAFTS", proprietor: "LUCY FIDELISAN", municipality: "Sagada" },
-      { id: 31, name: "GUINZADAN WEAVERS COOPERATIVE", proprietor: "THERESA WALISEN", municipality: "Bauko" },
-      { id: 32, name: "LIAS WEAVERS ASSOCIATION", proprietor: "SUSAN LIAS", municipality: "Barlig" },
-      { id: 33, name: "LUBON LOOM WEAVERS", proprietor: "GRACE MARCONI", municipality: "Tadian" },
-      { id: 34, name: "MASLA NATIVE WEAVES", proprietor: "PETER PINASEN", municipality: "Tadian" },
-      { id: 35, name: "NATONIN WEAVING GROUP", proprietor: "ALICE NATONIN", municipality: "Natonin" },
-      { id: 36, name: "OTUCAN HANDICRAFTS", proprietor: "NANCY OTUCAN", municipality: "Bauko" },
-      { id: 37, name: "POBLACION SABANGAN CRAFTS", proprietor: "TOMAS DAO", municipality: "Sabangan" },
-      { id: 38, name: "SADANGA WEAVERS GUILD", proprietor: "MARTHA SADANGA", municipality: "Sadanga" },
-      { id: 39, name: "SAMOKI LOOM WEAVING", proprietor: "CARMEN COFULAN", municipality: "Bontoc" },
-      { id: 40, name: "SAYO WEAVING ENTERPRISE", proprietor: "LINDA SAYO", municipality: "Besao" },
-      { id: 41, name: "SUPANG NATIVE CRAFTS", proprietor: "MARTHA PUYONGAN", municipality: "Sabangan" },
-      { id: 42, name: "TADIAN WEAVERS ASSOCIATION", proprietor: "JOAN TADIAN", municipality: "Tadian" },
-      { id: 43, name: "TAPAPAN LOOM CRAFTS", proprietor: "BEATRICE TAGABAN", municipality: "Bauko" },
-      { id: 44, name: "TETEP-AN WEAVERS", proprietor: "CATHERINE TETEPAN", municipality: "Sagada" },
-      { id: 45, name: "AGAWA LOOM WEAVERS", proprietor: "KAREN AGAWA", municipality: "Besao" },
-      { id: 46, name: "ANKILENG WEAVING CENTER", proprietor: "REBECCA ANKILENG", municipality: "Sagada" },
-      { id: 47, name: "BARLIG ETHNIC CRAFTS", proprietor: "BRENDA BARLIG", municipality: "Barlig" },
-      { id: 48, name: "BAUKO CENTRAL HANDICRAFTS", proprietor: "VICTORIA CODOD", municipality: "Bauko" },
-      { id: 49, name: "BAYYO WEAVERS GROUP", proprietor: "JULIA BAYYO", municipality: "Bontoc" },
-      { id: 50, name: "BESAO NATIVE CRAFTS", proprietor: "AGNES BESAO", municipality: "Besao" },
-      { id: 51, name: "CAWA WEAVING ASSOCIATION", proprietor: "PATRICIA CAWA", municipality: "Sabangan" },
-      { id: 52, name: "GUINAANG WEAVERS", proprietor: "GLORIA GUINAANG", municipality: "Bontoc" },
-      { id: 53, name: "KADACLAN WEAVERS", proprietor: "VERONICA KADACLAN", municipality: "Barlig" },
-      { id: 54, name: "MALIGCONG LOOM WEAVES", proprietor: "TERESA MALIGCONG", municipality: "Bontoc" },
-      { id: 55, name: "PARACELIS CRAFTS", proprietor: "DELIA PARACELIS", municipality: "Paracelis" },
-      { id: 56, name: "PINGAD WEAVERS", proprietor: "ELIZABETH PINGAD", municipality: "Sabangan" },
-      { id: 57, name: "SABANGAN LOOM CENTER", proprietor: "JOSEPH DAO", municipality: "Sabangan" },
-      { id: 58, name: "TOCUCAN WEAVING GROUP", proprietor: "NORMA TOCUCAN", municipality: "Bontoc" },
-      { id: 59, name: "VANAG LOOM CRAFTS", proprietor: "SOPHIA VANAG", municipality: "Bauko" }
-    ];
+    const tabTitles = {
+      dashboard: "Dashboard",
+      weavers: "Registered Weavers",
+      products: "Cataloged Products",
+      associations: "Weaver Associations",
+      nfc: "NFC Tags Issued",
+      logs: "Audit Logs"
+    };
 
-    // --- 2. RENDER FUNCTIONS ---
-    function renderWeaversTable(data) {
-      const tbody = document.getElementById('weaversTableBody');
-      tbody.innerHTML = data.map(item => `
-        <tr>
-          <td class="ps-3 text-muted">${item.id}</td>
-          <td class="fw-semibold text-dark">${item.name}</td>
-          <td>${item.proprietor}</td>
-          <td><span class="badge bg-light text-dark border fs-8">${item.municipality}</span></td>
-        </tr>
-      `).join('');
-    }
+    navLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetTab = this.getAttribute('data-tab');
 
-    function renderAssociationsGrid(data) {
-      const grid = document.getElementById('associationsGrid');
-      const colors = ['icon-box-green', 'icon-box-blue', 'icon-box-yellow', 'icon-box-purple'];
-      
-      grid.innerHTML = data.map((item, index) => {
-        const colorClass = colors[index % colors.length];
-        return `
-          <div class="col-12 col-md-6 col-lg-4">
-            <div class="dashboard-card">
-              <div class="d-flex align-items-start gap-3">
-                <div class="icon-box ${colorClass} mb-0 flex-shrink-0"><i class="bi bi-building"></i></div>
-                <div>
-                  <h6 class="fw-bold mb-1 fs-7">${item.name}</h6>
-                  <div class="text-muted fs-8 mb-1"><i class="bi bi-geo-alt me-1"></i>${item.location}</div>
-                  <div class="text-muted fs-8"><i class="bi bi-person me-1"></i>Lead: ${item.lead} ${item.phone !== 'N/A' ? '(' + item.phone + ')' : ''}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
 
-    // --- 3. NAVIGATION & SEARCH LOGIC ---
-    function switchTab(tabId, title, element) {
-      document.querySelectorAll('.offcanvas-nav .nav-link').forEach(el => el.classList.remove('active'));
-      element.classList.add('active');
-      document.getElementById('pageTitle').textContent = title;
+        pageTitle.textContent = tabTitles[targetTab] || "Dashboard";
 
-      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('d-none'));
-      document.getElementById('view-' + tabId).classList.remove('d-none');
+        document.querySelectorAll('.tab-view').forEach(view => view.classList.add('d-none'));
+        document.getElementById(`view-${targetTab}`).classList.remove('d-none');
 
-      const drawer = bootstrap.Offcanvas.getInstance(document.getElementById('navDrawer'));
-      if (drawer) drawer.hide();
-    }
-
-    function filterContent() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      
-      const filteredWeavers = weaversData.filter(w => 
-        w.name.toLowerCase().includes(query) || 
-        w.proprietor.toLowerCase().includes(query) || 
-        w.municipality.toLowerCase().includes(query)
-      );
-      renderWeaversTable(filteredWeavers);
-
-      const filteredAssoc = associationsData.filter(a => 
-        a.name.toLowerCase().includes(query) || 
-        a.lead.toLowerCase().includes(query) || 
-        a.location.toLowerCase().includes(query)
-      );
-      renderAssociationsGrid(filteredAssoc);
-    }
-
-    // --- 4. INIT ON DOM LOAD ---
-    document.addEventListener('DOMContentLoaded', () => {
-      renderWeaversTable(weaversData);
-      renderAssociationsGrid(associationsData);
-
-      // Line Chart Setup
-      const ctx = document.getElementById('trendsChart').getContext('2d');
-      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-      gradient.addColorStop(0, 'rgba(16, 90, 68, 0.18)');
-      gradient.addColorStop(1, 'rgba(16, 90, 68, 0.0)');
-
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-          datasets: [{
-            data: [65, 80, 110, 145, 190, 210, 240, 280],
-            borderColor: '#105a44',
-            borderWidth: 2.5,
-            backgroundColor: gradient,
-            fill: true,
-            tension: 0.35,
-            pointBackgroundColor: '#105a44',
-            pointRadius: 3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-            y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8' } }
-          }
-        }
+        const drawerEl = document.getElementById('navDrawer');
+        const instance = bootstrap.Offcanvas.getInstance(drawerEl);
+        if (instance) instance.hide();
       });
     });
+
+    // Trends Area Chart
+    const ctx = document.getElementById('trendsChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+    gradient.addColorStop(0, 'rgba(16, 90, 68, 0.18)');
+    gradient.addColorStop(1, 'rgba(16, 90, 68, 0.0)');
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        datasets: [{
+          data: [65, 80, 110, 145, 190, 210, 240, 280],
+          borderColor: '#105a44',
+          borderWidth: 2.5,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: '#105a44',
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+          y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8' } }
+        }
+      }
+    });
+
+    // Search Filter
+    function filterWeavers() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#weaverTableBody tr');
+      rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
   </script>
 </body>
 </html>
