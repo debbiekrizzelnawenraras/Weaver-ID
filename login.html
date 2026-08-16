@@ -26,19 +26,21 @@
       border-top-left-radius: 12px;
       border-top-right-radius: 12px;
     }
+    .fs-7 { font-size: 0.875rem; }
+    .fs-8 { font-size: 0.75rem; }
   </style>
 </head>
 <body>
 
   <div class="card login-card border-0">
-    <!-- Header -->
+    <!-- Brand Header -->
     <div class="brand-header text-center p-4">
       <h3 class="fw-bold mb-1"><i class="bi bi-shield-lock-fill"></i> WEAVER-ID</h3>
       <p class="mb-0 fs-7 text-white-50">DTI & Negosyo Center Administrative Access</p>
     </div>
 
     <div class="card-body p-4">
-      <!-- Generic Authentication Error Alert (FR-AUTH-01) -->
+      <!-- Generic Authentication Error Alert -->
       <div id="errorAlert" class="alert alert-danger d-none fs-7" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
         <span>Invalid credentials provided. Please try again.</span>
@@ -53,7 +55,7 @@
       <!-- Login Form -->
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="mb-3">
-          <label for="username" class="form-label fw-semibold">Username or Email</label>
+          <label for="username" class="form-label fw-semibold fs-7">Username or Email</label>
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-person"></i></span>
             <input type="text" class="form-control" id="username" autocomplete="username" required placeholder="user@dti.gov.ph">
@@ -62,7 +64,7 @@
 
         <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center">
-            <label for="password" class="form-label fw-semibold mb-0">Password</label>
+            <label for="password" class="form-label fw-semibold fs-7 mb-0">Password</label>
             <a href="#" class="text-decoration-none fs-7" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forgot Password?</a>
           </div>
           <div class="input-group mt-1">
@@ -83,7 +85,7 @@
     </div>
   </div>
 
-  <!-- Forgot Password Modal (FR-AUTH-03) -->
+  <!-- Forgot Password Modal -->
   <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -95,7 +97,7 @@
           <div class="modal-body">
             <p class="fs-7 text-muted">Enter your registered email address below. You will receive a password reset link if your account exists.</p>
             <div class="mb-3">
-              <label for="resetEmail" class="form-label fw-semibold">Verified Email Address</label>
+              <label for="resetEmail" class="form-label fw-semibold fs-7">Verified Email Address</label>
               <input type="email" class="form-control" id="resetEmail" required placeholder="name@domain.gov.ph">
             </div>
           </div>
@@ -112,7 +114,7 @@
   <script>
     const API_BASE = '/api';
 
-    // Automatically redirect if a valid session token is already present
+    // Auto-redirect if session already active
     window.onload = function() {
       const token = localStorage.getItem('jwt_token');
       const userRole = localStorage.getItem('user_role');
@@ -147,14 +149,12 @@
         const data = await response.json();
 
         if (response.ok && data.token) {
-          // Store JWT token and user info (NFR-09)
           localStorage.setItem('jwt_token', data.token);
           localStorage.setItem('user_role', data.role);
           localStorage.setItem('user_name', data.name);
           
           redirectToDashboard(data.role);
         } else {
-          // Display generic error without indicating email vs password invalidity (FR-AUTH-01)
           errorAlert.classList.remove('d-none');
         }
       } catch (err) {
@@ -187,13 +187,14 @@
       }
     }
 
+    // RELATIVE REDIRECT ROUTING
     function redirectToDashboard(role) {
       if (role === 'SUPER_ADMIN') {
-        window.location.href = '/admin.html';
+        window.location.replace('./admin.html');
       } else if (role === 'ADMIN') {
-        window.location.href = '/association_dashboard.html';
+        window.location.replace('./association_dashboard.html');
       } else {
-        window.location.href = '/login.html';
+        window.location.replace('./Login.html');
       }
     }
   </script>
