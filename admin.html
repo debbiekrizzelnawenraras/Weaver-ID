@@ -65,7 +65,7 @@
     .main-content {
       margin-left: var(--sidebar-width);
       padding: 2rem;
-      max-width: 1100px;
+      max-width: 1200px;
     }
 
     /* Search Input Bar */
@@ -120,7 +120,8 @@
       border-radius: 16px;
       border: 1px solid #eaeaea;
       box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      padding: 1.5rem;
+      padding: 1.25rem;
+      height: 100%;
     }
 
     /* Standalone Box Styles for Associations */
@@ -141,13 +142,13 @@
     }
 
     .scan-status-icon {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 0.9rem;
       flex-shrink: 0;
     }
 
@@ -275,65 +276,77 @@
         </div>
       </div>
 
-      <!-- Verification Trends Chart Card -->
-      <div class="dashboard-card mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-bold mb-0">Verification Trends</h6>
-          <button class="btn btn-sm btn-outline-secondary px-3" onclick="exportData()">Export</button>
-        </div>
-        <div style="height: 250px;">
-          <canvas id="verificationTrendChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Recent Scans Card -->
-      <div class="dashboard-card mb-4">
-        <h6 class="fw-bold mb-3"><i class="bi bi-clock me-2"></i>Recent Scans</h6>
+      <!-- SIDE-BY-SIDE ROW: Smaller Verification Trends + Recent Scans -->
+      <div class="row g-3 mb-4">
         
-        <div class="d-flex flex-column gap-3">
-          <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-              <div class="scan-status-icon bg-success-subtle text-success">
-                <i class="bi bi-check-lg"></i>
+        <!-- Verification Trends Chart Card (Smaller Left Column) -->
+        <div class="col-12 col-lg-5">
+          <div class="dashboard-card d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold mb-0 fs-7">Verification Trends</h6>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 fs-8" onclick="exportData()">Export</button>
               </div>
-              <div>
-                <div class="fw-bold fs-7">Product Verified</div>
-                <div class="text-muted fs-8">NFC: WVID-8842 | Backpack</div>
-              </div>
+              <small class="text-muted fs-8 d-block mb-2">Monthly Tag Verifications</small>
             </div>
-            <span class="text-muted fs-8">2m ago</span>
-          </div>
-
-          <hr class="my-0 text-border">
-
-          <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-              <div class="scan-status-icon bg-warning-subtle text-warning">
-                <i class="bi bi-exclamation-lg"></i>
-              </div>
-              <div>
-                <div class="fw-bold fs-7">Unregistered Tag</div>
-                <div class="text-muted fs-8">NFC: Unknown | Bauko Market</div>
-              </div>
+            <div style="height: 180px;">
+              <canvas id="verificationTrendChart"></canvas>
             </div>
-            <span class="text-muted fs-8">15m ago</span>
-          </div>
-
-          <hr class="my-0 text-border">
-
-          <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-              <div class="scan-status-icon bg-success-subtle text-success">
-                <i class="bi bi-check-lg"></i>
-              </div>
-              <div>
-                <div class="fw-bold fs-7">Product Verified</div>
-                <div class="text-muted fs-8">NFC: WVID-7721 | Blanket</div>
-              </div>
-            </div>
-            <span class="text-muted fs-8">32m ago</span>
           </div>
         </div>
+
+        <!-- Recent Scans Card (Right Column) -->
+        <div class="col-12 col-lg-7">
+          <div class="dashboard-card">
+            <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-clock me-2"></i>Recent Scans</h6>
+            
+            <div class="d-flex flex-column gap-2">
+              <div class="d-flex align-items-center justify-content-between p-1">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="scan-status-icon bg-success-subtle text-success">
+                    <i class="bi bi-check-lg"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold fs-7">Product Verified</div>
+                    <div class="text-muted fs-8">NFC: WVID-8842 | Backpack</div>
+                  </div>
+                </div>
+                <span class="text-muted fs-8">2m ago</span>
+              </div>
+
+              <hr class="my-1 text-border">
+
+              <div class="d-flex align-items-center justify-content-between p-1">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="scan-status-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-exclamation-lg"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold fs-7">Unregistered Tag</div>
+                    <div class="text-muted fs-8">NFC: Unknown | Bauko Market</div>
+                  </div>
+                </div>
+                <span class="text-muted fs-8">15m ago</span>
+              </div>
+
+              <hr class="my-1 text-border">
+
+              <div class="d-flex align-items-center justify-content-between p-1">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="scan-status-icon bg-success-subtle text-success">
+                    <i class="bi bi-check-lg"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold fs-7">Product Verified</div>
+                    <div class="text-muted fs-8">NFC: WVID-7721 | Blanket</div>
+                  </div>
+                </div>
+                <span class="text-muted fs-8">32m ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -567,7 +580,6 @@
       `).join('');
     }
 
-    // Render Association Cards Inside Unique Box Elements
     function renderAssociations(data) {
       const container = document.getElementById('associationsContainer');
       
@@ -636,7 +648,7 @@
 
     // Verification Trends Chart Setup
     const ctx = document.getElementById('verificationTrendChart').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 150);
     gradient.addColorStop(0, 'rgba(10, 77, 46, 0.25)');
     gradient.addColorStop(1, 'rgba(10, 77, 46, 0.0)');
 
@@ -647,12 +659,12 @@
         datasets: [{
           data: [65, 82, 110, 145, 190, 210, 238, 280],
           borderColor: '#0a4d2e',
-          borderWidth: 3,
+          borderWidth: 2,
           backgroundColor: gradient,
           fill: true,
           tension: 0.35,
           pointBackgroundColor: '#0a4d2e',
-          pointRadius: 4
+          pointRadius: 3
         }]
       },
       options: {
@@ -660,8 +672,8 @@
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false } },
-          y: { min: 0, max: 300, ticks: { stepSize: 50 }, grid: { color: '#f0f0f0' } }
+          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+          y: { min: 0, max: 300, ticks: { stepSize: 100, font: { size: 10 } }, grid: { color: '#f0f0f0' } }
         }
       }
     });
