@@ -61,17 +61,15 @@
         <i class="bi bi-building-check fs-2"></i>
       </div>
       <h5 class="fw-bold mb-0 text-success">Weaver-ID Portal</h5>
-      <p class="text-muted fs-7">Sign in to your Association Account</p>
+      <p class="text-muted fs-7">Sign in to your account</p>
     </div>
 
-    <!-- HTML Form -->
-    <form action="AssociationDashboard.html" method="GET">
-      
+    <form id="loginForm">
       <div class="mb-3">
         <label for="email" class="form-label fs-7 fw-semibold">Email Address</label>
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
-          <input type="email" id="email" name="email" class="form-control border-start-0 ps-0" placeholder="hub@montanosa.org" required>
+          <input type="email" id="email" class="form-control border-start-0 ps-0" placeholder="hub@montanosa.org" required>
         </div>
       </div>
 
@@ -79,19 +77,60 @@
         <label for="password" class="form-label fs-7 fw-semibold">Password</label>
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
-          <input type="password" id="password" name="password" class="form-control border-start-0 ps-0" placeholder="••••••••" required>
+          <input type="password" id="password" class="form-control border-start-0 ps-0" placeholder="••••••••" required>
         </div>
       </div>
 
-      <!-- Native HTML Link Directing to Dashboard on Submit -->
-      <button type="submit" class="btn btn-dti w-100 py-2 mb-3">Sign In</button>
+      <div id="loginError" class="alert alert-danger py-2 fs-7 d-none"></div>
 
-      <div class="text-center fs-7">
-        <a href="AssociationDashboard.html" class="text-success fw-semibold text-decoration-none">Continue without signing in &rarr;</a>
-      </div>
-
+      <button type="submit" class="btn btn-dti w-100 py-2 mb-3" id="loginBtn">Sign In</button>
     </form>
   </div>
 
+  <script>
+    // TODO: replace with your actual backend URL once deployed
+    const AUTH_API_URL = 'https://your-backend-domain.com/api/auth/login';
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorBox = document.getElementById('loginError');
+      const loginBtn = document.getElementById('loginBtn');
+
+      errorBox.classList.add('d-none');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Signing in...';
+
+      try {
+        const response = await fetch(AUTH_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          errorBox.textContent = 'Invalid email or password.';
+          errorBox.classList.remove('d-none');
+          return;
+        }
+
+        sessionStorage.setItem('weaverid_token', data.token);
+        sessionStorage.setItem('weaverid_role', data.role);
+        sessionStorage.setItem('weaverid_municipality', data.municipality || '');
+
+        window.location.href = data.role === 'dti_admin' ? './admin.html' : './association_dashboard.html';
+
+      } catch (err) {
+        errorBox.textContent = 'Unable to reach the server. Please try again.';
+        errorBox.classList.remove('d-none');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Sign In';
+      }
+    });
+  </script>
 </body>
 </html>

@@ -485,6 +485,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Auth guard — must run before anything else on this page
+    (function requireAuth(requiredRole) {
+      const token = sessionStorage.getItem('weaverid_token');
+      const role = sessionStorage.getItem('weaverid_role');
+      if (!token || role !== requiredRole) {
+        window.location.href = './login.html';
+      }
+    })('dti_admin');
+
     // --- 1. FULL DATA DATASETS ---
     const associationsData = [
       { name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
@@ -735,7 +744,10 @@
 
     function handleLogout() {
       if (confirm('Log out from Admin Dashboard?')) {
-        window.location.href = './Login.html';
+        sessionStorage.removeItem('weaverid_token');
+        sessionStorage.removeItem('weaverid_role');
+        sessionStorage.removeItem('weaverid_municipality');
+        window.location.href = './login.html';
       }
     }
 

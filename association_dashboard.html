@@ -452,6 +452,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Auth guard — must run before anything else on this page
+    (function requireAuth(requiredRole) {
+      const token = sessionStorage.getItem('weaverid_token');
+      const role = sessionStorage.getItem('weaverid_role');
+      if (!token || role !== requiredRole) {
+        window.location.href = './login.html';
+      }
+    })('association_staff');
+
     // Initial Dataset
     let catalogData = [
       { id: 'WVID-8890', title: 'Pinagpagan Pattern Blanket', category: 'Blanket / Textile', weaver: 'Rose Ann Wangdali', tagged: true },
@@ -574,8 +583,11 @@
     }
 
     function handleLogout() {
-      if(confirm('Log out from Association Hub?')) {
-        alert('Logging out...');
+      if (confirm('Log out from Association Hub?')) {
+        sessionStorage.removeItem('weaverid_token');
+        sessionStorage.removeItem('weaverid_role');
+        sessionStorage.removeItem('weaverid_municipality');
+        window.location.href = './login.html';
       }
     }
 
