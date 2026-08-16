@@ -80,6 +80,7 @@
             padding: 1rem;
             cursor: pointer;
             transition: transform 0.15s ease, box-shadow 0.15s ease;
+            height: 100%;
         }
 
         .assoc-card:hover {
@@ -106,7 +107,6 @@
             border-bottom: 1px solid var(--dti-border);
         }
 
-        /* Button override */
         .btn-success {
             background-color: var(--dti-green);
             border-color: var(--dti-green);
@@ -146,7 +146,6 @@
 
     <!-- Main Content Container -->
     <main class="main-wrapper">
-        <!-- Top Bar Header -->
         <header class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h4 class="fw-bold m-0" id="page-title">Dashboard</h4>
@@ -160,7 +159,6 @@
             </div>
         </header>
 
-        <!-- Dynamic View Panels -->
         <div id="content-container">
 
             <!-- Panel 1: Dashboard -->
@@ -240,7 +238,7 @@
             <section id="panel-weavers" class="view-panel">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold m-0">Registered Weavers Directory</h6>
+                        <h6 class="fw-bold m-0">Registered Weavers & MSME Directory</h6>
                         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal">Register New Weaver</button>
                     </div>
                     <div class="table-responsive">
@@ -284,6 +282,69 @@
                                     <td>Tadian</td>
                                     <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
                                 </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>BONTOC TEXTILE & WEAVING ENTERPRISE</td>
+                                    <td>Rosemary Pekas</td>
+                                    <td>09173344556</td>
+                                    <td>SAMOKI</td>
+                                    <td>Bontoc</td>
+                                    <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>BAUKO HANDLOOM PRODUCERS COOP</td>
+                                    <td>Carmen Taguba</td>
+                                    <td>09284455667</td>
+                                    <td>OTUCAN NORTE</td>
+                                    <td>Bauko</td>
+                                    <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>BESAO TRADITIONAL WEAVERS</td>
+                                    <td>Evelyn Banganan</td>
+                                    <td>09395566778</td>
+                                    <td>KINIWAY</td>
+                                    <td>Besao</td>
+                                    <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td>BARLIG CULTURAL LOOMWEAVERS</td>
+                                    <td>Agnes Chackag</td>
+                                    <td>09406677889</td>
+                                    <td>GAWANA</td>
+                                    <td>Barlig</td>
+                                    <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>8</td>
+                                    <td>SADANGA TRADITIONAL FABRICS</td>
+                                    <td>Theresa Falgui</td>
+                                    <td>09517788990</td>
+                                    <td>POBLACION</td>
+                                    <td>Sadanga</td>
+                                    <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>9</td>
+                                    <td>NATONIN HANDICRAFTS & LOOM</td>
+                                    <td>Lucia Siyang</td>
+                                    <td>09628899001</td>
+                                    <td>POBLACION</td>
+                                    <td>Natonin</td>
+                                    <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>10</td>
+                                    <td>PARACELIS WEAVERS GUILD</td>
+                                    <td>Marites Banguigui</td>
+                                    <td>09739900112</td>
+                                    <td>POBLACION</td>
+                                    <td>Paracelis</td>
+                                    <td><button class="btn btn-sm btn-outline-primary py-0" onclick="alert('Viewing Weaver Details...')">View</button></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -323,6 +384,20 @@
                                     <td>Sabangan</td>
                                     <td><button class="btn btn-sm btn-outline-success py-0" onclick="alert('Editing Product...')">Edit</button></td>
                                 </tr>
+                                <tr>
+                                    <td><span class="badge bg-secondary">WVID-1044</span></td>
+                                    <td>Samoki Traditional Wrap-around Skirt (Lufid)</td>
+                                    <td>Bontoc Textile Enterprise</td>
+                                    <td>Bontoc</td>
+                                    <td><button class="btn btn-sm btn-outline-success py-0" onclick="alert('Editing Product...')">Edit</button></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-secondary">WVID-1102</span></td>
+                                    <td>Handwoven Chaleco / Vest</td>
+                                    <td>Bauko Handloom Coop</td>
+                                    <td>Bauko</td>
+                                    <td><button class="btn btn-sm btn-outline-success py-0" onclick="alert('Editing Product...')">Edit</button></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -336,7 +411,7 @@
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAssocModal">Add New Group</button>
                 </div>
                 <div class="row g-3" id="associationGrid">
-                    <div class="col-12 col-md-6 search-item">
+                    <div class="col-12 col-md-6 col-lg-4 search-item">
                         <div class="assoc-card" onclick="openAssocDetails('Sagada Weavers Association', 'Poblacion, Sagada', 'Lilia Capuyan', 'Blankets, Bags, Tapestry', '28 Artisans', '09182345678')">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
@@ -358,7 +433,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 search-item">
+                    <div class="col-12 col-md-6 col-lg-4 search-item">
                         <div class="assoc-card" onclick="openAssocDetails('Sabangan Loomweaving Enterprise', 'Sabangan, Mountain Province', 'Grace Domogan', 'Table Runners, Shawls', '15 Artisans', '09198765432')">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
@@ -376,6 +451,94 @@
                                 <div class="col-6">
                                     <small class="text-muted d-block">Contact</small>
                                     <strong class="small text-primary">09198765432</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 search-item">
+                        <div class="assoc-card" onclick="openAssocDetails('Samoki Weavers Guild', 'Samoki, Bontoc', 'Rosemary Pekas', 'Traditional Lufid, Woven Belts', '22 Artisans', '09173344556')">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-1"></i>Samoki Weavers Guild</h6>
+                                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Samoki, Bontoc</small>
+                                </div>
+                                <span class="badge bg-success rounded-pill">Verified</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="row text-center g-1 mt-1">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Lead</small>
+                                    <strong class="small">Rosemary Pekas</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Contact</small>
+                                    <strong class="small text-primary">09173344556</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 search-item">
+                        <div class="assoc-card" onclick="openAssocDetails('Otucan Handloom Producers Coop', 'Otucan Norte, Bauko', 'Carmen Taguba', 'Woven Vests, Custom Fabrics', '30 Artisans', '09284455667')">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-1"></i>Otucan Handloom Producers Coop</h6>
+                                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Bauko, Mountain Province</small>
+                                </div>
+                                <span class="badge bg-success rounded-pill">Verified</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="row text-center g-1 mt-1">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Lead</small>
+                                    <strong class="small">Carmen Taguba</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Contact</small>
+                                    <strong class="small text-primary">09284455667</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 search-item">
+                        <div class="assoc-card" onclick="openAssocDetails('Besao Indigenous Weavers Collective', 'Kiniway, Besao', 'Evelyn Banganan', 'Cultural Tapestries, Tote Bags', '12 Artisans', '09395566778')">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-1"></i>Besao Indigenous Weavers Collective</h6>
+                                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Kiniway, Besao</small>
+                                </div>
+                                <span class="badge bg-success rounded-pill">Verified</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="row text-center g-1 mt-1">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Lead</small>
+                                    <strong class="small">Evelyn Banganan</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Contact</small>
+                                    <strong class="small text-primary">09395566778</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 search-item">
+                        <div class="assoc-card" onclick="openAssocDetails('Tadian Loomweavers Association', 'Poblacion, Tadian', 'Mary Wandag', 'Ethnic Scarves, Place Mats', '18 Artisans', '09201122334')">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-1"></i>Tadian Loomweavers Association</h6>
+                                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Poblacion, Tadian</small>
+                                </div>
+                                <span class="badge bg-success rounded-pill">Verified</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="row text-center g-1 mt-1">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Lead</small>
+                                    <strong class="small">Mary Wandag</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Contact</small>
+                                    <strong class="small text-primary">09201122334</strong>
                                 </div>
                             </div>
                         </div>
@@ -405,6 +568,8 @@
                                         <option value="" selected disabled>Select item...</option>
                                         <option value="1">Woven Table Runner (Sagada)</option>
                                         <option value="2">Shoulder Bag (Sabangan)</option>
+                                        <option value="3">Samoki Traditional Wrap-around Skirt (Bontoc)</option>
+                                        <option value="4">Handwoven Chaleco (Bauko)</option>
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-success btn-sm w-100">Write & Map NFC Tag</button>
@@ -442,6 +607,13 @@
                                     <td>WVID-9012</td>
                                     <td>Traditional Shoulder Bag</td>
                                     <td>Baguio City, PH</td>
+                                    <td><span class="badge bg-success">VERIFIED</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2026-08-16 09:05 AM</td>
+                                    <td>WVID-1044</td>
+                                    <td>Samoki Traditional Wrap-around Skirt</td>
+                                    <td>Clark, Pampanga, PH</td>
                                     <td><span class="badge bg-success">VERIFIED</span></td>
                                 </tr>
                             </tbody>
@@ -611,7 +783,6 @@
     <script>
         let trendChartInstance = null;
 
-        // Tab Navigation Switcher
         function switchTab(panelId, element) {
             document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-panel'));
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -639,7 +810,6 @@
                 document.getElementById('page-subtitle').innerText = titleMap[panelId][1];
             }
 
-            // Trigger Chart Resize when returning to Dashboard
             if (panelId === 'dashboard' && trendChartInstance) {
                 setTimeout(() => {
                     trendChartInstance.resize();
@@ -647,24 +817,20 @@
             }
         }
 
-        // Global Search Filter
         function filterTablesAndFeed() {
             const query = document.getElementById('globalSearchInput').value.toLowerCase();
 
-            // Filter tables
             document.querySelectorAll('.search-table tbody tr').forEach(row => {
                 const text = row.innerText.toLowerCase();
                 row.style.display = text.includes(query) ? '' : 'none';
             });
 
-            // Filter grid & feed items
             document.querySelectorAll('.search-item').forEach(item => {
                 const text = item.innerText.toLowerCase();
                 item.style.display = text.includes(query) ? '' : 'none';
             });
         }
 
-        // Modal Data Filler for Associations
         function openAssocDetails(name, loc, lead, products, weavers, contact) {
             document.getElementById('modalAssocTitle').innerText = name;
             document.getElementById('modalAssocLocation').innerText = loc;
@@ -677,7 +843,6 @@
             assocModal.show();
         }
 
-        // Form Submission Handlers
         function handleAddAssociation(event) {
             event.preventDefault();
             const name = document.getElementById('assocNameInput').value;
@@ -688,9 +853,9 @@
 
             const grid = document.getElementById('associationGrid');
             const newCard = document.createElement('div');
-            newCard.className = 'col-12 col-md-6 search-item';
+            newCard.className = 'col-12 col-md-6 col-lg-4 search-item';
             newCard.innerHTML = `
-                <div class="assoc-card" onclick="openAssocDetails('${name}', '${loc}', '${lead}', '${specialty}', '${lead}', '${phone}')">
+                <div class="assoc-card" onclick="openAssocDetails('${name}', '${loc}', '${lead}', '${specialty}', 'New Group', '${phone}')">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-1"></i>${name}</h6>
@@ -774,7 +939,6 @@
             document.getElementById('addProductForm').reset();
         }
 
-        // Initialize Chart
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('trendChart').getContext('2d');
             trendChartInstance = new Chart(ctx, {
