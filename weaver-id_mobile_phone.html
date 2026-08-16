@@ -107,10 +107,10 @@
                 <h5 class="fw-bold mt-2">NFC Verification Portal</h5>
                 <p class="text-muted small">Tap an NFC tag to verify.</p>
             </div>
-            <!-- <form id="verify-form" class="mb-3">
+            <form id="verify-form" class="mb-3">
                 <input type="text" id="manual-nfc-input" class="form-control text-center mb-3" placeholder="Enter NFC UID (e.g., 04:A2:8B:12)" required>
                 <button type="submit" class="btn btn-success w-100">Verify Card</button>
-            </form> -->
+            </form>
         </div>
 
         <!-- RE-SCAN BUTTON -->
@@ -120,8 +120,26 @@
     </div>
 
     <script>
-        // UPDATE THIS URL to point to where your PHP backend script is hosted on live server
-        const BACKEND_API_URL = 'https://your-domain.com/api/verify_nfc.php';
+        // TEMPORARY MOCK — no backend needed yet. Replace with the real
+        // fetch() call to GET /api/verify/:code once the backend is ready
+        // (see the commented block further down).
+        const MOCK_PRODUCTS = {
+            'WVID-8842': { name: 'Rose Ann Wangdali', business: 'Suklang Woven Backpack' },
+            'WVID-7721': { name: 'Virginia Omaweng', business: 'Pinagpagan Pattern Blanket' }
+        };
+
+        function mockVerify(uid) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const product = MOCK_PRODUCTS[uid.toUpperCase()];
+                    if (product) {
+                        resolve({ status: 'success', data: { id: uid, name: product.name, business: product.business } });
+                    } else {
+                        resolve({ status: 'error', message: 'This product is not registered in the system.' });
+                    }
+                }, 700);
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -133,31 +151,50 @@
                 showState('input');
             }
 
-            document.getElementById('verify-form').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const uid = document.getElementById('manual-nfc-input').value.trim();
-                if (uid) verifyNFC(uid);
-            });
+            // Guarded — only attaches if the form actually exists in the DOM
+            const verifyForm = document.getElementById('verify-form');
+            if (verifyForm) {
+                verifyForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const uid = document.getElementById('manual-nfc-input').value.trim();
+                    if (uid) verifyNFC(uid);
+                });
+            }
         });
 
         function verifyNFC(uid) {
             showState('loading');
 
-            fetch(`${BACKEND_API_URL}?nfc_uid=${encodeURIComponent(uid)}`)
+            mockVerify(uid).then(res => {
+                if (res.status === 'success') {
+                    document.getElementById('weaver-id').textContent = res.data.id;
+                    document.getElementById('weaver-name').textContent = res.data.name;
+                    document.getElementById('weaver-business').textContent = res.data.business;
+                    showState('success');
+                } else {
+                    showError(res.message || 'Verification failed.');
+                }
+            });
+
+            /* REAL VERSION — uncomment once the backend is ready, and delete
+               the mockVerify() call above.
+
+            fetch(`https://your-backend-domain.com/api/verify/${encodeURIComponent(uid)}`)
                 .then(response => response.json().then(data => ({ status: response.status, body: data })))
                 .then(res => {
-                    if (res.body.status === 'success') {
-                        document.getElementById('weaver-id').textContent = '#' + res.body.data.id;
-                        document.getElementById('weaver-name').textContent = res.body.data.name;
-                        document.getElementById('weaver-business').textContent = res.body.data.business;
+                    if (res.status === 200) {
+                        document.getElementById('weaver-id').textContent = res.body.id;
+                        document.getElementById('weaver-name').textContent = res.body.name;
+                        document.getElementById('weaver-business').textContent = res.body.business;
                         showState('success');
                     } else {
-                        showError(res.body.message || 'Verification failed.');
+                        showError(res.body.message || 'Product not registered.');
                     }
                 })
                 .catch(() => {
                     showError('Unable to connect to verification server.');
                 });
+            */
         }
 
         function showError(msg) {
