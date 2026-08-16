@@ -32,21 +32,21 @@
         }
 
         .brand-logo {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             background-color: #ffffff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--sidebar-green);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         .assoc-card {
             background-color: var(--sidebar-card);
             border-radius: 12px;
-            padding: 14px;
+            padding: 12px 14px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -54,12 +54,14 @@
             color: #d1e2d6;
             padding: 10px 16px;
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            text-decoration: none;
         }
 
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
@@ -75,6 +77,12 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.03);
             border-left: 4px solid transparent;
             padding: 18px 20px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
         }
 
         .kpi-card.green { border-left-color: #2e7d32; }
@@ -106,20 +114,20 @@
             background-color: var(--hero-green);
             border-radius: 16px;
             color: #ffffff;
-            padding: 40px 20px;
+            padding: 36px 20px;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         .phone-icon-circle {
-            width: 70px;
-            height: 70px;
+            width: 64px;
+            height: 64px;
             border: 2px dashed #4caf50;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             background: rgba(255, 255, 255, 0.05);
         }
 
@@ -130,13 +138,14 @@
             border-radius: 8px;
             padding: 10px 24px;
             border: none;
-            transition: transform 0.1s ease;
+            transition: all 0.15s ease;
         }
 
         .scan-btn:hover {
             background-color: #f8f9fa;
             color: #051d0f;
-            transform: scale(1.02);
+            transform: scale(1.03);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
         /* Bottom White Panels */
@@ -149,28 +158,36 @@
             min-height: 320px;
         }
 
-        .panel-link {
-            text-decoration: none;
-            color: #2e7d32;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .panel-link:hover {
-            color: #1b5e20;
-        }
-
         .nfc-code {
             font-family: monospace;
-            background: #f8f9fa;
+            background: #eef7f2;
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 0.78rem;
-            color: #2e7d32;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+
+        .view-tab {
+            display: none;
+        }
+
+        .view-tab.active {
+            display: block;
         }
     </style>
 </head>
 <body>
+
+<!-- Toast Alert for Live Actions -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+    <div id="actionToast" class="toast align-items-center text-bg-success border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">Action completed successfully.</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
 
 <div class="d-flex">
     <!-- Left Navigation Sidebar -->
@@ -188,115 +205,200 @@
 
         <!-- Negosyo Center Info Card -->
         <div class="assoc-card mb-4">
-            <h6 class="fw-bold text-white mb-1" style="font-size: 0.9rem;">Negosyo Center Bontoc</h6>
+            <h6 class="fw-bold text-white mb-1" style="font-size: 0.88rem;">Negosyo Center Bontoc</h6>
             <p class="text-white-50 small mb-1" style="font-size: 0.75rem;">DTI Mountain Province</p>
-            <span class="text-white-50 small" style="font-size: 0.72rem;"><i class="bi bi-check-circle-fill text-success me-1"></i>Active Assistance Hub</span>
+            <span class="badge bg-success text-white fw-normal" style="font-size: 0.68rem;"><i class="bi bi-check-circle-fill me-1"></i>Active Hub</span>
         </div>
 
-        <!-- Sidebar Navigation Menu -->
-        <nav class="nav flex-column gap-1">
-            <a class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-            <a class="nav-link"><i class="bi bi-houses-fill"></i> MSME Associations</a>
-            <a class="nav-link"><i class="bi bi-people-fill"></i> Registered Weavers</a>
-            <a class="nav-link" data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="bi bi-box-seam-fill"></i> Register Product</a>
+        <!-- Clickable Navigation Links -->
+        <nav class="nav flex-column gap-1" id="sidebarNav">
+            <a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+            <a class="nav-link" onclick="switchTab('msmeView', this)"><i class="bi bi-houses-fill"></i> MSME Associations</a>
+            <a class="nav-link" onclick="switchTab('productsView', this)"><i class="bi bi-box-seam-fill"></i> Registered Products</a>
             <a class="nav-link" onclick="triggerNFCScan()"><i class="bi bi-phone-vibrate-fill"></i> Scan & Verify</a>
-            <a class="nav-link"><i class="bi bi-tags-fill"></i> DTI Tag Allocation</a>
-            <a class="nav-link mt-auto"><i class="bi bi-gear-fill"></i> System Settings</a>
+            <a class="nav-link" onclick="switchTab('tagsView', this)"><i class="bi bi-tags-fill"></i> DTI Tag Inventory</a>
+            <a class="nav-link mt-auto" onclick="switchTab('settingsView', this)"><i class="bi bi-gear-fill"></i> Settings</a>
         </nav>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow-1 p-4" style="overflow-y: auto;">
-        
-        <!-- Top Metrics Row -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3 col-sm-6">
-                <div class="kpi-card green">
-                    <div class="kpi-value" id="kpiMSMEs">14</div>
-                    <div class="kpi-title">Assisted MSMEs / Groups</div>
-                    <div class="kpi-subtext text-success">Mountain Province Wide</div>
-                </div>
-            </div>
+    <!-- Main Dynamic Content Area -->
+    <main class="flex-grow-1 p-4" style="overflow-y: auto; max-height: 100vh;">
 
-            <div class="col-md-3 col-sm-6">
-                <div class="kpi-card yellow">
-                    <div class="kpi-value" id="kpiProducts">342</div>
-                    <div class="kpi-title">Authenticated Products</div>
-                    <div class="kpi-subtext text-success">38 registered this month</div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6">
-                <div class="kpi-card emerald">
-                    <div class="kpi-value" id="kpiScans">3,890</div>
-                    <div class="kpi-title">Public Authentications</div>
-                    <div class="kpi-subtext text-success">245 this week</div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6">
-                <div class="kpi-card orange">
-                    <div class="kpi-value" id="kpiTags">185</div>
-                    <div class="kpi-title">NC Tag Stock</div>
-                    <div class="kpi-subtext text-muted">Ready for distribution</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Central Verify Product Authenticity Banner -->
-        <div class="hero-banner mb-4">
-            <div class="phone-icon-circle">
-                <i class="bi bi-phone-fill fs-3 text-info"></i>
-            </div>
-            <h3 class="fw-bold mb-2">Verify Product Authenticity</h3>
-            <p class="text-white-50 small mb-4" style="max-width: 550px; margin: 0 auto;">
-                Negosyo Center Verification Hub: Tap an NFC tag to inspect product provenance, weaver association credentials, and DTI authenticity certification.
-            </p>
-            <button class="scan-btn shadow-sm" onclick="triggerNFCScan()">
-                <i class="bi bi-phone me-1"></i> Scan NFC Tag Now
-            </button>
-        </div>
-
-        <!-- Bottom Content Panels -->
-        <div class="row g-3">
-            <!-- Registered Products Panel -->
-            <div class="col-md-6">
-                <div class="panel-card">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2 text-success"></i>Negosyo Center Tagged Products</h6>
-                        <button class="btn btn-success btn-sm py-0 px-2" style="font-size: 0.78rem;" data-bs-toggle="modal" data-bs-target="#addProductModal">+ Tag Item</button>
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="dashboard" class="view-tab active">
+            <!-- Top Metric Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6" onclick="switchTab('msmeView', document.querySelectorAll('.nav-link')[1])">
+                    <div class="kpi-card green">
+                        <div class="kpi-value" id="kpiMSMEs">4</div>
+                        <div class="kpi-title">Assisted MSMEs / Groups</div>
+                        <div class="kpi-subtext text-success">Mountain Province Wide</div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
-                            <thead class="table-light text-secondary">
-                                <tr>
-                                    <th>Item</th>
-                                    <th>MSME / Association</th>
-                                    <th>NFC UID</th>
-                                    <th class="text-end">Value</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recentProductsTable">
-                                <!-- Dynamic Render -->
-                            </tbody>
-                        </table>
+                </div>
+
+                <div class="col-md-3 col-sm-6" onclick="switchTab('productsView', document.querySelectorAll('.nav-link')[2])">
+                    <div class="kpi-card yellow">
+                        <div class="kpi-value" id="kpiProducts">3</div>
+                        <div class="kpi-title">Authenticated Products</div>
+                        <div class="kpi-subtext text-success">+1 registered today</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="kpi-card emerald">
+                        <div class="kpi-value" id="kpiScans">3,890</div>
+                        <div class="kpi-title">Public Authentications</div>
+                        <div class="kpi-subtext text-success">Live verification feed</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6" onclick="switchTab('tagsView', document.querySelectorAll('.nav-link')[4])">
+                    <div class="kpi-card orange">
+                        <div class="kpi-value" id="kpiTags">185</div>
+                        <div class="kpi-title">NC Tag Stock Available</div>
+                        <div class="kpi-subtext text-muted">Ready for allocation</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Verification Activity Log -->
-            <div class="col-md-6">
-                <div class="panel-card">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-check me-2 text-success"></i>Live Verification Logs</h6>
-                        <span class="badge bg-success-subtle text-success">NC Monitoring</span>
+            <!-- Central Banner -->
+            <div class="hero-banner mb-4">
+                <div class="phone-icon-circle">
+                    <i class="bi bi-phone-fill fs-3 text-info"></i>
+                </div>
+                <h3 class="fw-bold mb-2">Verify Product Authenticity</h3>
+                <p class="text-white-50 small mb-4" style="max-width: 580px; margin: 0 auto;">
+                    DTI Negosyo Center Verification Hub: Tap an NFC tag or trigger a simulated scan to inspect provenance, association records, and official DTI authenticity.
+                </p>
+                <button class="scan-btn shadow-sm" onclick="triggerNFCScan()">
+                    <i class="bi bi-phone me-1"></i> Scan NFC Tag Now
+                </button>
+            </div>
+
+            <!-- Bottom Content Panels -->
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="panel-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2 text-success"></i>Recent Tagged Items</h6>
+                            <button class="btn btn-success btn-sm py-1 px-3" data-bs-toggle="modal" data-bs-target="#addProductModal">+ Add Product</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                <thead class="table-light text-secondary">
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>MSME</th>
+                                        <th>NFC UID</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentProductsTable"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <ul class="list-group list-group-flush" id="recentScansList" style="font-size: 0.85rem;">
-                        <!-- Dynamic Render -->
-                    </ul>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-check me-2 text-success"></i>Live Verification Logs</h6>
+                            <button class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;" onclick="clearLogs()">Clear</button>
+                        </div>
+                        <ul class="list-group list-group-flush" id="recentScansList" style="font-size: 0.85rem;"></ul>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- 2. MSME ASSOCIATIONS VIEW -->
+        <section id="msmeView" class="view-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0 text-dark">Assisted MSME Associations</h4>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addMsmeModal">+ Add Association</button>
+            </div>
+            <div class="row g-3" id="msmeCardsContainer"></div>
+        </section>
+
+        <!-- 3. PRODUCTS LIST VIEW -->
+        <section id="productsView" class="view-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0 text-dark">All Registered Products</h4>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">+ Register Product</button>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
+                        <thead class="table-light text-secondary">
+                            <tr>
+                                <th>Product Name</th>
+                                <th>MSME Group</th>
+                                <th>NFC UID</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullProductsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. NFC TAG INVENTORY VIEW -->
+        <section id="tagsView" class="view-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0 text-dark">DTI Tag Inventory Allocation</h4>
+                <button class="btn btn-success btn-sm" onclick="restockTags()">Restock +100 Tags</button>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3">
+                        <small class="text-muted fw-bold">Available in Stock</small>
+                        <h2 class="text-success fw-bold my-1" id="inventoryStock">185</h2>
+                        <small class="text-secondary">Unassigned NDEF Tags</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3">
+                        <small class="text-muted fw-bold">Issued to Products</small>
+                        <h2 class="text-primary fw-bold my-1" id="inventoryIssued">3</h2>
+                        <small class="text-secondary">Active Tagged Textiles</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3">
+                        <small class="text-muted fw-bold">Total DTI Budgeted</small>
+                        <h2 class="text-dark fw-bold my-1">500</h2>
+                        <small class="text-secondary">Fiscal Year Allocation</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SETTINGS VIEW -->
+        <section id="settingsView" class="view-tab">
+            <h4 class="fw-bold mb-3 text-dark">Negosyo Center Hub Settings</h4>
+            <div class="card border-0 shadow-sm p-4" style="max-width: 600px;">
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Hub Name</label>
+                    <input type="text" class="form-control form-control-sm" value="Negosyo Center Bontoc (DTI MP)">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">NFC Reader Mode</label>
+                    <select class="form-select form-select-sm">
+                        <option>Web NFC Standard (Chrome Mobile)</option>
+                        <option>USB External Desktop Scanner</option>
+                        <option>Simulation Mode (Testing)</option>
+                    </select>
+                </div>
+                <div class="mb-3 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="autoVerifyCheck" checked>
+                    <label class="form-check-label small fw-bold" for="autoVerifyCheck">Auto-log location on scan</label>
+                </div>
+                <button class="btn btn-success btn-sm w-100" onclick="showToast('Settings saved successfully!')">Save Preferences</button>
+            </div>
+        </section>
 
     </main>
 </div>
@@ -306,18 +408,33 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header text-white" style="background-color: var(--sidebar-green);">
-                <h6 class="modal-title fw-bold"><i class="bi bi-wifi me-2"></i>Negosyo Center NFC Scanner</h6>
+                <h6 class="modal-title fw-bold"><i class="bi bi-wifi me-2"></i>NFC Tag Reader Active</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center py-4">
-                <div class="spinner-grow text-success mb-3" style="width: 3rem; height: 3rem;" role="status">
+                <div class="spinner-grow text-success mb-3" style="width: 3.5rem; height: 3.5rem;" role="status">
                     <span class="visually-hidden">Scanning...</span>
                 </div>
-                <h5 class="fw-bold text-dark mb-2">Place Tag Near Smartphone / Reader</h5>
-                <p class="text-muted small mb-3">Scanning will validate the DTI registry record and display provenance details.</p>
+                <h5 class="fw-bold text-dark mb-2">Hold NFC Tag Near Device</h5>
+                <p class="text-muted small mb-3">Bring the product's woven tag near your device's NFC sensor to verify provenance.</p>
                 <div class="border-top pt-3">
-                    <button type="button" class="btn btn-outline-success btn-sm" onclick="simulateScanSuccess()">Simulate Scan Verification</button>
+                    <button type="button" class="btn btn-success btn-sm px-4" onclick="simulateScanSuccess()">Click to Simulate Scan Result</button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Product Details Viewer -->
+<div class="modal fade" id="productDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: var(--sidebar-green);">
+                <h6 class="modal-title fw-bold"><i class="bi bi-patch-check-fill me-2 text-warning"></i>DTI Authenticity Certificate</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center" id="productDetailContent">
+                <!-- Dynamically filled -->
             </div>
         </div>
     </div>
@@ -328,24 +445,19 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header text-white" style="background-color: var(--sidebar-green);">
-                <h6 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>NC Product & NFC Tag Registration</h6>
+                <h6 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Register Textile Product</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addProductForm" onsubmit="saveProduct(event)">
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Textile / Craft Name</label>
-                        <input type="text" id="inputName" class="form-control form-control-sm" placeholder="e.g. Lang-ay Festival Special Tapestry" required>
+                        <input type="text" id="inputName" class="form-control form-control-sm" placeholder="e.g. Bontoc Traditional Woven Tapestry" required>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label small fw-bold">MSME / Association</label>
-                            <select id="inputAssociation" class="form-select form-control-sm" style="font-size: 0.85rem;" required>
-                                <option value="Caneo Women's Weavers">Caneo Women's Weavers</option>
-                                <option value="Sabangan Textile Producers">Sabangan Textile Producers</option>
-                                <option value="Sagada Weavers Association">Sagada Weavers Association</option>
-                                <option value="Barlig Heritage Crafts">Barlig Heritage Crafts</option>
-                            </select>
+                            <select id="inputAssociation" class="form-select form-select-sm" style="font-size: 0.85rem;" required></select>
                         </div>
                         <div class="col-6">
                             <label class="form-label small fw-bold">Price (PHP)</label>
@@ -353,15 +465,47 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">DTI NFC Tag UID</label>
+                        <label class="form-label small fw-bold">Assigned NFC Tag UID</label>
                         <div class="input-group input-group-sm">
                             <input type="text" id="inputNfcUid" class="form-control nfc-code" placeholder="04:NC:88:99:A1" readonly required>
-                            <button class="btn btn-outline-success" type="button" onclick="generateNFCUID()">Allocate Tag</button>
+                            <button class="btn btn-outline-success" type="button" onclick="generateNFCUID()">Generate UID</button>
                         </div>
                     </div>
                     <div class="text-end">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success btn-sm">Register & Issue Tag</button>
+                        <button type="submit" class="btn btn-success btn-sm">Save & Register</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add MSME Association -->
+<div class="modal fade" id="addMsmeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: var(--sidebar-green);">
+                <h6 class="modal-title fw-bold"><i class="bi bi-building-add me-2"></i>Register New MSME Group</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="saveMsme(event)">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Association / Group Name</label>
+                        <input type="text" id="msmeName" class="form-control form-control-sm" placeholder="e.g. Sadanga Heritage Weavers" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Municipality / Location</label>
+                        <input type="text" id="msmeLoc" class="form-control form-control-sm" placeholder="e.g. Sadanga, Mountain Province" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Member Count</label>
+                        <input type="number" id="msmeMembers" class="form-control form-control-sm" placeholder="18" required>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success btn-sm">Register Group</button>
                     </div>
                 </form>
             </div>
@@ -373,88 +517,169 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // State Management for Negosyo Center
+    // App State Data
+    let msmeGroups = [
+        { name: "Caneo Women's Weavers", loc: "Bontoc", members: 22 },
+        { name: "Sagada Weavers Association", loc: "Sagada", members: 35 },
+        { name: "Sabangan Textile Producers", loc: "Sabangan", members: 18 },
+        { name: "Barlig Heritage Crafts", loc: "Barlig", members: 15 }
+    ];
+
     let products = [
-        { name: "Caneo Heritage Wrap", assoc: "Caneo Women's Weavers", uid: "04:NC:88:C2", price: "₱2,200" },
-        { name: "Sagada Pinagpagan Blanket", assoc: "Sagada Weavers Association", uid: "04:NC:77:D9", price: "₱4,500" },
-        { name: "Sabangan Traditional Runner", assoc: "Sabangan Textile Producers", uid: "04:NC:12:E0", price: "₱1,850" }
+        { id: 1, name: "Caneo Heritage Wrap", assoc: "Caneo Women's Weavers", uid: "04:NC:88:C2", price: "₱2,200", status: "DTI Tagged" },
+        { id: 2, name: "Sagada Pinagpagan Blanket", assoc: "Sagada Weavers Association", uid: "04:NC:77:D9", price: "₱4,500", status: "DTI Tagged" },
+        { id: 3, name: "Sabangan Traditional Runner", assoc: "Sabangan Textile Producers", uid: "04:NC:12:E0", price: "₱1,850", status: "DTI Tagged" }
     ];
 
     let scanActivity = [
-        { item: "Sagada Pinagpagan Blanket", loc: "Makati City, PH", status: "DTI Verified", time: "5 mins ago" },
-        { item: "Caneo Heritage Wrap", loc: "Negosyo Center Bontoc", status: "DTI Verified", time: "22 mins ago" },
-        { item: "Sabangan Traditional Runner", loc: "Clark, Pampanga", status: "DTI Verified", time: "2 hours ago" }
+        { item: "Sagada Pinagpagan Blanket", loc: "Makati City, PH", time: "5 mins ago" },
+        { item: "Caneo Heritage Wrap", loc: "Negosyo Center Bontoc", time: "22 mins ago" },
+        { item: "Sabangan Traditional Runner", loc: "Clark, Pampanga", time: "2 hours ago" }
     ];
 
-    function renderData() {
-        // Render Products
-        const prodTable = document.getElementById('recentProductsTable');
-        prodTable.innerHTML = '';
-        products.forEach(p => {
-            prodTable.innerHTML += `
+    let tagStock = 185;
+
+    // View Switching Logic
+    function switchTab(viewId, element) {
+        document.querySelectorAll('.view-tab').forEach(el => el.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+
+        if(element) {
+            document.querySelectorAll('#sidebarNav .nav-link').forEach(nav => nav.classList.remove('active'));
+            element.classList.add('active');
+        }
+    }
+
+    // Render All Dynamic Sections
+    function renderApp() {
+        // Render Dashboard Table
+        const recentTable = document.getElementById('recentProductsTable');
+        recentTable.innerHTML = '';
+        products.slice(0, 4).forEach(p => {
+            recentTable.innerHTML += `
                 <tr>
                     <td class="fw-semibold text-dark">${p.name}</td>
                     <td class="text-secondary">${p.assoc}</td>
                     <td><span class="nfc-code">${p.uid}</span></td>
-                    <td class="text-end fw-bold text-success">${p.price}</td>
+                    <td class="text-end">
+                        <button class="btn btn-outline-success btn-sm py-0 px-2" onclick="viewDetails(${p.id})">Verify</button>
+                    </td>
                 </tr>
             `;
         });
 
-        // Render Scans
+        // Render Recent Scans Log
         const scanList = document.getElementById('recentScansList');
         scanList.innerHTML = '';
         scanActivity.forEach(s => {
             scanList.innerHTML += `
-                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                     <div>
-                        <strong class="text-dark d-block">${s.item}</strong>
-                        <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${s.loc} • ${s.time}</small>
+                        <strong class="text-dark d-block" style="font-size:0.85rem;">${s.item}</strong>
+                        <small class="text-muted" style="font-size:0.75rem;"><i class="bi bi-geo-alt me-1"></i>${s.loc} • ${s.time}</small>
                     </div>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-patch-check-fill me-1"></i>${s.status}</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-patch-check-fill me-1"></i>Verified</span>
                 </li>
             `;
         });
 
+        // Render Full Products Table
+        const fullTable = document.getElementById('fullProductsTable');
+        fullTable.innerHTML = '';
+        products.forEach(p => {
+            fullTable.innerHTML += `
+                <tr>
+                    <td class="fw-semibold text-dark">${p.name}</td>
+                    <td>${p.assoc}</td>
+                    <td><span class="nfc-code">${p.uid}</span></td>
+                    <td class="fw-bold text-success">${p.price}</td>
+                    <td><span class="badge bg-success">${p.status}</span></td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-success py-0 me-1" onclick="viewDetails(${p.id})">Inspect</button>
+                        <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteProduct(${p.id})">Remove</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Render MSME Cards
+        const msmeContainer = document.getElementById('msmeCardsContainer');
+        msmeContainer.innerHTML = '';
+        msmeGroups.forEach(m => {
+            msmeContainer.innerHTML += `
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark">${m.name}</h6>
+                                <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>${m.loc}, Mountain Province</small>
+                            </div>
+                            <span class="badge bg-success-subtle text-success">${m.members} Artisans</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Update Select Dropdowns
+        const assocSelect = document.getElementById('inputAssociation');
+        assocSelect.innerHTML = '';
+        msmeGroups.forEach(m => {
+            assocSelect.innerHTML += `<option value="${m.name}">${m.name}</option>`;
+        });
+
         // Update KPIs
-        document.getElementById('kpiProducts').innerText = 342 + products.length;
-        document.getElementById('kpiScans').innerText = (3890 + scanActivity.length).toLocaleString();
+        document.getElementById('kpiMSMEs').innerText = msmeGroups.length;
+        document.getElementById('kpiProducts').innerText = products.length;
+        document.getElementById('kpiTags').innerText = tagStock;
+        document.getElementById('inventoryStock').innerText = tagStock;
+        document.getElementById('inventoryIssued').innerText = products.length;
     }
 
-    // Web NFC API Integration
-    async function triggerNFCScan() {
+    // Interactive Actions & NFC Simulation
+    function triggerNFCScan() {
         const modal = new bootstrap.Modal(document.getElementById('scanModal'));
         modal.show();
-
-        if ('NDEFReader' in window) {
-            try {
-                const ndef = new NDEFReader();
-                await ndef.scan();
-                ndef.addEventListener("reading", ({ serialNumber }) => {
-                    bootstrap.Modal.getInstance(document.getElementById('scanModal')).hide();
-                    handleScanSuccess(serialNumber || "04:NC:90:F1");
-                });
-            } catch (error) {
-                console.log("NFC scanning failed or permission denied: " + error);
-            }
-        }
     }
 
     function simulateScanSuccess() {
-        bootstrap.Modal.getInstance(document.getElementById('scanModal')).hide();
-        handleScanSuccess("04:NC:E8:90:A3");
+        const modalEl = document.getElementById('scanModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        const item = products[Math.floor(Math.random() * products.length)];
+        scanActivity.unshift({
+            item: item.name,
+            loc: "Negosyo Center Bontoc Reader",
+            time: "Just now"
+        });
+
+        renderApp();
+        viewDetails(item.id);
     }
 
-    function handleScanSuccess(uid) {
-        const newScan = {
-            item: products[0].name,
-            loc: "Negosyo Center Bontoc Hub",
-            status: "DTI Verified",
-            time: "Just now"
-        };
-        scanActivity.unshift(newScan);
-        renderData();
-        alert(`DTI Negosyo Center Scan Verified!\nNFC UID: ${uid}\nItem: ${products[0].name}\nStatus: Authentic Mountain Province Handicraft.`);
+    function viewDetails(productId) {
+        const item = products.find(p => p.id === productId);
+        if(!item) return;
+
+        const content = document.getElementById('productDetailContent');
+        content.innerHTML = `
+            <div class="mb-3">
+                <i class="bi bi-shield-check text-success fs-1"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-1">${item.name}</h5>
+            <p class="text-success fw-bold mb-3">${item.price}</p>
+            <div class="bg-light p-3 rounded mb-3 text-start small">
+                <div class="mb-1"><strong>MSME Producer:</strong> ${item.assoc}</div>
+                <div class="mb-1"><strong>NFC Tag UID:</strong> <span class="nfc-code">${item.uid}</span></div>
+                <div class="mb-1"><strong>DTI Registry:</strong> Mountain Province Certified</div>
+                <div><strong>Authenticity:</strong> 100% Genuine Indigenous Weave</div>
+            </div>
+            <button class="btn btn-success btn-sm w-100" data-bs-dismiss="modal">Close Verification</button>
+        `;
+
+        const modal = new bootstrap.Modal(document.getElementById('productDetailModal'));
+        modal.show();
     }
 
     function generateNFCUID() {
@@ -469,23 +694,65 @@
     function saveProduct(e) {
         e.preventDefault();
         const newProd = {
+            id: Date.now(),
             name: document.getElementById('inputName').value,
             assoc: document.getElementById('inputAssociation').value,
-            uid: document.getElementById('inputNfcUid').value,
-            price: `₱${parseFloat(document.getElementById('inputPrice').value).toLocaleString()}`
+            uid: document.getElementById('inputNfcUid').value || "04:NC:99:FF",
+            price: `₱${parseFloat(document.getElementById('inputPrice').value).toLocaleString()}`,
+            status: "DTI Tagged"
         };
-        products.unshift(newProd);
-        renderData();
-        
-        // Decrement available tags stock
-        const currentTags = parseInt(document.getElementById('kpiTags').innerText);
-        if (currentTags > 0) document.getElementById('kpiTags').innerText = currentTags - 1;
 
-        document.getElementById('addProductForm').reset();
+        products.unshift(newProd);
+        if (tagStock > 0) tagStock--;
+
+        renderApp();
         bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+        document.getElementById('addProductForm').reset();
+        showToast("Product successfully registered & NFC tag issued!");
     }
 
-    document.addEventListener('DOMContentLoaded', renderData);
+    function saveMsme(e) {
+        e.preventDefault();
+        const newMsme = {
+            name: document.getElementById('msmeName').value,
+            loc: document.getElementById('msmeLoc').value,
+            members: parseInt(document.getElementById('msmeMembers').value)
+        };
+        msmeGroups.push(newMsme);
+        renderApp();
+        bootstrap.Modal.getInstance(document.getElementById('addMsmeModal')).hide();
+        showToast("New MSME Association registered!");
+    }
+
+    function deleteProduct(id) {
+        products = products.filter(p => p.id !== id);
+        renderApp();
+        showToast("Product removed from registry.");
+    }
+
+    function restockTags() {
+        tagStock += 100;
+        renderApp();
+        showToast("Restocked +100 DTI NFC Tags!");
+    }
+
+    function clearLogs() {
+        scanActivity = [];
+        renderApp();
+        showToast("Scan activity logs cleared.");
+    }
+
+    function showToast(msg) {
+        document.getElementById('toastMessage').innerText = msg;
+        const toast = new bootstrap.Toast(document.getElementById('actionToast'));
+        toast.show();
+    }
+
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', () => {
+        generateNFCUID();
+        renderApp();
+    });
 </script>
 
 </body>
