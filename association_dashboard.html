@@ -314,7 +314,6 @@
                             <tr>
                                 <th>Product Name</th>
                                 <th>NFC UID</th>
-                                <th>Price</th>
                                 <th>Status</th>
                                 <th class="text-end">Actions</th>
                             </tr>
@@ -433,10 +432,6 @@
                         <input type="text" id="inputName" class="form-control form-control-sm" placeholder="e.g. Bontoc Woven Tapestry" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Price (PHP)</label>
-                        <input type="number" id="inputPrice" class="form-control form-control-sm" placeholder="2500" required>
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label small fw-bold">Assigned NFC Tag UID</label>
                         <div class="input-group input-group-sm">
                             <input type="text" id="inputNfcUid" class="form-control nfc-code" placeholder="04:NC:88:99:A1" readonly required>
@@ -459,9 +454,9 @@
 <script>
     // State Data
     let products = [
-        { id: 1, name: "Caneo Heritage Wrap", uid: "04:NC:88:C2", price: "₱2,200", status: "DTI Tagged" },
-        { id: 2, name: "Sagada Pinagpagan Blanket", uid: "04:NC:77:D9", price: "₱4,500", status: "DTI Tagged" },
-        { id: 3, name: "Sabangan Traditional Runner", uid: "04:NC:12:E0", price: "₱1,850", status: "DTI Tagged" }
+        { id: 1, name: "Caneo Heritage Wrap", uid: "04:NC:88:C2", status: "DTI Tagged" },
+        { id: 2, name: "Sagada Pinagpagan Blanket", uid: "04:NC:77:D9", status: "DTI Tagged" },
+        { id: 3, name: "Sabangan Traditional Runner", uid: "04:NC:12:E0", status: "DTI Tagged" }
     ];
 
     let scanActivity = [
@@ -600,7 +595,6 @@
             id: Date.now(),
             name: document.getElementById('inputName').value,
             uid: document.getElementById('inputNfcUid').value || "04:NC:99:FF",
-            price: `₱${parseFloat(document.getElementById('inputPrice').value).toLocaleString()}`,
             status: "DTI Tagged"
         };
 
