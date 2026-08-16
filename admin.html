@@ -22,6 +22,26 @@
       color: #333333;
     }
 
+    /* Login Screen Container */
+    #view-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-canvas);
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 400px;
+      padding: 2.5rem 2rem;
+    }
+
     /* Sidebar Navigation */
     .sidebar {
       width: var(--sidebar-width);
@@ -182,278 +202,315 @@
 </head>
 <body>
 
-  <!-- Admin Sidebar Navigation -->
-  <aside class="sidebar d-flex flex-column justify-content-between">
-    <div>
-      <div class="sidebar-brand d-flex align-items-center gap-2">
-        <i class="bi bi-shield-check text-success fs-3"></i>
-        <div>
-          <h6 class="fw-bold mb-0 text-success">Weaver-ID</h6>
-          <small class="text-muted fs-8">Admin Control Panel</small>
+  <!-- LOGIN VIEW -->
+  <div id="view-login">
+    <div class="login-card">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success rounded-circle p-3 mb-2" style="width: 60px; height: 60px;">
+          <i class="bi bi-shield-check fs-2"></i>
         </div>
+        <h4 class="fw-bold mb-1 text-success">Weaver-ID</h4>
+        <p class="text-muted fs-8">Admin Control Panel Authentication</p>
       </div>
 
-      <nav class="sidebar-nav mt-3">
-        <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers</a>
-        <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
-        <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Cataloged Products</a>
-        <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
-        <a class="nav-link" data-tab="logs"><i class="bi bi-journal-check"></i> Audit Logs</a>
-      </nav>
-    </div>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="mb-3">
+          <label class="form-label fs-7 fw-semibold">Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted fs-7"></i></span>
+            <input type="email" id="loginEmail" class="form-control border-start-0" placeholder="admin@weaverid.gov.ph" required value="admin@weaverid.gov.ph">
+          </div>
+        </div>
 
-    <!-- Admin Profile Footer -->
-    <div class="p-3 border-top d-flex align-items-center gap-2">
-      <div class="bg-light rounded-circle p-2"><i class="bi bi-person-fill text-secondary"></i></div>
-      <div class="overflow-hidden me-auto">
-        <div class="fw-bold fs-7 text-truncate">Provincial Admin</div>
-        <div class="text-muted fs-8 text-truncate">admin@weaverid.gov.ph</div>
-      </div>
-      <button onclick="handleLogout()" class="btn btn-sm btn-light border-0" title="Logout"><i class="bi bi-box-arrow-right"></i></button>
-    </div>
-  </aside>
+        <div class="mb-4">
+          <label class="form-label fs-7 fw-semibold">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted fs-7"></i></span>
+            <input type="password" id="loginPassword" class="form-control border-start-0" placeholder="••••••••" required value="password">
+          </div>
+        </div>
 
-  <!-- Main Content Area -->
-  <main class="main-content">
+        <button type="submit" class="btn btn-dti w-100 py-2 fw-semibold fs-7 mb-3">Sign In to Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN APP CONTAINER (HIDDEN UNTIL LOGIN) -->
+  <div id="app-container" class="d-none">
     
-    <!-- Top Action Bar -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-light border d-lg-none" type="button"><i class="bi bi-list"></i></button>
-        <h4 class="fw-bold mb-0" id="sectionTitle">Dashboard</h4>
+    <!-- Admin Sidebar Navigation -->
+    <aside class="sidebar d-flex flex-column justify-content-between">
+      <div>
+        <div class="sidebar-brand d-flex align-items-center gap-2">
+          <i class="bi bi-shield-check text-success fs-3"></i>
+          <div>
+            <h6 class="fw-bold mb-0 text-success">Weaver-ID</h6>
+            <small class="text-muted fs-8">Admin Control Panel</small>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav mt-3">
+          <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+          <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers</a>
+          <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
+          <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Cataloged Products</a>
+          <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
+          <a class="nav-link" data-tab="logs"><i class="bi bi-journal-check"></i> Audit Logs</a>
+        </nav>
       </div>
-      <button class="btn btn-light rounded-circle border p-2 d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
-        <i class="bi bi-bell"></i>
-      </button>
-    </div>
 
-    <!-- Search Input -->
-    <div class="search-box mb-4">
-      <i class="bi bi-search text-muted"></i>
-      <input type="text" id="adminSearchInput" placeholder="Search MSMEs, weavers, products, associations..." onkeyup="filterDirectory()">
-    </div>
+      <!-- Admin Profile Footer -->
+      <div class="p-3 border-top d-flex align-items-center gap-2">
+        <div class="bg-light rounded-circle p-2"><i class="bi bi-person-fill text-secondary"></i></div>
+        <div class="overflow-hidden me-auto">
+          <div class="fw-bold fs-7 text-truncate">Provincial Admin</div>
+          <div class="text-muted fs-8 text-truncate" id="loggedUserDisplay">admin@weaverid.gov.ph</div>
+        </div>
+        <button onclick="handleLogout()" class="btn btn-sm btn-light border-0" title="Logout"><i class="bi bi-box-arrow-right text-danger"></i></button>
+      </div>
+    </aside>
 
-    <!-- 1. DASHBOARD VIEW -->
-    <div id="view-dashboard" class="tab-view">
+    <!-- Main Content Area -->
+    <main class="main-content">
       
-      <!-- 4 Metric Cards Grid -->
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-weavers"><i class="bi bi-people-fill"></i></div>
-            <h2 class="fw-bold mb-0 countWeaversDisplay">59</h2>
-            <div class="text-muted fs-8 mt-1">Registered Weavers</div>
-          </div>
+      <!-- Top Action Bar -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-light border d-lg-none" type="button"><i class="bi bi-list"></i></button>
+          <h4 class="fw-bold mb-0" id="sectionTitle">Dashboard</h4>
         </div>
-
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-products"><i class="bi bi-box-seam-fill"></i></div>
-            <h2 class="fw-bold mb-0">12</h2>
-            <div class="text-muted fs-8 mt-1">Cataloged Products</div>
-          </div>
-        </div>
-
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-nfc"><i class="bi bi-wifi"></i></div>
-            <h2 class="fw-bold mb-0">295</h2>
-            <div class="text-muted fs-8 mt-1">NFC Tags Issued</div>
-          </div>
-        </div>
-
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-verifications"><i class="bi bi-check-circle-fill"></i></div>
-            <h2 class="fw-bold mb-0">841</h2>
-            <div class="text-muted fs-8 mt-1">Total Verifications</div>
-          </div>
-        </div>
+        <button class="btn btn-light rounded-circle border p-2 d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+          <i class="bi bi-bell"></i>
+        </button>
       </div>
 
-      <!-- SIDE-BY-SIDE ROW -->
-      <div class="row g-3 mb-4">
+      <!-- Search Input -->
+      <div class="search-box mb-4">
+        <i class="bi bi-search text-muted"></i>
+        <input type="text" id="adminSearchInput" placeholder="Search MSMEs, weavers, products, associations..." onkeyup="filterDirectory()">
+      </div>
+
+      <!-- 1. DASHBOARD VIEW -->
+      <div id="view-dashboard" class="tab-view">
         
-        <!-- Verification Trends Chart Card -->
-        <div class="col-12 col-lg-5">
-          <div class="dashboard-card d-flex flex-column justify-content-between">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold mb-0 fs-7">Verification Trends</h6>
-                <button class="btn btn-sm btn-outline-secondary py-0 px-2 fs-8" onclick="exportData()">Export</button>
-              </div>
-              <small class="text-muted fs-8 d-block mb-2">Monthly Tag Verifications</small>
+        <!-- 4 Metric Cards Grid -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="metric-card">
+              <div class="metric-icon icon-weavers"><i class="bi bi-people-fill"></i></div>
+              <h2 class="fw-bold mb-0 countWeaversDisplay">59</h2>
+              <div class="text-muted fs-8 mt-1">Registered Weavers</div>
             </div>
-            <div style="height: 180px;">
-              <canvas id="verificationTrendChart"></canvas>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <div class="metric-card">
+              <div class="metric-icon icon-products"><i class="bi bi-box-seam-fill"></i></div>
+              <h2 class="fw-bold mb-0">12</h2>
+              <div class="text-muted fs-8 mt-1">Cataloged Products</div>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <div class="metric-card">
+              <div class="metric-icon icon-nfc"><i class="bi bi-wifi"></i></div>
+              <h2 class="fw-bold mb-0">295</h2>
+              <div class="text-muted fs-8 mt-1">NFC Tags Issued</div>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <div class="metric-card">
+              <div class="metric-icon icon-verifications"><i class="bi bi-check-circle-fill"></i></div>
+              <h2 class="fw-bold mb-0">841</h2>
+              <div class="text-muted fs-8 mt-1">Total Verifications</div>
             </div>
           </div>
         </div>
 
-        <!-- Recent Scans Card -->
-        <div class="col-12 col-lg-7">
-          <div class="dashboard-card">
-            <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-clock me-2"></i>Recent Scans</h6>
-            
-            <div class="d-flex flex-column gap-2">
-              <div class="d-flex align-items-center justify-content-between p-1">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="scan-status-icon bg-success-subtle text-success">
-                    <i class="bi bi-check-lg"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold fs-7">Product Verified</div>
-                    <div class="text-muted fs-8">NFC: WVID-8842 | Backpack</div>
-                  </div>
+        <!-- SIDE-BY-SIDE ROW -->
+        <div class="row g-3 mb-4">
+          
+          <!-- Verification Trends Chart Card -->
+          <div class="col-12 col-lg-5">
+            <div class="dashboard-card d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold mb-0 fs-7">Verification Trends</h6>
+                  <button class="btn btn-sm btn-outline-secondary py-0 px-2 fs-8" onclick="exportData()">Export</button>
                 </div>
-                <span class="text-muted fs-8">2m ago</span>
+                <small class="text-muted fs-8 d-block mb-2">Monthly Tag Verifications</small>
               </div>
-
-              <hr class="my-1 text-border">
-
-              <div class="d-flex align-items-center justify-content-between p-1">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="scan-status-icon bg-warning-subtle text-warning">
-                    <i class="bi bi-exclamation-lg"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold fs-7">Unregistered Tag</div>
-                    <div class="text-muted fs-8">NFC: Unknown | Bauko Market</div>
-                  </div>
-                </div>
-                <span class="text-muted fs-8">15m ago</span>
-              </div>
-
-              <hr class="my-1 text-border">
-
-              <div class="d-flex align-items-center justify-content-between p-1">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="scan-status-icon bg-success-subtle text-success">
-                    <i class="bi bi-check-lg"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold fs-7">Product Verified</div>
-                    <div class="text-muted fs-8">NFC: WVID-7721 | Blanket</div>
-                  </div>
-                </div>
-                <span class="text-muted fs-8">32m ago</span>
+              <div style="height: 180px;">
+                <canvas id="verificationTrendChart"></canvas>
               </div>
             </div>
           </div>
+
+          <!-- Recent Scans Card -->
+          <div class="col-12 col-lg-7">
+            <div class="dashboard-card">
+              <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-clock me-2"></i>Recent Scans</h6>
+              
+              <div class="d-flex flex-column gap-2">
+                <div class="d-flex align-items-center justify-content-between p-1">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="scan-status-icon bg-success-subtle text-success">
+                      <i class="bi bi-check-lg"></i>
+                    </div>
+                    <div>
+                      <div class="fw-bold fs-7">Product Verified</div>
+                      <div class="text-muted fs-8">NFC: WVID-8842 | Backpack</div>
+                    </div>
+                  </div>
+                  <span class="text-muted fs-8">2m ago</span>
+                </div>
+
+                <hr class="my-1 text-border">
+
+                <div class="d-flex align-items-center justify-content-between p-1">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="scan-status-icon bg-warning-subtle text-warning">
+                      <i class="bi bi-exclamation-lg"></i>
+                    </div>
+                    <div>
+                      <div class="fw-bold fs-7">Unregistered Tag</div>
+                      <div class="text-muted fs-8">NFC: Unknown | Bauko Market</div>
+                    </div>
+                  </div>
+                  <span class="text-muted fs-8">15m ago</span>
+                </div>
+
+                <hr class="my-1 text-border">
+
+                <div class="d-flex align-items-center justify-content-between p-1">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="scan-status-icon bg-success-subtle text-success">
+                      <i class="bi bi-check-lg"></i>
+                    </div>
+                    <div>
+                      <div class="fw-bold fs-7">Product Verified</div>
+                      <div class="text-muted fs-8">NFC: WVID-7721 | Blanket</div>
+                    </div>
+                  </div>
+                  <span class="text-muted fs-8">32m ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
 
-    </div>
-
-    <!-- 2. REGISTERED WEAVERS VIEW -->
-    <div id="view-weavers" class="tab-view d-none">
-      <div class="dashboard-card p-0">
-        <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-          <h6 class="fw-bold mb-0">Registered Weavers & Enterprises</h6>
-          <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-plus-lg"></i> Add Weaver</button>
-        </div>
-        <div class="table-responsive" style="max-height: 550px;">
-          <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-            <thead class="table-light sticky-top">
-              <tr>
-                <th>#</th>
-                <th>Enterprise Name</th>
-                <th>Artisan / Representative</th>
-                <th>Municipality</th>
-                <th class="text-end pe-3">Action</th>
-              </tr>
-            </thead>
-            <tbody id="directoryTable">
-              <!-- Populated dynamically by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. ASSOCIATIONS VIEW -->
-    <div id="view-associations" class="tab-view d-none">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="fw-bold mb-0">Registered Associations & Cooperatives</h6>
-        <span class="badge bg-success-subtle text-success border">Registry Cards View</span>
-      </div>
-      
-      <div class="row g-3" id="associationsContainer">
-        <!-- Rendered dynamically as structured boxes -->
-      </div>
-    </div>
-
-    <!-- 4. CATALOGED PRODUCTS VIEW -->
-    <div id="view-products" class="tab-view d-none">
-      <div class="dashboard-card">
-        <h6 class="fw-bold mb-3">Cataloged Products</h6>
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-            <thead class="table-light">
-              <tr>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Origin</th>
-                <th class="text-end">Action</th>
-              </tr>
-            </thead>
-            <tbody id="productsTable">
-              <!-- Populated dynamically by JavaScript -->
-            </tbody>
-          </table>
+      <!-- 2. REGISTERED WEAVERS VIEW -->
+      <div id="view-weavers" class="tab-view d-none">
+        <div class="dashboard-card p-0">
+          <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
+            <h6 class="fw-bold mb-0">Registered Weavers & Enterprises</h6>
+            <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-plus-lg"></i> Add Weaver</button>
+          </div>
+          <div class="table-responsive" style="max-height: 550px;">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th>#</th>
+                  <th>Enterprise Name</th>
+                  <th>Artisan / Representative</th>
+                  <th>Municipality</th>
+                  <th class="text-end pe-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="directoryTable">
+                <!-- Populated dynamically by JavaScript -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 5. NFC TAGS VIEW -->
-    <div id="view-nfc" class="tab-view d-none">
-      <div class="dashboard-card">
-        <h6 class="fw-bold mb-3">NFC Tags Issued</h6>
-        <div class="table-responsive">
-          <table class="table table-hover fs-7 text-nowrap">
-            <thead class="table-light">
-              <tr>
-                <th>NFC ID</th>
-                <th>Assigned Item</th>
-                <th>Status</th>
-                <th class="text-end">Controls</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td><code>WVID-8842</code></td><td>Suklang Woven Backpack</td><td><span class="badge bg-success">Active</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0">Unlink</button></td></tr>
-              <tr><td><code>WVID-7721</code></td><td>Pinagpagan Blanket</td><td><span class="badge bg-success">Active</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0">Unlink</button></td></tr>
-            </tbody>
-          </table>
+      <!-- 3. ASSOCIATIONS VIEW -->
+      <div id="view-associations" class="tab-view d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0">Registered Associations & Cooperatives</h6>
+          <span class="badge bg-success-subtle text-success border">Registry Cards View</span>
+        </div>
+        
+        <div class="row g-3" id="associationsContainer">
+          <!-- Rendered dynamically as structured boxes -->
         </div>
       </div>
-    </div>
 
-    <!-- 6. AUDIT LOGS VIEW -->
-    <div id="view-logs" class="tab-view d-none">
-      <div class="dashboard-card">
-        <h6 class="fw-bold mb-3">Audit Logs</h6>
-        <div class="table-responsive">
-          <table class="table table-striped fs-7 text-nowrap">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Tag ID</th>
-                <th>Verification Status</th>
-                <th>Location</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>2m ago</td><td><code>WVID-8842</code></td><td><span class="text-success fw-bold">Verified</span></td><td>System Scan</td></tr>
-              <tr><td>15m ago</td><td><code>Unknown</code></td><td><span class="text-warning fw-bold">Unregistered</span></td><td>Bauko Market</td></tr>
-            </tbody>
-          </table>
+      <!-- 4. CATALOGED PRODUCTS VIEW -->
+      <div id="view-products" class="tab-view d-none">
+        <div class="dashboard-card">
+          <h6 class="fw-bold mb-3">Cataloged Products</h6>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Origin</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody id="productsTable">
+                <!-- Populated dynamically by JavaScript -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
 
-  </main>
+      <!-- 5. NFC TAGS VIEW -->
+      <div id="view-nfc" class="tab-view d-none">
+        <div class="dashboard-card">
+          <h6 class="fw-bold mb-3">NFC Tags Issued</h6>
+          <div class="table-responsive">
+            <table class="table table-hover fs-7 text-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>NFC ID</th>
+                  <th>Assigned Item</th>
+                  <th>Status</th>
+                  <th class="text-end">Controls</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>WVID-8842</code></td><td>Suklang Woven Backpack</td><td><span class="badge bg-success">Active</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0">Unlink</button></td></tr>
+                <tr><td><code>WVID-7721</code></td><td>Pinagpagan Blanket</td><td><span class="badge bg-success">Active</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0">Unlink</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. AUDIT LOGS VIEW -->
+      <div id="view-logs" class="tab-view d-none">
+        <div class="dashboard-card">
+          <h6 class="fw-bold mb-3">Audit Logs</h6>
+          <div class="table-responsive">
+            <table class="table table-striped fs-7 text-nowrap">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Tag ID</th>
+                  <th>Verification Status</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>2m ago</td><td><code>WVID-8842</code></td><td><span class="text-success fw-bold">Verified</span></td><td>System Scan</td></tr>
+                <tr><td>15m ago</td><td><code>Unknown</code></td><td><span class="text-warning fw-bold">Unregistered</span></td><td>Bauko Market</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
 
   <!-- Add Weaver Modal -->
   <div class="modal fade" id="addWeaverModal" tabindex="-1">
@@ -476,7 +533,7 @@
     </div>
   </div>
 
-  <!-- Product Details Modal (WITHOUT PRICE) -->
+  <!-- Product Details Modal -->
   <div class="modal fade" id="productDetailModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -538,6 +595,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    let chartInstance = null;
+
     // --- 1. DATASETS ---
     const productsData = [
       { id: 1, name: "Pinagpagan Pattern Blanket", category: "Textile / Blanket", origin: "Sagada", material: "Handloom Woven Cotton", nfc: "WVID-7721", weaver: "Pinagpagan Womens Workers Association", desc: "Traditional Sagada woven blanket featuring authentic ceremonial geometric weave patterns passed down through generations." },
@@ -625,14 +684,46 @@
       { id: 59, name: "VANAG LOOM CRAFTS", proprietor: "SOPHIA VANAG", municipality: "Bauko" }
     ];
 
-    // --- 2. RENDER FUNCTIONS ---
+    const tabTitles = {
+      dashboard: "Dashboard",
+      weavers: `Registered Weavers (${weaversData.length})`,
+      associations: `Associations (${associationsData.length})`,
+      products: "Cataloged Products",
+      nfc: "NFC Tags",
+      logs: "Audit Logs"
+    };
+
+    // --- 2. AUTHENTICATION HANDLERS ---
+    function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      
+      document.getElementById('loggedUserDisplay').textContent = email;
+      document.getElementById('view-login').classList.add('d-none');
+      document.getElementById('app-container').classList.remove('d-none');
+
+      initChart();
+    }
+
+    function handleLogout() {
+      if (confirm("Log out of the Weaver-ID Admin Control Panel?")) {
+        document.getElementById('app-container').classList.add('d-none');
+        document.getElementById('view-login').classList.remove('d-none');
+        document.getElementById('loginPassword').value = '';
+        
+        // Reset navigation back to Dashboard view for next login
+        switchTab('dashboard');
+      }
+    }
+
+    // --- 3. RENDER FUNCTIONS ---
     function updateWeaverCounters() {
       const count = weaversData.length;
       document.querySelectorAll('.weavers-count, .countWeaversDisplay').forEach(el => {
         el.textContent = count;
       });
       tabTitles.weavers = `Registered Weavers (${count})`;
-      const activeTab = document.querySelector('.sidebar-nav .nav-link.active').getAttribute('data-tab');
+      const activeTab = document.querySelector('.sidebar-nav .nav-link.active')?.getAttribute('data-tab');
       if (activeTab === 'weavers') {
         document.getElementById('sectionTitle').textContent = tabTitles.weavers;
       }
@@ -697,7 +788,7 @@
     function renderAssociations(data) {
       const container = document.getElementById('associationsContainer');
       if (data.length === 0) {
-        container.innerHTML = `<div class="col-12 text-muted text-center py-4">No matching associations found.</div>`;
+        container.innerHTML = `<div class="col-12 text-center text-muted py-4">No matching associations found.</div>`;
         return;
       }
 
@@ -705,150 +796,72 @@
         <div class="col-12 col-md-6 col-lg-4">
           <div class="association-box d-flex flex-column justify-content-between">
             <div>
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <i class="bi bi-building text-success fs-5"></i>
-                <h6 class="fw-bold mb-0 text-success text-truncate" title="${a.name}">${a.name}</h6>
+              <div class="d-flex align-items-start justify-content-between mb-2">
+                <h6 class="fw-bold mb-0 text-dark fs-7">${a.name}</h6>
+                <span class="badge bg-light text-dark border fs-8">${a.location.split(',').pop().trim()}</span>
               </div>
-              <hr class="my-2 text-border">
-              <div class="fs-7 text-dark mb-1">
-                <i class="bi bi-person me-2 text-muted"></i><strong>Lead:</strong> ${a.lead}
-              </div>
-              <div class="fs-7 text-dark mb-1">
-                <i class="bi bi-telephone me-2 text-muted"></i><strong>Contact:</strong> ${a.phone !== 'N/A' ? a.phone : '<span class="text-muted">N/A</span>'}
-              </div>
+              <div class="text-muted fs-8 mb-3"><i class="bi bi-geo-alt me-1"></i>${a.location}</div>
             </div>
-            <div class="pt-2 mt-2 border-top d-flex justify-content-between align-items-center">
-              <span class="fs-8 text-muted"><i class="bi bi-geo-alt me-1"></i>${a.location}</span>
-              <span class="badge bg-success-subtle text-success border fs-8">Active</span>
+            <div class="pt-2 border-top">
+              <div class="d-flex align-items-center justify-content-between fs-8">
+                <span class="text-muted">Lead / Representative:</span>
+                <span class="fw-semibold text-dark">${a.lead}</span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between fs-8 mt-1">
+                <span class="text-muted">Contact:</span>
+                <span class="fw-medium text-secondary">${a.phone !== 'N/A' ? '+63 ' + a.phone : 'N/A'}</span>
+              </div>
             </div>
           </div>
         </div>
       `).join('');
     }
 
-    // --- 3. TAB NAVIGATION ---
-    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
-    const sectionTitle = document.getElementById('sectionTitle');
-
-    const tabTitles = {
-      dashboard: "Dashboard",
-      weavers: `Registered Weavers (${weaversData.length})`,
-      associations: "Registered Associations (15)",
-      products: "Cataloged Products",
-      nfc: "NFC Tags Issued",
-      logs: "Audit Logs"
-    };
-
-    function switchTab(tabKey) {
-      navLinks.forEach(l => {
-        if (l.getAttribute('data-tab') === tabKey) l.classList.add('active');
-        else l.classList.remove('active');
-      });
-
-      sectionTitle.textContent = tabTitles[tabKey] || "Dashboard";
+    // --- 4. TAB NAVIGATION ---
+    function switchTab(tab) {
+      document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
+      const targetLink = document.querySelector(`.sidebar-nav .nav-link[data-tab="${tab}"]`);
+      if (targetLink) targetLink.classList.add('active');
 
       document.querySelectorAll('.tab-view').forEach(view => view.classList.add('d-none'));
-      const activeView = document.getElementById(`view-${tabKey}`);
+      const activeView = document.getElementById(`view-${tab}`);
       if (activeView) activeView.classList.remove('d-none');
+
+      document.getElementById('sectionTitle').textContent = tabTitles[tab] || 'Dashboard';
     }
 
-    navLinks.forEach(link => {
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
       link.addEventListener('click', function(e) {
         e.preventDefault();
-        switchTab(this.getAttribute('data-tab'));
+        const tab = this.getAttribute('data-tab');
+        switchTab(tab);
       });
     });
 
-    // --- 4. CHART INITIALIZATION ---
-    const ctx = document.getElementById('verificationTrendChart').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 150);
-    gradient.addColorStop(0, 'rgba(10, 77, 46, 0.25)');
-    gradient.addColorStop(1, 'rgba(10, 77, 46, 0.0)');
-
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [{
-          data: [65, 82, 110, 145, 190, 210, 238, 280],
-          borderColor: '#0a4d2e',
-          borderWidth: 2,
-          backgroundColor: gradient,
-          fill: true,
-          tension: 0.35,
-          pointBackgroundColor: '#0a4d2e',
-          pointRadius: 3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-          y: { min: 0, max: 300, ticks: { stepSize: 100, font: { size: 10 } }, grid: { color: '#f0f0f0' } }
-        }
-      }
-    });
-
-    // --- 5. INTERACTION LOGIC ---
-    function filterDirectory() {
-      const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
-
-      const filteredWeavers = weaversData.filter(w =>
-        w.name.toLowerCase().includes(query) ||
-        w.proprietor.toLowerCase().includes(query) ||
-        w.municipality.toLowerCase().includes(query)
-      );
-      renderWeavers(filteredWeavers);
-
-      const filteredAssoc = associationsData.filter(a =>
-        a.name.toLowerCase().includes(query) ||
-        a.lead.toLowerCase().includes(query) ||
-        a.location.toLowerCase().includes(query)
-      );
-      renderAssociations(filteredAssoc);
-
-      const filteredProducts = productsData.filter(p =>
-        p.name.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query) ||
-        p.origin.toLowerCase().includes(query)
-      );
-      renderProducts(filteredProducts);
-    }
-
+    // --- 5. CRUD OPERATIONS & SEARCH ---
     function saveWeaver() {
-      const bizInput = document.getElementById('addBusiness');
-      const propInput = document.getElementById('addProprietor');
-      const muniInput = document.getElementById('addMunicipality');
+      const bus = document.getElementById('addBusiness').value.trim();
+      const prop = document.getElementById('addProprietor').value.trim();
+      const mun = document.getElementById('addMunicipality').value.trim();
 
-      const biz = bizInput.value.trim();
-      const prop = propInput.value.trim();
-      const muni = muniInput.value.trim();
-
-      if (!biz || !prop) {
-        alert('Please fill in required fields.');
+      if (!bus || !prop || !mun) {
+        alert('Please fill out all fields.');
         return;
       }
 
-      const newId = weaversData.length ? Math.max(...weaversData.map(w => w.id)) + 1 : 1;
-      weaversData.push({
-        id: newId,
-        name: biz.toUpperCase(),
-        proprietor: prop.toUpperCase(),
-        municipality: muni || 'N/A'
-      });
+      const newId = weaversData.length > 0 ? Math.max(...weaversData.map(w => w.id)) + 1 : 1;
+      weaversData.unshift({ id: newId, name: bus.toUpperCase(), proprietor: prop.toUpperCase(), municipality: mun });
 
       updateWeaverCounters();
-      filterDirectory();
+      renderWeavers(weaversData);
 
-      bizInput.value = '';
-      propInput.value = '';
-      muniInput.value = '';
+      document.getElementById('addBusiness').value = '';
+      document.getElementById('addProprietor').value = '';
+      document.getElementById('addMunicipality').value = '';
 
       const modalEl = document.getElementById('addWeaverModal');
-      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-      modal.hide();
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
     }
 
     function deleteWeaver(id) {
@@ -859,20 +872,84 @@
       }
     }
 
-    function exportData() {
-      alert('Exporting verification trends to CSV...');
+    function filterDirectory() {
+      const q = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+
+      const filteredWeavers = weaversData.filter(w => 
+        w.name.toLowerCase().includes(q) || 
+        w.proprietor.toLowerCase().includes(q) || 
+        w.municipality.toLowerCase().includes(q)
+      );
+
+      const filteredAssociations = associationsData.filter(a => 
+        a.name.toLowerCase().includes(q) || 
+        a.lead.toLowerCase().includes(q) || 
+        a.location.toLowerCase().includes(q)
+      );
+
+      const filteredProducts = productsData.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        p.category.toLowerCase().includes(q) || 
+        p.origin.toLowerCase().includes(q) ||
+        p.weaver.toLowerCase().includes(q)
+      );
+
+      renderWeavers(filteredWeavers);
+      renderAssociations(filteredAssociations);
+      renderProducts(filteredProducts);
     }
 
-    function handleLogout() {
-      if (confirm('Are you sure you want to logout?')) {
-        alert('Logged out successfully.');
+    function exportData() {
+      alert("Exporting verification report (CSV)...");
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('verificationTrendChart');
+      if (ctx && !chartInstance) {
+        chartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+              label: 'Verifications',
+              data: [65, 90, 120, 185, 230, 281],
+              borderColor: '#0a4d2e',
+              backgroundColor: 'rgba(10, 77, 46, 0.08)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 3,
+              pointBackgroundColor: '#0a4d2e'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 10 } }
+              },
+              y: {
+                grid: { borderDash: [4, 4], color: '#e2e8f0' },
+                ticks: { font: { size: 10 } }
+              }
+            }
+          }
+        });
       }
     }
 
-    // Initial Population
-    renderWeavers(weaversData);
-    renderAssociations(associationsData);
-    renderProducts(productsData);
+    // --- 6. INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      updateWeaverCounters();
+      renderWeavers(weaversData);
+      renderAssociations(associationsData);
+      renderProducts(productsData);
+    });
   </script>
 </body>
 </html>
