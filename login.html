@@ -88,49 +88,131 @@
   </div>
 
   <script>
-    // TODO: replace with your actual backend URL once deployed
-    const AUTH_API_URL = 'https://your-backend-domain.com/api/auth/login';
+  // ============================================
+  // TEMPORARY MOCK AUTH — remove this whole block
+  // once the real backend endpoint is ready, and
+  // restore the fetch() version instead.
+  // ============================================
 
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
+  const MOCK_USERS = [
+    {
+      email: 'superadmin@weaverid.gov.ph',
+      password: 'admin123',
+      role: 'dti_admin',
+      municipality: null
+    },
+    {
+      email: 'hub@montanosa.org',
+      password: 'hub123',
+      role: 'association_staff',
+      municipality: 'Sagada'
+    },
+    {
+      email: 'bontoc@weaverid.gov.ph',
+      password: 'hub123',
+      role: 'association_staff',
+      municipality: 'Bontoc'
+    }
+  ];
 
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const errorBox = document.getElementById('loginError');
-      const loginBtn = document.getElementById('loginBtn');
-
-      errorBox.classList.add('d-none');
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Signing in...';
-
-      try {
-        const response = await fetch(AUTH_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await response.json();
-
-        if (!response.ok) {
-          errorBox.textContent = 'Invalid email or password.';
-          errorBox.classList.remove('d-none');
-          return;
+  function mockLogin(email, password) {
+    // Simulates network delay so the loading state is visible during testing
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+        if (user) {
+          resolve({
+            token: 'mock-token-' + Date.now(),
+            role: user.role,
+            municipality: user.municipality
+          });
+        } else {
+          reject(new Error('Invalid credentials'));
         }
-
-        sessionStorage.setItem('weaverid_token', data.token);
-        sessionStorage.setItem('weaverid_role', data.role);
-        sessionStorage.setItem('weaverid_municipality', data.municipality || '');
-
-        window.location.href = data.role === 'dti_admin' ? './admin.html' : './association_dashboard.html';
-
-      } catch (err) {
-        errorBox.textContent = 'Unable to reach the server. Please try again.';
-        errorBox.classList.remove('d-none');
-      } finally {
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Sign In';
-      }
+      }, 600);
     });
-  </script>
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorBox = document.getElementById('loginError');
+    const loginBtn = document.getElementById('loginBtn');
+
+    errorBox.classList.add('d-none');
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Signing in...';
+
+    try {
+      // TODO: once the backend is ready, replace mockLogin(email, password)
+      // with the real fetch() call to AUTH_API_URL (see commented block below)
+      const data = await mockLogin(email, password);
+
+      sessionStorage.setItem('weaverid_token', data.token);
+      sessionStorage.setItem('weaverid_role', data.role);
+      sessionStorage.setItem('weaverid_municipality', data.municipality || '');
+
+      window.location.href = data.role === 'dti_admin' ? './admin.html' : './association_dashboard.html';
+
+    } catch (err) {
+      errorBox.textContent = 'Invalid email or password.';
+      errorBox.classList.remove('d-none');
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Sign In';
+    }
+  });
+
+  /* ============================================
+     REAL VERSION — uncomment and delete the mock
+     block above once the backend endpoint exists.
+  ============================================
+
+  const AUTH_API_URL = 'https://your-backend-domain.com/api/auth/login';
+
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorBox = document.getElementById('loginError');
+    const loginBtn = document.getElementById('loginBtn');
+
+    errorBox.classList.add('d-none');
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Signing in...';
+
+    try {
+      const response = await fetch(AUTH_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        errorBox.textContent = 'Invalid email or password.';
+        errorBox.classList.remove('d-none');
+        return;
+      }
+
+      sessionStorage.setItem('weaverid_token', data.token);
+      sessionStorage.setItem('weaverid_role', data.role);
+      sessionStorage.setItem('weaverid_municipality', data.municipality || '');
+
+      window.location.href = data.role === 'dti_admin' ? './admin.html' : './association_dashboard.html';
+
+    } catch (err) {
+      errorBox.textContent = 'Unable to reach the server. Please try again.';
+      errorBox.classList.remove('d-none');
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Sign In';
+    }
+  });
+  */
+</script>
 </body>
 </html>
