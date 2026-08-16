@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weaver-ID | DTI Admin Dashboard</title>
+    <title>Weaver-ID | DTI Provincial Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -146,15 +146,19 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
-            border-bottom: 1px solid #f1f3f5;
+            padding: 18px 20px;
+            border: 1px solid #eef1f5;
+            margin-bottom: 12px;
+            border-radius: 10px;
             transition: all 0.2s ease;
             cursor: pointer;
-            border-radius: 8px;
+            background: #ffffff;
         }
 
         .assoc-item:hover {
-            background-color: #f8f9fa;
+            border-color: #0d4e2d;
+            box-shadow: 0 4px 12px rgba(13, 78, 45, 0.08);
+            transform: translateY(-1px);
         }
 
         .msme-badge {
@@ -214,45 +218,58 @@
     <!-- Main Content Workspace -->
     <div class="main-wrapper">
 
-        <!-- MSME Associations Tab -->
+        <!-- MSME Associations Tab (Previous Main View) -->
         <div id="panel-msme-associations" class="view-panel active-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="fw-bold m-0">Provincial Weavers Associations</h4>
-                <div style="width: 260px;">
-                    <input type="text" id="assoc-search" class="form-control form-control-sm" placeholder="Search association...">
+                <div>
+                    <h4 class="fw-bold m-0">Provincial Weavers Associations</h4>
+                    <small class="text-muted">Mountain Province DTI Master Guild Registry</small>
+                </div>
+                <div style="width: 280px;">
+                    <input type="text" id="assoc-search" class="form-control form-control-sm" placeholder="Search association or location...">
                 </div>
             </div>
-            <div class="content-card">
-                <div id="associations-list"></div>
-            </div>
+            
+            <div id="associations-list"></div>
         </div>
 
-        <!-- Association Detail View Tab -->
+        <!-- Detailed View for Selected Association -->
         <div id="panel-association-view" class="view-panel">
+            <!-- Navigation Back Bar -->
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="switchTab('msme-associations')"><i class="bi bi-arrow-left"></i> Back</button>
+                    <button class="btn btn-sm btn-outline-dark fw-semibold" onclick="returnToPreviousAssocList()">
+                        <i class="bi bi-arrow-left"></i> Previous / Back to Associations List
+                    </button>
+                </div>
+                <span class="badge bg-success-subtle text-success px-3 py-2 border border-success-subtle">DTI Provincial Record</span>
+            </div>
+
+            <div class="content-card mb-4">
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h4 class="fw-bold m-0" id="selected-assoc-name">Association Detail View</h4>
-                        <small class="text-muted" id="selected-assoc-subtext"></small>
+                        <h3 class="fw-bold m-0 text-dark" id="selected-assoc-name">Association Detail View</h3>
+                        <p class="text-muted mb-0 mt-1" id="selected-assoc-subtext"></p>
                     </div>
+                    <span class="badge bg-primary fs-6 px-3 py-2" id="selected-assoc-badge">0 Registered MSMEs</span>
                 </div>
             </div>
 
             <div class="content-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold m-0">Registered MSME Members (<span id="msme-total-count">0</span>)</h6>
-                    <input type="text" id="msme-member-search" class="form-control form-control-sm" style="width:220px;" placeholder="Search weaver or business...">
+                    <input type="text" id="msme-member-search" class="form-control form-control-sm" style="width:240px;" placeholder="Search weaver or business...">
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
+                                <th>ID Code</th>
                                 <th>Business / MSME Name</th>
                                 <th>Proprietor / Weaver</th>
-                                <th>Location</th>
-                                <th>Status</th>
+                                <th>Barangay Location</th>
+                                <th>DTI Status</th>
                             </tr>
                         </thead>
                         <tbody id="assoc-members-table"></tbody>
@@ -270,7 +287,7 @@
         <!-- Registered Weavers Panel Placeholder -->
         <div id="panel-registered-weavers" class="view-panel">
             <h4 class="fw-bold mb-3">All Registered Weavers</h4>
-            <div class="content-card"><p class="text-muted">Complete master list of all 45 weavers in Mountain Province.</p></div>
+            <div class="content-card"><p class="text-muted">Master list of all 45 weavers in Mountain Province.</p></div>
         </div>
 
         <!-- Verified Products Panel Placeholder -->
@@ -370,10 +387,13 @@
             container.innerHTML = associations.map(a => `
                 <div class="assoc-item" onclick="openAssociationView(${a.id})">
                     <div>
-                        <div class="fw-bold text-dark">${a.name}</div>
+                        <div class="fw-bold text-dark fs-6">${a.name}</div>
                         <small class="text-muted"><i class="bi bi-geo-alt"></i> ${a.location}</small>
                     </div>
-                    <span class="msme-badge">${a.msmeCount} MSMEs</span>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="msme-badge">${a.msmeCount} Registered MSMEs</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </div>
                 </div>
             `).join('');
         }
@@ -384,23 +404,29 @@
             if (!assoc) return;
 
             document.getElementById('selected-assoc-name').innerText = assoc.name;
-            document.getElementById('selected-assoc-subtext').innerText = `${assoc.location} • Full Registry`;
+            document.getElementById('selected-assoc-subtext').innerText = `${assoc.location} • Full DTI Member Directory`;
             document.getElementById('msme-total-count').innerText = assoc.msmeCount;
+            document.getElementById('selected-assoc-badge').innerText = `${assoc.msmeCount} Registered MSMEs`;
 
             renderMembersTable(assoc.members);
             switchTab('association-view');
         }
 
+        function returnToPreviousAssocList() {
+            switchTab('msme-associations');
+        }
+
         function renderMembersTable(members) {
             const tableBody = document.getElementById('assoc-members-table');
             if (members.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No matching MSME members found.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No matching MSME members found.</td></tr>`;
                 return;
             }
 
             tableBody.innerHTML = members.map((m, index) => `
                 <tr>
                     <td class="text-muted fw-semibold">${index + 1}</td>
+                    <td><code>${m.id}</code></td>
                     <td class="fw-bold text-dark">${m.msme}</td>
                     <td>${m.proprietor}</td>
                     <td><small class="text-muted">${m.barangay}</small></td>
@@ -416,8 +442,13 @@
             const targetPanel = document.getElementById(`panel-${tabId}`);
             if (targetPanel) targetPanel.classList.add('active-panel');
 
+            // Set main sidebar active tab
             const activeLink = document.querySelector(`.sidebar-menu .nav-link[data-tab="${tabId}"]`);
-            if (activeLink) activeLink.classList.add('active');
+            if (activeLink) {
+                activeLink.classList.add('active');
+            } else if (tabId === 'association-view') {
+                document.querySelector(`.sidebar-menu .nav-link[data-tab="msme-associations"]`).classList.add('active');
+            }
         }
 
         document.querySelectorAll('.sidebar-menu .nav-link[data-tab]').forEach(link => {
@@ -440,7 +471,8 @@
             const filteredMembers = assoc.members.filter(m => 
                 m.msme.toLowerCase().includes(query) || 
                 m.proprietor.toLowerCase().includes(query) ||
-                m.barangay.toLowerCase().includes(query)
+                m.barangay.toLowerCase().includes(query) ||
+                m.id.toLowerCase().includes(query)
             );
             renderMembersTable(filteredMembers);
         });
