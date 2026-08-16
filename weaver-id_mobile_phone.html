@@ -1,41 +1,90 @@
-<?php
-header('Content-Type: application/json');
-require_once '../db.php';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Tag Verification Result</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .verification-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 28px;
+            max-width: 420px;
+            width: 100%;
+            border: 1px solid #edf2f7;
+        }
+        .status-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px auto;
+            font-size: 1.8rem;
+        }
+        .status-icon-box.success { background-color: #dcfce7; color: #15803d; }
+        .status-icon-box.error { background-color: #fee2e2; color: #dc2626; }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #f1f5f9;
+            font-size: 0.9rem;
+        }
+        .data-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
 
-// Accept JSON payload or standard POST
-$input = json_decode(file_get_contents('php://input'), true);
-$nfc_uid = $input['nfc_uid'] ?? $_POST['nfc_uid'] ?? null;
+    <div class="verification-card">
+        <!-- SUCCESS STATE -->
+        <div class="text-center">
+            <div class="status-icon-box success">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <h5 class="fw-bold mb-1">Authentication Successful</h5>
+            <p class="text-muted small mb-4">Valid Weaver NFC Tag</p>
+        </div>
 
-if (!$nfc_uid) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'NFC UID is required']);
-    exit;
-}
+        <div class="bg-light p-3 rounded mb-3">
+            <div class="data-row">
+                <span class="text-muted">Weaver ID:</span>
+                <span class="fw-bold">#102</span>
+            </div>
+            <div class="data-row">
+                <span class="text-muted">Weaver Name:</span>
+                <span class="fw-bold">Maria Pawid</span>
+            </div>
+            <div class="data-row">
+                <span class="text-muted">Business / Guild:</span>
+                <span class="fw-bold">Sagada Weavers Coop</span>
+            </div>
+            <div class="data-row">
+                <span class="text-muted">Status:</span>
+                <span class="badge bg-success">Active</span>
+            </div>
+        </div>
 
-// Check database for active weaver with matching NFC UID
-$stmt = $pdo->prepare("SELECT id, business_name, first_name, last_name, status FROM msme_weavers WHERE nfc_uid = ?");
-$stmt->execute([$nfc_uid]);
-$weaver = $stmt->fetch();
+        <button class="btn btn-outline-secondary w-100 btn-sm" onclick="window.history.back()">
+            <i class="bi bi-arrow-left"></i> Scan Another Tag
+        </button>
+    </div>
 
-if (!$weaver) {
-    http_response_code(404);
-    echo json_encode(['status' => 'error', 'message' => 'Unregistered NFC card']);
-    exit;
-}
-
-if ($weaver['status'] !== 'active') {
-    http_response_code(403);
-    echo json_encode(['status' => 'error', 'message' => 'Card is inactive or revoked']);
-    exit;
-}
-
-echo json_encode([
-    'status' => 'success',
-    'message' => 'Authentication successful',
-    'data' => [
-        'id' => $weaver['id'],
-        'name' => trim($weaver['first_name'] . ' ' . $weaver['last_name']),
-        'business' => $weaver['business_name']
-    ]
-]);
-?>
+</body>
+</html>
