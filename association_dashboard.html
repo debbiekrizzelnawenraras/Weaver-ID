@@ -3,364 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Associations & Cooperatives Dashboard</title>
+    <title>Mountain Province Association Portal</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .sidebar { min-height: 100vh; background-color: #1a252f; }
+        .sidebar .nav-link { color: #adb5bd; border-radius: 6px; margin-bottom: 4px; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #ffffff; background-color: #198754; }
+        .portal-card { transition: transform 0.2s; }
+        .portal-card:hover { transform: translateY(-3px); }
+    </style>
 </head>
 <body class="bg-light">
 
-    <!-- Associations Dashboard Container -->
-    <div class="container-fluid p-4">
-        
-        <!-- Header Title & Controls -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-            <div>
-                <h4 class="fw-bold mb-1 text-dark">
-                    <i class="bi bi-grid-1x2-fill text-success me-2"></i>Associations & Cooperatives Dashboard
-                </h4>
-                <p class="text-secondary small mb-0">Consolidated analytics and MSME registry across Mountain Province weaving clusters</p>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3 text-white">
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-diagram-3-fill text-success fs-3 me-2"></i>
+                <span class="fw-bold fs-6">MP Weavers Portal</span>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
-                    <i class="bi bi-printer me-1"></i> Print / Export
-                </button>
-                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAssocModal">
-                    <i class="bi bi-plus-circle me-1"></i> Add New Group
-                </button>
-            </div>
-        </div>
+            <hr class="border-secondary">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="switchView('dashboard')">
+                        <i class="bi bi-speedometer2 me-2"></i> Dashboard Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('associations')">
+                        <i class="bi bi-building me-2"></i> Association Portal
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('projects')">
+                        <i class="bi bi-kanban me-2"></i> Projects & Grants
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <!-- Top KPI Metrics Bar -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-4 border-success">
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            
+            <!-- VIEW 1: DASHBOARD OVERVIEW -->
+            <div id="view-dashboard">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold m-0 text-dark">Executive Dashboard</h4>
+                        <small class="text-secondary">Mountain Province Weaving Cooperatives & MSME Clusters</small>
+                    </div>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAssocModal">
+                        <i class="bi bi-plus-circle me-1"></i> New Group
+                    </button>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3 bg-white border-start border-4 border-success">
+                            <span class="text-muted small fw-semibold">TOTAL ASSOCIATIONS</span>
+                            <h3 class="fw-bold m-0 text-dark" id="dashTotalGroups">11</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3 bg-white border-start border-4 border-primary">
+                            <span class="text-muted small fw-semibold">REGISTERED MSMES</span>
+                            <h3 class="fw-bold m-0 text-dark" id="dashTotalMsmes">58</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3 bg-white border-start border-4 border-warning">
+                            <span class="text-muted small fw-semibold">DISTRICTS COVERED</span>
+                            <h3 class="fw-bold m-0 text-dark">8</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm p-3 bg-white border-start border-4 border-info">
+                            <span class="text-muted small fw-semibold">ACTIVE PROJECTS</span>
+                            <h3 class="fw-bold m-0 text-dark">5</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Association Quick Selector Cards -->
+                <h6 class="fw-bold mb-3 text-dark">Select Association Portal View</h6>
+                <div class="row g-3" id="assocPortalGrid">
+                    <!-- Dynamic Portal Cards Rendered Here -->
+                </div>
+            </div>
+
+            <!-- VIEW 2: INDIVIDUAL ASSOCIATION PORTAL DETAILED VIEW -->
+            <div id="view-associations" style="display: none;">
+                <div class="d-flex align-items-center justify-content-between mb-4">
                     <div class="d-flex align-items-center">
-                        <div class="p-3 bg-success bg-opacity-10 rounded-circle text-success me-3">
-                            <i class="bi bi-people-fill fs-3"></i>
-                        </div>
+                        <button class="btn btn-outline-secondary btn-sm me-3" onclick="switchView('dashboard')">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </button>
                         <div>
-                            <span class="text-muted small fw-semibold text-uppercase">Total Groups</span>
-                            <h3 class="fw-bold mb-0 text-dark" id="statTotalGroups">11</h3>
+                            <h4 class="fw-bold m-0 text-dark" id="portalTitle">Montañosa Weavers Association</h4>
+                            <small class="text-muted"><i class="bi bi-geo-alt me-1 text-danger"></i><span id="portalLoc">Sagada & Bontoc Region</span></small>
                         </div>
                     </div>
+                    <span class="badge bg-success fs-6 px-3 py-2" id="portalBadge">6 MSMEs Enrolled</span>
                 </div>
-            </div>
 
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-4 border-primary">
-                    <div class="d-flex align-items-center">
-                        <div class="p-3 bg-primary bg-opacity-10 rounded-circle text-primary me-3">
-                            <i class="bi bi-shop fs-3"></i>
-                        </div>
-                        <div>
-                            <span class="text-muted small fw-semibold text-uppercase">Mapped MSMEs</span>
-                            <h3 class="fw-bold mb-0 text-dark" id="statMappedMsmes">58</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-4 border-warning">
-                    <div class="d-flex align-items-center">
-                        <div class="p-3 bg-warning bg-opacity-10 rounded-circle text-warning me-3">
-                            <i class="bi bi-geo-alt-fill fs-3"></i>
-                        </div>
-                        <div>
-                            <span class="text-muted small fw-semibold text-uppercase">Active Districts</span>
-                            <h3 class="fw-bold mb-0 text-dark">8</h3>
+                <!-- Association Executive Summary -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm p-3 bg-white h-100">
+                            <h6 class="fw-bold text-dark border-bottom pb-2">Leadership Contact</h6>
+                            <p class="mb-1"><strong class="text-secondary small">Head Officers:</strong></p>
+                            <p class="fw-semibold text-dark mb-2" id="portalLead">Jocelyn Miranda / Lilia Capuyan</p>
+                            <p class="mb-1"><strong class="text-secondary small">Contact Number:</strong></p>
+                            <p class="fw-bold text-primary font-monospace" id="portalPhone">09182345601</p>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-4 border-info">
-                    <div class="d-flex align-items-center">
-                        <div class="p-3 bg-info bg-opacity-10 rounded-circle text-info me-3">
-                            <i class="bi bi-person-badge-fill fs-3"></i>
-                        </div>
-                        <div>
-                            <span class="text-muted small fw-semibold text-uppercase">Lead Representatives</span>
-                            <h3 class="fw-bold mb-0 text-dark">14</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analytics Charts Row -->
-        <div class="row g-3 mb-4">
-            <!-- Capacity Chart -->
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm p-3 rounded-3 bg-white h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark m-0"><i class="bi bi-bar-chart-line-fill me-2 text-success"></i>MSME Capacity per Association</h6>
-                        <span class="badge bg-light text-dark border">Mountain Province</span>
-                    </div>
-                    <div style="position: relative; height: 280px;">
-                        <canvas id="assocCapacityChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Regional Share Donut Chart -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm p-3 rounded-3 bg-white h-100">
-                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Regional Allocation</h6>
-                    <div style="position: relative; height: 280px;" class="d-flex justify-content-center align-items-center">
-                        <canvas id="assocDonutChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Directory Table Container -->
-        <div class="card border-0 shadow-sm rounded-3 bg-white">
-            <div class="card-header bg-white py-3 border-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
-                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-bookmark-fill me-2 text-success"></i>Consolidated Association Registry</h6>
-                <div class="input-group input-group-sm w-auto">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" id="assocSearch" class="form-control bg-light border-start-0" placeholder="Filter group, location, or lead..." onkeyup="filterAssociations()">
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-secondary small text-uppercase">
-                        <tr>
-                            <th class="ps-3">Group Name</th>
-                            <th>District / Location</th>
-                            <th>Lead Officer</th>
-                            <th>Contact</th>
-                            <th>Key Members Preview</th>
-                            <th class="text-center">MSMEs</th>
-                            <th class="text-end pe-3">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assocRegistryBody">
-                        <!-- Rendered dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for Viewing Details -->
-    <div class="modal fade" id="assocDetailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white">
-                    <h6 class="modal-title fw-bold" id="modalTitle">Group Details</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-2"><strong class="text-muted">District / Location:</strong> <span id="modalLoc" class="ms-1"></span></div>
-                    <div class="mb-2"><strong class="text-muted">Lead Officer:</strong> <span id="modalLead" class="ms-1 fw-bold"></span></div>
-                    <div class="mb-3"><strong class="text-muted">Contact:</strong> <span id="modalPhone" class="ms-1 text-primary font-monospace"></span></div>
-                    <hr>
-                    <h6 class="fw-bold text-dark mb-2">Registered Member Enterprises</h6>
-                    <div class="p-3 bg-light rounded text-secondary small" id="modalMembers"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for Adding New Group -->
-    <div class="modal fade" id="addAssocModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-dark text-white">
-                    <h6 class="modal-title fw-bold">Add Association or Co-op</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addAssocForm" onsubmit="handleFormSubmit(event)">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Group / Association Name</label>
-                            <input type="text" id="inputName" class="form-control form-control-sm" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Location / Municipality</label>
-                            <input type="text" id="inputLoc" class="form-control form-control-sm" required>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label small fw-bold">Lead Officer</label>
-                                <input type="text" id="inputLead" class="form-control form-control-sm" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold">Contact Number</label>
-                                <input type="text" id="inputPhone" class="form-control form-control-sm" required>
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm p-3 bg-white h-100">
+                            <h6 class="fw-bold text-dark border-bottom pb-2">Associated Member MSMEs</h6>
+                            <div id="portalMembersList" class="d-flex flex-wrap gap-2 mt-2">
+                                <!-- Dynamic Badges -->
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Member Enterprises (Comma Separated)</label>
-                            <textarea id="inputMembers" class="form-control form-control-sm" rows="3" required></textarea>
-                        </div>
-                        <div class="text-end">
-                            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success btn-sm">Save Group</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
+
+                <!-- Member Management Table -->
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold m-0 text-dark"><i class="bi bi-people-fill text-success me-2"></i>Group MSME Directory</h6>
+                        <button class="btn btn-outline-success btn-sm"><i class="bi bi-person-plus me-1"></i> Assign MSME</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small text-uppercase">
+                                <tr>
+                                    <th>Enterprise Name</th>
+                                    <th>Status</th>
+                                    <th>Role</th>
+                                    <th>Verification</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="portalMsmeTable">
+                                <!-- Dynamic rendering -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: PROJECTS & GRANTS -->
+            <div id="view-projects" style="display: none;">
+                <h4 class="fw-bold text-dark mb-3">Active Association Projects & Grants</h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-3 bg-white">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold text-dark">DTI Shared Service Facility (SSF) Grant</h6>
+                                <span class="badge bg-success-subtle text-success">Active</span>
+                            </div>
+                            <p class="small text-muted mt-2">Provision of high-capacity handlooms and warping equipment to Sabangan and Sagada weaving clusters.</p>
+                            <small class="text-secondary">Beneficiary: <strong>Montañosa & Sabangan Associations</strong></small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-3 bg-white">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold text-dark">Cultural Heritage Preservation Training</h6>
+                                <span class="badge bg-warning-subtle text-warning">In Progress</span>
+                            </div>
+                            <p class="small text-muted mt-2">Workshop on traditional natural dye extraction and pattern conservation for young weavers.</p>
+                            <small class="text-secondary">Beneficiary: <strong>SUTADA & Samoki Guilds</strong></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- Modal: Add New Group -->
+<div class="modal fade" id="addAssocModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title fw-bold">Register New Association</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAssocForm" onsubmit="handleAddGroup(event)">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Association Name</label>
+                        <input type="text" id="assocName" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">District / Municipality Location</label>
+                        <input type="text" id="assocLoc" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Lead Officer</label>
+                            <input type="text" id="assocLead" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Contact Number</label>
+                            <input type="text" id="assocPhone" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Member Enterprises (Comma Separated)</label>
+                        <textarea id="assocMembers" class="form-control form-control-sm" rows="3" required></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success btn-sm">Save Association</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js Engine -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // Consolidated Association Dataset
-        let dataset = [
-            { name: "Montañosa Weavers Association", loc: "Sagada & Bontoc Region", lead: "Jocelyn Miranda / Lilia Capuyan", phone: "09182345601", members: "Jocelyn Miranda Loomweaving, Kamowan Souvenirs, Marilyn Dao-Asen, Rodilyn Chumel-Ang, Regeelyn Bacolong, Joy Anoyan Cluster", count: 6 },
-            { name: "Sabangan Weavers Association", loc: "Sabangan, Mountain Province", lead: "Juliana Walisen / Grace Domogan", phone: "09182345603", members: "Juliana's Loom Weaving, Kinayan Handloom, Mary Ann Modawan, Regina Balagtas, Aranduque Family Crafts", count: 6 },
-            { name: "SUTADA Weaver's Association", loc: "Tadian & Besao Region", lead: "Brenda Anongos / Lanie Gaongen", phone: "09182345604", members: "Brenda Anongos Textiles, Lanie Gaongen Ent., Herminia Piayas, Catherine Calingling, Pray Keen Ban-Ang, Saldy Puyongan, Phoebe Amogawen", count: 7 },
-            { name: "Pinagpagan Women's Workers Association", loc: "Bauko, Mountain Province", lead: "Florence Aliwengweng", phone: "09182345605", members: "Florence Aliwengweng Weaving, Mary Tukaki Handicrafts, Julien Pineda Handloom, Florence Likigan, Gladys Wadingan, Caren Kiwang", count: 6 },
-            { name: "Samoki Cultural Weavers Guild", loc: "Samoki, Bontoc", lead: "Josephine Fuchadcha / Rosemary Pekas", phone: "09182345602", members: "Josephine Fuchadcha Handicrafts, ZK Clothing Boutique, Marina Balaniyan, Christopher Pinasen, Ruth Kathleen Codod, Paula Cofulan", count: 6 },
-            { name: "Natonin Women Crafts Association", loc: "Poblacion, Natonin", lead: "Rose Ann Wangdali / Maria Teresa Abad", phone: "09182345609", members: "Rose Ann Wangdali, Abad Family Weavers (Maria Teresa & Marites Abad), Evelyn Ochasan, Luciano Bagyan", count: 5 },
-            { name: "Paracelis Weavers Guild", loc: "Paracelis, Mountain Province", lead: "Loida Baniaga", phone: "09182345610", members: "Loida Baniaga, Kimberly Onga-Ong, Rannie Dao, Krys Ivonne Joy Soria, Michael Ivan Juliano", count: 5 },
-            { name: "Eastern Mountain Province Artisans", loc: "Barlig, Mountain Province", lead: "Felipa Tagaban", phone: "09182345607", members: "Felipa Tagaban Cultural Crafts, Daisy May-Eng, Brendo Cayanga, Methuselah Kollin, Irene Marconi", count: 5 },
-            { name: "Sadanga Traditional Weavers Association", loc: "Sadanga, Mountain Province", lead: "Lina Unos", phone: "09182345608", members: "Lina Unos, Rose Dulay, Virginia Omaweng, Bangiyad Bolinget, Eloiza Jean Changat", count: 5 },
-            { name: "Amkileng Weavers Collective", loc: "Amkileng, Sagada", lead: "Agnes & Rebecca Cadiogan", phone: "09182345636", members: "Agnes Cadiogan Artisans, Rebecca Cadiogan Loom Producers, Seigrid Ann Bangyay", count: 3 },
-            { name: "Viewhill & Letang Womens Organizations", loc: "Besao & Sadanga Borders", lead: "Patricio Masliyan", phone: "09182345639", members: "Patricio Masliyan Traditional Art, Esther Cacay, Rufina Aluyen, Alice Tauli", count: 4 }
-        ];
+<script>
+    // Master Dataset
+    let associationsData = [
+        { id: 1, name: "Montañosa Weavers Association", loc: "Sagada & Bontoc Region", lead: "Jocelyn Miranda / Lilia Capuyan", phone: "09182345601", members: ["Jocelyn Miranda Loomweaving", "Kamowan Souvenirs", "Marilyn Dao-Asen", "Rodilyn Chumel-Ang", "Regeelyn Bacolong", "Joy Anoyan Cluster"], count: 6 },
+        { id: 2, name: "Sabangan Weavers Association", loc: "Sabangan, Mountain Province", lead: "Juliana Walisen / Grace Domogan", phone: "09182345603", members: ["Juliana's Loom Weaving", "Kinayan Handloom", "Mary Ann Modawan", "Regina Balagtas", "Aranduque Family Crafts"], count: 5 },
+        { id: 3, name: "SUTADA Weaver's Association", loc: "Tadian & Besao Region", lead: "Brenda Anongos / Lanie Gaongen", phone: "09182345604", members: ["Brenda Anongos Textiles", "Lanie Gaongen Ent.", "Herminia Piayas", "Catherine Calingling", "Pray Keen Ban-Ang", "Saldy Puyongan", "Phoebe Amogawen"], count: 7 },
+        { id: 4, name: "Pinagpagan Women's Workers", loc: "Bauko, Mountain Province", lead: "Florence Aliwengweng", phone: "09182345605", members: ["Florence Aliwengweng Weaving", "Mary Tukaki Handicrafts", "Julien Pineda Handloom", "Florence Likigan", "Gladys Wadingan", "Caren Kiwang"], count: 6 },
+        { id: 5, name: "Samoki Cultural Weavers Guild", loc: "Samoki, Bontoc", lead: "Josephine Fuchadcha / Rosemary Pekas", phone: "09182345602", members: ["Josephine Fuchadcha Handicrafts", "ZK Clothing Boutique", "Marina Balaniyan", "Christopher Pinasen", "Ruth Kathleen Codod", "Paula Cofulan"], count: 6 },
+        { id: 6, name: "Natonin Women Crafts", loc: "Poblacion, Natonin", lead: "Rose Ann Wangdali / Maria Teresa Abad", phone: "09182345609", members: ["Rose Ann Wangdali", "Abad Family Weavers", "Evelyn Ochasan", "Luciano Bagyan"], count: 4 },
+        { id: 7, name: "Paracelis Weavers Guild", loc: "Paracelis, Mountain Province", lead: "Loida Baniaga", phone: "09182345610", members: ["Loida Baniaga", "Kimberly Onga-Ong", "Rannie Dao", "Krys Ivonne Joy Soria", "Michael Ivan Juliano"], count: 5 },
+        { id: 8, name: "Eastern Mountain Province Artisans", loc: "Barlig, Mountain Province", lead: "Felipa Tagaban", phone: "09182345607", members: ["Felipa Tagaban Cultural Crafts", "Daisy May-Eng", "Brendo Cayanga", "Methuselah Kollin", "Irene Marconi"], count: 5 },
+        { id: 9, name: "Sadanga Traditional Weavers", loc: "Sadanga, Mountain Province", lead: "Lina Unos", phone: "09182345608", members: ["Lina Unos", "Rose Dulay", "Virginia Omaweng", "Bangiyad Bolinget", "Eloiza Jean Changat"], count: 5 },
+        { id: 10, name: "Amkileng Weavers Collective", loc: "Amkileng, Sagada", lead: "Agnes & Rebecca Cadiogan", phone: "09182345636", members: ["Agnes Cadiogan Artisans", "Rebecca Cadiogan Loom Producers", "Seigrid Ann Bangyay"], count: 3 },
+        { id: 11, name: "Viewhill & Letang Womens Org", loc: "Besao & Sadanga Borders", lead: "Patricio Masliyan", phone: "09182345639", members: ["Patricio Masliyan Traditional Art", "Esther Cacay", "Rufina Aluyen", "Alice Tauli"], count: 4 }
+    ];
 
-        let capacityChart, donutChart;
+    // Navigation Switcher
+    function switchView(viewName) {
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('view-associations').style.display = 'none';
+        document.getElementById('view-projects').style.display = 'none';
 
-        // Render Table Body
-        function renderRegistry(list) {
-            const tbody = document.getElementById('assocRegistryBody');
-            tbody.innerHTML = '';
-            list.forEach((item, index) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="ps-3 fw-bold text-dark">${item.name}</td>
-                        <td><span class="badge bg-light text-dark border"><i class="bi bi-geo-alt me-1 text-danger"></i>${item.loc}</span></td>
-                        <td class="small fw-semibold text-secondary">${item.lead}</td>
-                        <td class="small font-monospace text-primary">${item.phone}</td>
-                        <td class="small text-muted text-truncate" style="max-width: 220px;">${item.members}</td>
-                        <td class="text-center"><span class="badge bg-success rounded-pill px-3">${item.count}</span></td>
-                        <td class="text-end pe-3">
-                            <button class="btn btn-light btn-sm border" onclick="showDetails(${index})">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            updateStats();
+        // Sidebar active state
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+
+        if (viewName === 'dashboard') {
+            document.getElementById('view-dashboard').style.display = 'block';
+            document.querySelectorAll('.sidebar .nav-link')[0].classList.add('active');
+        } else if (viewName === 'associations') {
+            document.getElementById('view-associations').style.display = 'block';
+            document.querySelectorAll('.sidebar .nav-link')[1].classList.add('active');
+        } else if (viewName === 'projects') {
+            document.getElementById('view-projects').style.display = 'block';
+            document.querySelectorAll('.sidebar .nav-link')[2].classList.add('active');
         }
+    }
 
-        // Update Key Dashboard Numbers
-        function updateStats() {
-            document.getElementById('statTotalGroups').innerText = dataset.length;
-            const totalMsmes = dataset.reduce((sum, item) => sum + item.count, 0);
-            document.getElementById('statMappedMsmes').innerText = totalMsmes;
-        }
-
-        // Show Detail Modal
-        function showDetails(index) {
-            const item = dataset[index];
-            document.getElementById('modalTitle').innerText = item.name;
-            document.getElementById('modalLoc').innerText = item.loc;
-            document.getElementById('modalLead').innerText = item.lead;
-            document.getElementById('modalPhone').innerText = item.phone;
-            document.getElementById('modalMembers').innerText = item.members;
-            new bootstrap.Modal(document.getElementById('assocDetailModal')).show();
-        }
-
-        // Add New Association Form Action
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const membersList = document.getElementById('inputMembers').value;
-            const memberCount = membersList.split(',').filter(m => m.trim().length > 0).length;
-
-            const newItem = {
-                name: document.getElementById('inputName').value,
-                loc: document.getElementById('inputLoc').value,
-                lead: document.getElementById('inputLead').value,
-                phone: document.getElementById('inputPhone').value,
-                members: membersList,
-                count: memberCount || 1
-            };
-
-            dataset.unshift(newItem);
-            renderRegistry(dataset);
-            updateCharts();
-
-            // Reset & Close Modal
-            document.getElementById('addAssocForm').reset();
-            bootstrap.Modal.getInstance(document.getElementById('addAssocModal')).hide();
-        }
-
-        // Filter Function
-        function filterAssociations() {
-            const query = document.getElementById('assocSearch').value.toLowerCase();
-            const filtered = dataset.filter(a => 
-                a.name.toLowerCase().includes(query) || 
-                a.loc.toLowerCase().includes(query) ||
-                a.lead.toLowerCase().includes(query)
-            );
-            renderRegistry(filtered);
-        }
-
-        // Initialize & Update Charts
-        function updateCharts() {
-            const labels = dataset.map(d => d.name.split(' ')[0]);
-            const counts = dataset.map(d => d.count);
-
-            if (capacityChart) capacityChart.destroy();
-            if (donutChart) donutChart.destroy();
-
-            // Horizontal Capacity Bar Chart
-            capacityChart = new Chart(document.getElementById('assocCapacityChart'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'MSMEs',
-                        data: counts,
-                        backgroundColor: '#198754',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                }
-            });
-
-            // Donut Regional Share Chart
-            donutChart = new Chart(document.getElementById('assocDonutChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Sagada & Bontoc', 'Sabangan', 'Tadian & Besao', 'Bauko', 'Others'],
-                    datasets: [{
-                        data: [15, 11, 11, 6, 15],
-                        backgroundColor: ['#198754', '#0d6efd', '#ffc107', '#0dcaf0', '#6c757d']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-        }
-
-        // Initial Load Execution
-        document.addEventListener('DOMContentLoaded', () => {
-            renderRegistry(dataset);
-            updateCharts();
+    // Render Portal Grid Cards on Dashboard View
+    function renderPortalCards() {
+        const grid = document.getElementById('assocPortalGrid');
+        grid.innerHTML = '';
+        associationsData.forEach(item => {
+            grid.innerHTML += `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm p-3 bg-white portal-card h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="fw-bold text-success m-0">${item.name}</h6>
+                                <span class="badge bg-success-subtle text-success border">${item.count} MSMEs</span>
+                            </div>
+                            <small class="text-muted d-block mb-2"><i class="bi bi-geo-alt me-1"></i>${item.loc}</small>
+                            <p class="small text-secondary mb-3"><strong>Lead:</strong> ${item.lead}</p>
+                        </div>
+                        <button class="btn btn-outline-success btn-sm w-100 mt-2" onclick="openPortal(${item.id})">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Enter Portal
+                        </button>
+                    </div>
+                </div>
+            `;
         });
-    </script>
+
+        // Update total counters
+        document.getElementById('dashTotalGroups').innerText = associationsData.length;
+        const total = associationsData.reduce((sum, a) => sum + a.count, 0);
+        document.getElementById('dashTotalMsmes').innerText = total;
+    }
+
+    // Open Specific Association Portal View
+    function openPortal(assocId) {
+        const assoc = associationsData.find(a => a.id === assocId);
+        if (!assoc) return;
+
+        document.getElementById('portalTitle').innerText = assoc.name;
+        document.getElementById('portalLoc').innerText = assoc.loc;
+        document.getElementById('portalLead').innerText = assoc.lead;
+        document.getElementById('portalPhone').innerText = assoc.phone;
+        document.getElementById('portalBadge').innerText = `${assoc.count} MSMEs Enrolled`;
+
+        // Render member badges
+        const membersList = document.getElementById('portalMembersList');
+        membersList.innerHTML = '';
+        assoc.members.forEach(m => {
+            membersList.innerHTML += `<span class="badge bg-light text-dark border p-2"><i class="bi bi-shop me-1 text-success"></i>${m}</span>`;
+        });
+
+        // Render table
+        const msmeTable = document.getElementById('portalMsmeTable');
+        msmeTable.innerHTML = '';
+        assoc.members.forEach((m, idx) => {
+            msmeTable.innerHTML += `
+                <tr>
+                    <td class="fw-bold text-dark">${m}</td>
+                    <td><span class="badge bg-success">Active Member</span></td>
+                    <td>${idx === 0 ? 'Lead Representative Enterprise' : 'Member Enterprise'}</td>
+                    <td><i class="bi bi-patch-check-fill text-primary me-1"></i> Verified</td>
+                    <td class="text-end">
+                        <button class="btn btn-light btn-sm border"><i class="bi bi-pencil"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        switchView('associations');
+    }
+
+    // Form Submit Handler
+    function handleAddGroup(e) {
+        e.preventDefault();
+        const membersArr = document.getElementById('assocMembers').value.split(',').map(m => m.trim()).filter(m => m.length > 0);
+
+        const newGroup = {
+            id: associationsData.length + 1,
+            name: document.getElementById('assocName').value,
+            loc: document.getElementById('assocLoc').value,
+            lead: document.getElementById('assocLead').value,
+            phone: document.getElementById('assocPhone').value,
+            members: membersArr,
+            count: membersArr.length || 1
+        };
+
+        associationsData.unshift(newGroup);
+        renderPortalCards();
+
+        document.getElementById('addAssocForm').reset();
+        bootstrap.Modal.getInstance(document.getElementById('addAssocModal')).hide();
+    }
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+        renderPortalCards();
+    });
+</script>
+
 </body>
 </html>
