@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weaver-ID | NFC Verification</title>
+    <title>Weaver-ID Verification</title>
     <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -17,6 +17,7 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
+            padding: 16px;
         }
         .card-container {
             background: #ffffff;
@@ -55,11 +56,11 @@
     <div class="card-container text-center">
         <!-- LOADING STATE -->
         <div id="state-loading">
-            <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status">
+            <div class="spinner-border text-success mb-3" style="width: 2.5rem; height: 2.5rem;" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <h5 class="fw-bold">Verifying NFC Tag...</h5>
-            <p class="text-muted small">Checking database records</p>
+            <h5 class="fw-bold mb-1">Authenticating NFC Tag</h5>
+            <p class="text-muted small">Checking registration database...</p>
         </div>
 
         <!-- SUCCESS STATE -->
@@ -68,7 +69,7 @@
                 <i class="bi bi-shield-check"></i>
             </div>
             <h5 class="fw-bold mb-1">Authentication Successful</h5>
-            <p class="text-muted small mb-4">Valid Weaver NFC Identification</p>
+            <p class="text-muted small mb-4">Official Weaver NFC Tag Verified</p>
 
             <div class="bg-light p-3 rounded-3 text-start mb-4">
                 <div class="detail-row">
@@ -99,55 +100,90 @@
             <p class="text-danger small fw-semibold mb-4" id="error-message">An error occurred.</p>
         </div>
 
-        <!-- ACTION BUTTON -->
-        <a href="javascript:history.back()" id="action-btn" class="btn btn-outline-secondary w-100 btn-sm d-none">
-            <i class="bi bi-arrow-left"></i> Scan Another NFC Tag
-        </a>
+        <!-- MANUAL SEARCH INPUT (Fallback if no NFC UID parameter is supplied) -->
+        <div id="state-input" class="d-none">
+            <div class="mb-3">
+                <i class="bi bi-wifi text-success fs-1"></i>
+                <h5 class="fw-bold mt-2">NFC Verification Portal</h5>
+                <p class="text-muted small">Tap an NFC tag or enter the UID below to verify.</p>
+            </div>
+            <form id="verify-form" class="mb-3">
+                <input type="text" id="manual-nfc-input" class="form-control text-center mb-3" placeholder="Enter NFC UID (e.g., 04:A2:8B:12)" required>
+                <button type="submit" class="btn btn-success w-100">Verify Card</button>
+            </form>
+        </div>
+
+        <!-- RE-SCAN BUTTON -->
+        <button id="rescan-btn" class="btn btn-outline-secondary w-100 btn-sm d-none" onclick="resetView()">
+            <i class="bi bi-arrow-left"></i> Scan Another Card
+        </button>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get 'nfc_uid' parameter from URL (e.g. verify_nfc.html?nfc_uid=12345)
+        // UPDATE THIS URL to point to where your PHP backend script is hosted on live server
+        const BACKEND_API_URL = 'https://your-domain.com/api/verify_nfc.php';
+
+        document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
             const nfcUid = urlParams.get('nfc_uid');
 
-            const loadingState = document.getElementById('state-loading');
-            const successState = document.getElementById('state-success');
-            const errorState = document.getElementById('state-error');
-            const actionBtn = document.getElementById('action-btn');
-
-            if (!nfcUid) {
-                showError('NFC UID is required.');
-                return;
+            if (nfcUid) {
+                verifyNFC(nfcUid);
+            } else {
+                showState('input');
             }
 
-            // Fetch verification data from backend API
-            fetch(`api_verify_nfc.php?nfc_uid=${encodeURIComponent(nfcUid)}`)
-                .then(response => response.json())
-                .then(data => {
-                    loadingState.classList.add('d-none');
-                    actionBtn.classList.remove('d-none');
+            document.getElementById('verify-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const uid = document.getElementById('manual-nfc-input').value.trim();
+                if (uid) verifyNFC(uid);
+            });
+        });
 
-                    if (data.status === 'success') {
-                        document.getElementById('weaver-id').textContent = '#' + data.data.id;
-                        document.getElementById('weaver-name').textContent = data.data.name;
-                        document.getElementById('weaver-business').textContent = data.data.business;
-                        successState.classList.remove('d-none');
+        function verifyNFC(uid) {
+            showState('loading');
+
+            fetch(`${BACKEND_API_URL}?nfc_uid=${encodeURIComponent(uid)}`)
+                .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                .then(res => {
+                    if (res.body.status === 'success') {
+                        document.getElementById('weaver-id').textContent = '#' + res.body.data.id;
+                        document.getElementById('weaver-name').textContent = res.body.data.name;
+                        document.getElementById('weaver-business').textContent = res.body.data.business;
+                        showState('success');
                     } else {
-                        showError(data.message || 'Verification failed.');
+                        showError(res.body.message || 'Verification failed.');
                     }
                 })
                 .catch(() => {
-                    showError('Server connection error.');
+                    showError('Unable to connect to verification server.');
                 });
+        }
 
-            function showError(msg) {
-                loadingState.classList.add('d-none');
-                document.getElementById('error-message').textContent = msg;
-                errorState.classList.remove('d-none');
-                actionBtn.classList.remove('d-none');
+        function showError(msg) {
+            document.getElementById('error-message').textContent = msg;
+            showState('error');
+        }
+
+        function showState(state) {
+            document.getElementById('state-loading').classList.add('d-none');
+            document.getElementById('state-success').classList.add('d-none');
+            document.getElementById('state-error').classList.add('d-none');
+            document.getElementById('state-input').classList.add('d-none');
+            document.getElementById('rescan-btn').classList.add('d-none');
+
+            document.getElementById(`state-${state}`).classList.remove('d-none');
+
+            if (state === 'success' || state === 'error') {
+                document.getElementById('rescan-btn').classList.remove('d-none');
             }
-        });
+        }
+
+        function resetView() {
+            window.history.pushState({}, document.title, window.location.pathname);
+            document.getElementById('manual-nfc-input').value = '';
+            showState('input');
+        }
     </script>
 </body>
 </html>
