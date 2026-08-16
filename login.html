@@ -83,7 +83,7 @@
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-badge text-muted"></i></span>
           <select id="role" class="form-select border-start-0 ps-0" required>
-            <option value="AssociationDashboard.html" selected>Association Hub</option>
+            <option value="association_dashboard.html" selected>Association Hub</option>
             <option value="AdminDashboard.html">DTI Regional Admin</option>
           </select>
         </div>
@@ -115,12 +115,8 @@
 
   <script>
     function handleCombinedLogin(event) {
-      event.preventDefault(); // Prevents page reload
-      
-      // Get the target dashboard URL from the selected dropdown option
+      event.preventDefault();
       const targetDashboard = document.getElementById('role').value;
-      
-      // Redirect directly to the chosen dashboard
       window.location.href = targetDashboard;
     }
   </script>
