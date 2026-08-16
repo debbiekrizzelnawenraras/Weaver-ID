@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weaver-ID | Association Dashboard</title>
+    <title>Weaver-ID | DTI Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --sidebar-bg: #0F5B38;
-            --sidebar-active: #136d44;
+            --sidebar-bg: #0d4e2d;
+            --sidebar-hover: rgba(255, 255, 255, 0.12);
+            --sidebar-active: #156d40;
             --bg-light: #f4f6f8;
             --card-border: #eaedf1;
         }
@@ -22,9 +23,8 @@
             color: #2b2b2b;
         }
 
-        /* Fixed Sidebar Navigation */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background-color: var(--sidebar-bg);
             color: #ffffff;
             min-height: 100vh;
@@ -32,37 +32,38 @@
             top: 0;
             left: 0;
             z-index: 100;
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
         .brand-header {
-            padding: 24px 20px;
-        }
-
-        .brand-header .brand-title {
-            font-size: 1.2rem;
-            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 8px;
         }
 
-        .brand-header .brand-subtitle {
-            font-size: 0.75rem;
-            opacity: 0.85;
-            margin-top: 2px;
-            color: #a3e635;
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
         }
 
-        .sidebar-section-title {
-            font-size: 0.68rem;
-            font-weight: 700;
+        .nav-section-title {
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.8px;
             color: rgba(255, 255, 255, 0.5);
-            padding: 16px 20px 6px;
+            font-weight: 700;
+            margin: 18px 0 8px 12px;
         }
 
         .sidebar-menu {
@@ -73,183 +74,96 @@
 
         .sidebar-menu .nav-link {
             color: rgba(255, 255, 255, 0.85);
-            padding: 10px 20px;
+            padding: 10px 14px;
             font-size: 0.9rem;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 12px;
             text-decoration: none;
-            cursor: pointer;
+            border-radius: 8px;
             transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 4px;
         }
 
         .sidebar-menu .nav-link:hover {
+            background-color: var(--sidebar-hover);
             color: #ffffff;
-            background-color: rgba(255, 255, 255, 0.08);
         }
 
         .sidebar-menu .nav-link.active {
             color: #ffffff;
             background-color: var(--sidebar-active);
             font-weight: 600;
-            border-radius: 8px;
-            margin: 0 10px;
-            padding: 10px 10px;
         }
 
-        .sidebar-user {
-            padding: 16px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .sidebar-menu .nav-link.logout-link {
+            color: #ff8a8a;
+        }
+
+        .sidebar-menu .nav-link.logout-link:hover {
+            background-color: rgba(255, 77, 77, 0.15);
+            color: #ff4d4d;
+        }
+
+        .user-profile {
             display: flex;
             align-items: center;
             gap: 12px;
+            padding: 12px;
+            background-color: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
         }
 
-        .user-avatar {
-            width: 38px;
-            height: 38px;
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            background-color: #f3d178;
+            color: #0d4e2d;
+            font-weight: 700;
             border-radius: 50%;
-            background-color: #f7d070;
-            color: #333;
-            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* Main Workspace Layout */
         .main-wrapper {
-            margin-left: 260px;
-            padding: 24px 32px;
+            margin-left: 280px;
+            padding: 32px 40px;
         }
 
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-        }
-
-        .search-box {
-            position: relative;
-            width: 320px;
-        }
-
-        .search-box input {
-            padding-left: 38px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            font-size: 0.875rem;
-            background-color: #ffffff;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #adb5bd;
-        }
-
-        /* Top Metric Cards Matching Screenshot */
-        .kpi-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
-            padding: 20px;
-            position: relative;
-        }
-
-        .kpi-icon-wrapper {
-            width: 42px;
-            height: 42px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            margin-bottom: 12px;
-        }
-
-        .kpi-green { background-color: #e6f4ea; color: #137333; }
-        .kpi-blue { background-color: #e8f0fe; color: #1a73e8; }
-        .kpi-yellow { background-color: #fef7e0; color: #b06000; }
-        .kpi-purple { background-color: #f3e8fd; color: #8430ce; }
-
-        .growth-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 12px;
-            background-color: #e6f4ea;
-            color: #137333;
-        }
-
-        .kpi-value {
-            font-size: 1.85rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            line-height: 1.2;
-        }
-
-        .kpi-label {
-            font-size: 0.825rem;
-            color: #6c757d;
-            margin-top: 4px;
-        }
-
-        /* Content Framing */
         .content-card {
             background-color: #ffffff;
             border-radius: 12px;
             border: 1px solid var(--card-border);
             padding: 24px;
-            height: 100%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
 
-        /* Scan Feed Items */
-        .activity-item {
+        .assoc-item {
             display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 14px 0;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
             border-bottom: 1px solid #f1f3f5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-radius: 8px;
         }
 
-        .activity-item:last-child {
-            border-bottom: none;
+        .assoc-item:hover {
+            background-color: #f8f9fa;
         }
 
-        .activity-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .icon-success { background-color: #e6f4ea; color: #137333; }
-        .icon-warning { background-color: #fef7e0; color: #b06000; }
-        .icon-danger { background-color: #fce8e6; color: #c5221f; }
-
-        .chart-placeholder {
-            background-color: #f8fafc;
-            border: 2px dashed #e2e8f0;
-            border-radius: 12px;
-            height: 280px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #94a3b8;
+        .msme-badge {
+            background-color: #0d6efd;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 20px;
         }
 
         .view-panel { display: none; }
@@ -258,232 +172,286 @@
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar -->
     <div class="sidebar">
         <div>
             <div class="brand-header">
-                <div class="brand-title">
-                    <i class="bi bi-fingerprint fs-3"></i> Weaver-ID
+                <div class="brand-logo"><i class="bi bi-shield-check"></i></div>
+                <div>
+                    <h5 class="fw-bold mb-0 text-white">Weaver-ID</h5>
+                    <small style="color: #62c38e; font-size: 0.75rem;">DTI Provincial Admin Portal</small>
                 </div>
-                <div class="brand-subtitle">Montañosa Weavers Assn.</div>
             </div>
 
-            <div class="sidebar-section-title">MAIN</div>
+            <div class="nav-section-title">Main</div>
             <ul class="sidebar-menu">
-                <li><a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
-                <li><a class="nav-link" onclick="switchTab('weavers', this)"><i class="bi bi-people"></i> Weavers</a></li>
-                <li><a class="nav-link" onclick="switchTab('products', this)"><i class="bi bi-box-seam"></i> Products</a></li>
-                <li><a class="nav-link" onclick="switchTab('associations', this)"><i class="bi bi-building"></i> Associations</a></li>
+                <li><a class="nav-link" data-tab="dashboard"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                <li><a class="nav-link" data-tab="registered-weavers"><i class="bi bi-people-fill"></i> Registered Weavers</a></li>
+                <li><a class="nav-link" data-tab="verified-products"><i class="bi bi-box-seam-fill"></i> Verified Products</a></li>
+                <li><a class="nav-link active" data-tab="msme-associations"><i class="bi bi-building"></i> MSME Associations</a></li>
             </ul>
 
-            <div class="sidebar-section-title">NFC & VERIFICATION</div>
+            <div class="nav-section-title">NFC Management</div>
             <ul class="sidebar-menu">
-                <li><a href="scan.php" class="nav-link"><i class="bi bi-wifi"></i> NFC Tag Management</a></li>
-                <li><a class="nav-link" onclick="switchTab('dashboard', this)"><i class="bi bi-clock-history"></i> Scan Logs</a></li>
+                <li><a class="nav-link" data-tab="tag-logs"><i class="bi bi-wifi"></i> Tag Encoding & Logs</a></li>
             </ul>
 
-            <!-- <div class="sidebar-section-title">ADMINISTRATION</div>
+            <div class="nav-section-title">Administration</div>
             <ul class="sidebar-menu">
-                <li><a href="dti_dashboard.php" class="nav-link"><i class="bi bi-building"></i> Switch to DTI Admin</a></li>
-                <li><a class="nav-link" onclick="alert('Generating Association Inventory Report...')"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
-            </ul> -->
+                <li><a class="nav-link logout-link" onclick="handleLogout()"><i class="bi bi-box-arrow-right"></i> Log Out</a></li>
+            </ul>
         </div>
 
-        <div class="sidebar-user">
-            <div class="user-avatar">LG</div>
+        <div class="user-profile">
+            <div class="avatar-circle">DTI</div>
             <div>
-                <div class="fw-bold" style="font-size: 0.85rem;">Lanie Gaongen</div>
-                <div class="text-white-50" style="font-size: 0.725rem;">Association Lead (Sagada)</div>
+                <div class="fw-bold" style="font-size: 0.85rem;">DTI Administrator</div>
+                <small style="color: rgba(255,255,255,0.6); font-size: 0.72rem;">Mountain Province Officer</small>
             </div>
         </div>
     </div>
 
-    <!-- Main Workspace Area -->
+    <!-- Main Content Workspace -->
     <div class="main-wrapper">
-        
-        <!-- Tab 1: Dashboard Panel (Matches Image Exact Visuals) -->
-        <div id="panel-dashboard" class="view-panel active-panel">
-            <div class="top-header">
-                <div>
-                    <h4 class="fw-bold m-0">Dashboard</h4>
-                    <small class="text-muted">Overview of the Weaver-ID system</small>
+
+        <!-- MSME Associations Tab -->
+        <div id="panel-msme-associations" class="view-panel active-panel">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold m-0">Provincial Weavers Associations</h4>
+                <div style="width: 260px;">
+                    <input type="text" id="assoc-search" class="form-control form-control-sm" placeholder="Search association...">
                 </div>
-                
+            </div>
+            <div class="content-card">
+                <div id="associations-list"></div>
+            </div>
+        </div>
+
+        <!-- Association Detail View Tab -->
+        <div id="panel-association-view" class="view-panel">
+            <div class="d-flex align-items-center justify-content-between mb-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="globalSearchInput" class="form-control" onkeyup="filterFeed()" placeholder="Search weavers, products, NFC tag">
-                    </div>
-                    <button class="btn btn-light rounded-circle p-2 border" style="width: 38px; height: 38px;">
-                        <i class="bi bi-bell"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Top KPI Cards -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-3">
-                    <div class="kpi-card">
-                        <span class="growth-badge"><i class="bi bi-arrow-up"></i> 12%</span>
-                        <div class="kpi-icon-wrapper kpi-green"><i class="bi bi-people-fill"></i></div>
-                        <div class="kpi-value">42</div>
-                        <div class="kpi-label">Registered Weavers</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="kpi-card">
-                        <span class="growth-badge"><i class="bi bi-arrow-up"></i> 8%</span>
-                        <div class="kpi-icon-wrapper kpi-blue"><i class="bi bi-box-seam-fill"></i></div>
-                        <div class="kpi-value">318</div>
-                        <div class="kpi-label">Products Registered</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="kpi-card">
-                        <span class="growth-badge"><i class="bi bi-arrow-up"></i> 24%</span>
-                        <div class="kpi-icon-wrapper kpi-yellow"><i class="bi bi-wifi"></i></div>
-                        <div class="kpi-value">295</div>
-                        <div class="kpi-label">NFC Tags Issued</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="kpi-card">
-                        <span class="growth-badge"><i class="bi bi-arrow-up"></i> 18%</span>
-                        <div class="kpi-icon-wrapper kpi-purple"><i class="bi bi-check-circle-fill"></i></div>
-                        <div class="kpi-value">841</div>
-                        <div class="kpi-label">Total Verifications</div>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="switchTab('msme-associations')"><i class="bi bi-arrow-left"></i> Back</button>
+                    <div>
+                        <h4 class="fw-bold m-0" id="selected-assoc-name">Association Detail View</h4>
+                        <small class="text-muted" id="selected-assoc-subtext"></small>
                     </div>
                 </div>
             </div>
 
-            <!-- Middle Section: Chart and Scan Activity Feed -->
-            <div class="row g-4">
-                <div class="col-md-8">
-                    <div class="content-card">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h6 class="fw-bold m-0">Verification Trends</h6>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exporting Association trends...')">
-                                <i class="bi bi-download me-1"></i> Export
-                            </button>
-                        </div>
-                        <div class="chart-placeholder">
-                            <i class="bi bi-image fs-1 mb-2"></i>
-                            <p class="m-0 text-secondary fw-medium">Monthly scan verification chart will render here</p>
-                        </div>
-                    </div>
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0">Registered MSME Members (<span id="msme-total-count">0</span>)</h6>
+                    <input type="text" id="msme-member-search" class="form-control form-control-sm" style="width:220px;" placeholder="Search weaver or business...">
                 </div>
-
-                <div class="col-md-4">
-                    <div class="content-card">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold m-0"><i class="bi bi-clock-history me-1"></i> Recent Scan Activity</h6>
-                        </div>
-
-                        <div id="activityFeed">
-                            <div class="activity-item">
-                                <div class="activity-icon icon-success"><i class="bi bi-check-lg"></i></div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold" style="font-size: 0.875rem;">Authentic Product Verified</div>
-                                    <div class="text-muted" style="font-size: 0.775rem;">NFC: WVID-8842 | Sagada Woven Backpack</div>
-                                </div>
-                                <span class="text-muted" style="font-size: 0.725rem;">2 min ago</span>
-                            </div>
-
-                            <div class="activity-item">
-                                <div class="activity-icon icon-warning"><i class="bi bi-exclamation-lg"></i></div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold" style="font-size: 0.875rem;">Unregistered Tag Scanned</div>
-                                    <div class="text-muted" style="font-size: 0.775rem;">NFC: Unknown | Location: Bauko Market</div>
-                                </div>
-                                <span class="text-muted" style="font-size: 0.725rem;">15 min ago</span>
-                            </div>
-
-                            <div class="activity-item">
-                                <div class="activity-icon icon-success"><i class="bi bi-check-lg"></i></div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold" style="font-size: 0.875rem;">Authentic Product Verified</div>
-                                    <div class="text-muted" style="font-size: 0.775rem;">NFC: WVID-7721 | Sabangan Traditional Blanket</div>
-                                </div>
-                                <span class="text-muted" style="font-size: 0.725rem;">32 min ago</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Business / MSME Name</th>
+                                <th>Proprietor / Weaver</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assoc-members-table"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Tab 2: Weavers Panel -->
-        <div id="panel-weavers" class="view-panel">
-            <h4 class="fw-bold mb-3">Association Weavers Roster</h4>
-            <div class="content-card">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr><th>Name</th><th>Location</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Lanie Gaongen</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td></tr>
-                        <tr><td>Rose Ann Wangdali</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td></tr>
-                        <tr><td>Juliana (Juliana's Loom)</td><td>Bauko, Mountain Province</td><td><span class="badge bg-success">Active</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- Dashboard Panel Placeholder -->
+        <div id="panel-dashboard" class="view-panel">
+            <h4 class="fw-bold mb-3">Provincial Overview</h4>
+            <div class="content-card"><p class="text-muted">Summary metrics and active provincial reports.</p></div>
         </div>
 
-        <!-- Tab 3: Products Panel -->
-        <div id="panel-products" class="view-panel">
-            <h4 class="fw-bold mb-3">Association Product List</h4>
-            <div class="content-card">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr><th>NFC Code</th><th>Product</th><th>Weaver</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>WVID-8842</td><td>Sagada Woven Backpack</td><td>Lanie Gaongen</td></tr>
-                        <tr><td>WVID-8843</td><td>Eton Woven Shoulder Bag</td><td>Rose Ann Wangdali</td></tr>
-                        <tr><td>WVID-7721</td><td>Traditional Pattern Blanket</td><td>Sabangan Weavers</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- Registered Weavers Panel Placeholder -->
+        <div id="panel-registered-weavers" class="view-panel">
+            <h4 class="fw-bold mb-3">All Registered Weavers</h4>
+            <div class="content-card"><p class="text-muted">Complete master list of all 45 weavers in Mountain Province.</p></div>
         </div>
 
-        <!-- Tab 4: Associations Panel -->
-        <div id="panel-associations" class="view-panel">
-            <h4 class="fw-bold mb-3">Mountain Province Weaving Groups</h4>
-            <div class="content-card">
-                <div class="list-group">
-                    <div class="list-group-item d-flex justify-content-between p-3">
-                        <div><strong>Montañosa Weavers Association</strong><br><small class="text-muted">Sagada Chapter</small></div>
-                        <span class="badge bg-success rounded-pill align-self-center">42 Active Weavers</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between p-3">
-                        <div><strong>Sabangan Weavers Association</strong><br><small class="text-muted">Sabangan Chapter</small></div>
-                        <span class="badge bg-success rounded-pill align-self-center">28 Active Weavers</span>
-                    </div>
-                </div>
-            </div>
+        <!-- Verified Products Panel Placeholder -->
+        <div id="panel-verified-products" class="view-panel">
+            <h4 class="fw-bold mb-3">Verified Products</h4>
+            <div class="content-card"><p class="text-muted">Master product list with registered NFC tag IDs.</p></div>
+        </div>
+
+        <!-- Tag Logs Panel Placeholder -->
+        <div id="panel-tag-logs" class="view-panel">
+            <h4 class="fw-bold mb-3">NFC Tag Encoding & Logs</h4>
+            <div class="content-card"><p class="text-muted">System NFC scan logs and tag encoding history.</p></div>
         </div>
 
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Working Tab Switcher
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-panel'));
-            document.querySelectorAll('.sidebar-menu .nav-link').forEach(l => l.classList.remove('active'));
-            
-            document.getElementById('panel-' + tabId).classList.add('active-panel');
-            if(element) element.classList.add('active');
+        const state = {
+            associations: [
+                { 
+                    id: 1, 
+                    name: "Montañosa Weavers Association (Sagada Chapter)", 
+                    msmeCount: 18, 
+                    location: "Sagada, Mountain Province",
+                    members: [
+                        { id: "SAG-01", msme: "Sagada Weaving & Souvenirs", proprietor: "Elena Dacoge", barangay: "Poblacion, Sagada" },
+                        { id: "SAG-02", msme: "Gagandapan Weaving Craft", proprietor: "Grace Lingbanan", barangay: "Dagdag, Sagada" },
+                        { id: "SAG-03", msme: "Echo Valley Loomcraft", proprietor: "Rosa Agpad", barangay: "Ambasing, Sagada" },
+                        { id: "SAG-04", msme: "Lumiang Heritage Textiles", proprietor: "Martha Pekas", barangay: "Demang, Sagada" },
+                        { id: "SAG-05", msme: "Kiltepan Sunrise Weaves", proprietor: "Agnes Bangloy", barangay: "Kiltepan, Sagada" },
+                        { id: "SAG-06", msme: "Sumaguing Loom Creations", proprietor: "Clara Bandao", barangay: "Ambasing, Sagada" },
+                        { id: "SAG-07", msme: "Zapata Handloom Woven Products", proprietor: "Beatriz Zapata", barangay: "Poblacion, Sagada" },
+                        { id: "SAG-08", msme: "Danum Traditional Weaves", proprietor: "Teresa Kiat-ong", barangay: "Danum, Sagada" },
+                        { id: "SAG-09", msme: "Fidelisan Tribal Weavers", proprietor: "Lucia Padayao", barangay: "Fidelisan, Sagada" },
+                        { id: "SAG-10", msme: "Bangkew Inabel Shop", proprietor: "Josephine Dao-as", barangay: "Bangkew, Sagada" },
+                        { id: "SAG-11", msme: "Aguid Woven Handicrafts", proprietor: "Mary Buyagan", barangay: "Aguid, Sagada" },
+                        { id: "SAG-12", msme: "Central Sagada Loom Arts", proprietor: "Patricia Wandag", barangay: "Poblacion, Sagada" },
+                        { id: "SAG-13", msme: "Tetep-an Weavers Cooperative", proprietor: "Esther Ballug", barangay: "Tetep-an, Sagada" },
+                        { id: "SAG-14", msme: "Northern Sagada Garments", proprietor: "Florence Delson", barangay: "Madalum, Sagada" },
+                        { id: "SAG-15", msme: "Ankileng Loom & Craft", proprietor: "Gloria Calde", barangay: "Ankileng, Sagada" },
+                        { id: "SAG-16", msme: "Sito Inabel Creations", proprietor: "Susan Belingon", barangay: "Sito, Sagada" },
+                        { id: "SAG-17", msme: "Tanulong Tribal Weavers", proprietor: "Irene Mapala", barangay: "Tanulong, Sagada" },
+                        { id: "SAG-18", msme: "Balugan Native Weaving", proprietor: "Victoria Cayabas", barangay: "Balugan, Sagada" }
+                    ]
+                },
+                { 
+                    id: 2, 
+                    name: "Bontoc Loom Weavers Guild", 
+                    msmeCount: 12, 
+                    location: "Bontoc, Mountain Province",
+                    members: [
+                        { id: "BON-01", msme: "Caneo Traditional Weavers", proprietor: "Maria Santos", barangay: "Caneo, Bontoc" },
+                        { id: "BON-02", msme: "Samoki Inabel Handicrafts", proprietor: "Ana Cruz", barangay: "Samoki, Bontoc" },
+                        { id: "BON-03", msme: "Kala Inabel & Accessories", proprietor: "Linda Bawer", barangay: "Poblacion, Bontoc" },
+                        { id: "BON-04", msme: "Tocucan Loom Weaving", proprietor: "Catherine Fana-ang", barangay: "Tocucan, Bontoc" },
+                        { id: "BON-05", msme: "Guina-ang Native Fabrics", proprietor: "Dorothy Chakas", barangay: "Guina-ang, Bontoc" },
+                        { id: "BON-06", msme: "Mainit Thermal Loomcraft", proprietor: "Evelyn Poklis", barangay: "Mainit, Bontoc" },
+                        { id: "BON-07", msme: "Maligcong Rice Terraces Weaves", proprietor: "Felisa Khafe", barangay: "Maligcong, Bontoc" },
+                        { id: "BON-08", msme: "Dalican Tribal Weavers", proprietor: "Gladys Solang", barangay: "Dalican, Bontoc" },
+                        { id: "BON-09", msme: "Bontoc Riverside Inabel", proprietor: "Helen Linggayo", barangay: "Poblacion, Bontoc" },
+                        { id: "BON-10", msme: "Chaco Heritage Textiles", proprietor: "Isabel Akangan", barangay: "Samoki, Bontoc" },
+                        { id: "BON-11", msme: "Bayyo Mountain Handloom", proprietor: "Janet Chaokas", barangay: "Bayyo, Bontoc" },
+                        { id: "BON-12", msme: "Riverside Women's Guild", proprietor: "Karen Falag-ey", barangay: "Poblacion, Bontoc" }
+                    ]
+                },
+                { 
+                    id: 3, 
+                    name: "Sabangan & Bauko Handloom Association", 
+                    msmeCount: 15, 
+                    location: "Sabangan & Bauko, Mountain Province",
+                    members: [
+                        { id: "SAB-01", msme: "Sabangan Loom & Craft", proprietor: "Rita Lumaban", barangay: "Poblacion, Sabangan" },
+                        { id: "SAB-02", msme: "Bauko Heritage Fabrics", proprietor: "Clara Pongay", barangay: "Abatan, Bauko" },
+                        { id: "SAB-03", msme: "Bila Tribal Inabel", proprietor: "Laura Cudiamat", barangay: "Bila, Bauko" },
+                        { id: "SAB-04", msme: "Otucan Traditional Weaves", proprietor: "Margaret Banganan", barangay: "Otucan, Bauko" },
+                        { id: "SAB-05", msme: "Data Loom & Textile Center", proprietor: "Nancy Pooten", barangay: "Data, Sabangan" },
+                        { id: "SAB-06", msme: "Monamon Mountain Handloom", proprietor: "Olive Domogan", barangay: "Monamon, Bauko" },
+                        { id: "SAB-07", msme: "Gayang Native Garments", proprietor: "Pearl Tagtag", barangay: "Gayang, Sabangan" },
+                        { id: "SAB-08", msme: "Suyo Inabel Workshop", proprietor: "Rachel Mangallay", barangay: "Suyo, Sagada-Sabangan" },
+                        { id: "SAB-09", msme: "Pingad Handloom Weavers", proprietor: "Stella Baliwag", barangay: "Pingad, Sabangan" },
+                        { id: "SAB-10", msme: "Mount Data Alpine Weaves", proprietor: "Tina Bugtong", barangay: "Mount Data, Bauko" },
+                        { id: "SAB-11", msme: "Tapapan Native Textiles", proprietor: "Ursula Kis-ing", barangay: "Tapapan, Bauko" },
+                        { id: "SAB-12", msme: "Bagnen Cultural Loomcraft", proprietor: "Veronica Padtoc", barangay: "Bagnen, Bauko" },
+                        { id: "SAB-13", msme: "Lagan Inabel Creations", proprietor: "Wilma Wandali", barangay: "Lagan, Sabangan" },
+                        { id: "SAB-14", msme: "Sadsadan Loom Workers", proprietor: "Yolanda Cos-agon", barangay: "Sadsadan, Bauko" },
+                        { id: "SAB-15", msme: "Busa Traditional Weaving", proprietor: "Zenaida Amistad", barangay: "Busa, Sabangan" }
+                    ]
+                }
+            ]
+        };
+
+        let currentActiveAssocId = null;
+
+        function renderAssociationsList(associations) {
+            const container = document.getElementById('associations-list');
+            container.innerHTML = associations.map(a => `
+                <div class="assoc-item" onclick="openAssociationView(${a.id})">
+                    <div>
+                        <div class="fw-bold text-dark">${a.name}</div>
+                        <small class="text-muted"><i class="bi bi-geo-alt"></i> ${a.location}</small>
+                    </div>
+                    <span class="msme-badge">${a.msmeCount} MSMEs</span>
+                </div>
+            `).join('');
         }
 
-        // Live Feed Search Filter
-        function filterFeed() {
-            const query = document.getElementById('globalSearchInput').value.toLowerCase();
-            const items = document.querySelectorAll('.activity-item');
-            items.forEach(item => {
-                item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
-            });
+        function openAssociationView(assocId) {
+            currentActiveAssocId = assocId;
+            const assoc = state.associations.find(a => a.id === assocId);
+            if (!assoc) return;
+
+            document.getElementById('selected-assoc-name').innerText = assoc.name;
+            document.getElementById('selected-assoc-subtext').innerText = `${assoc.location} • Full Registry`;
+            document.getElementById('msme-total-count').innerText = assoc.msmeCount;
+
+            renderMembersTable(assoc.members);
+            switchTab('association-view');
         }
+
+        function renderMembersTable(members) {
+            const tableBody = document.getElementById('assoc-members-table');
+            if (members.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No matching MSME members found.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = members.map((m, index) => `
+                <tr>
+                    <td class="text-muted fw-semibold">${index + 1}</td>
+                    <td class="fw-bold text-dark">${m.msme}</td>
+                    <td>${m.proprietor}</td>
+                    <td><small class="text-muted">${m.barangay}</small></td>
+                    <td><span class="badge bg-success-subtle text-success">Verified DTI MSME</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-panel'));
+            document.querySelectorAll('.sidebar-menu .nav-link').forEach(l => l.classList.remove('active'));
+
+            const targetPanel = document.getElementById(`panel-${tabId}`);
+            if (targetPanel) targetPanel.classList.add('active-panel');
+
+            const activeLink = document.querySelector(`.sidebar-menu .nav-link[data-tab="${tabId}"]`);
+            if (activeLink) activeLink.classList.add('active');
+        }
+
+        document.querySelectorAll('.sidebar-menu .nav-link[data-tab]').forEach(link => {
+            link.addEventListener('click', function() {
+                switchTab(this.getAttribute('data-tab'));
+            });
+        });
+
+        document.getElementById('assoc-search').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const filtered = state.associations.filter(a => a.name.toLowerCase().includes(query) || a.location.toLowerCase().includes(query));
+            renderAssociationsList(filtered);
+        });
+
+        document.getElementById('msme-member-search').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const assoc = state.associations.find(a => a.id === currentActiveAssocId);
+            if (!assoc) return;
+
+            const filteredMembers = assoc.members.filter(m => 
+                m.msme.toLowerCase().includes(query) || 
+                m.proprietor.toLowerCase().includes(query) ||
+                m.barangay.toLowerCase().includes(query)
+            );
+            renderMembersTable(filteredMembers);
+        });
+
+        function handleLogout() {
+            if (confirm("Log out of DTI Provincial Admin Portal?")) {
+                alert("Logged out.");
+            }
+        }
+
+        renderAssociationsList(state.associations);
     </script>
 </body>
 </html>
