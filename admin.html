@@ -20,48 +20,27 @@
     .sidebar {
       width: var(--sidebar-width);
       position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
+      top: 0; bottom: 0; left: 0;
       background-color: #ffffff;
       border-right: 1px solid #e9ecef;
       z-index: 1000;
     }
-    .sidebar-brand {
-      padding: 1.25rem 1rem;
-      border-bottom: 1px solid #f1f3f5;
-    }
+    .sidebar-brand { padding: 1.25rem 1rem; border-bottom: 1px solid #f1f3f5; }
     .sidebar-nav .nav-link {
       color: #495057;
       padding: 0.65rem 1.25rem;
       font-size: 0.875rem;
       font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+      display: flex; align-items: center; gap: 0.75rem;
       cursor: pointer;
     }
-    .sidebar-nav .nav-link:hover {
-      color: var(--dti-green);
-      background-color: #f8f9fa;
-    }
-    .sidebar-nav .nav-link.active {
-      color: var(--dti-green);
-      background-color: #e8f5e9;
-      font-weight: 600;
-    }
-    .main-content {
-      margin-left: var(--sidebar-width);
-      padding: 2rem;
-    }
-    .btn-dti {
-      background-color: var(--dti-green);
-      color: white;
-    }
-    .btn-dti:hover {
-      background-color: var(--dti-green-hover);
-      color: white;
-    }
+    .sidebar-nav .nav-link:hover { color: var(--dti-green); background-color: #f8f9fa; }
+    .sidebar-nav .nav-link.active { color: var(--dti-green); background-color: #e8f5e9; font-weight: 600; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .btn-dti { background-color: var(--dti-green); color: white; }
+    .btn-dti:hover { background-color: var(--dti-green-hover); color: white; }
+    .clickable-card { cursor: pointer; transition: transform 0.15s ease, shadow 0.15s ease; }
+    .clickable-card:hover { transform: translateY(-2px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08) !important; }
     .fs-7 { font-size: 0.85rem; }
     .fs-8 { font-size: 0.75rem; }
   </style>
@@ -79,8 +58,8 @@
         </div>
       </div>
       <nav class="sidebar-nav mt-3">
-        <a class="nav-link" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a class="nav-link active" data-tab="weavers"><i class="bi bi-people"></i> Weavers & MSMEs</a>
+        <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Weavers & MSMEs</a>
         <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Products Catalog</a>
         <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
         <a class="nav-link" data-tab="nfc"><i class="bi bi-cpu"></i> NFC Management</a>
@@ -103,8 +82,8 @@
   <main class="main-content">
     <div class="d-flex justify-content-between align-items-start mb-4">
       <div>
-        <h3 class="fw-bold mb-1" id="sectionTitle">Weavers & MSMEs Directory</h3>
-        <p class="text-muted mb-0" id="sectionSub">Registered cultural loomweavers and local enterprises</p>
+        <h3 class="fw-bold mb-1" id="sectionTitle">Dashboard Overview</h3>
+        <p class="text-muted mb-0" id="sectionSub">Summary metrics and overall network activity</p>
       </div>
       <div class="d-flex gap-2">
         <input type="text" id="searchInput" class="form-control" placeholder="Search entries..." onkeyup="filterDirectory()">
@@ -112,8 +91,67 @@
       </div>
     </div>
 
-    <!-- Weavers View -->
-    <div id="view-weavers" class="tab-view">
+    <!-- 1. DASHBOARD VIEW -->
+    <div id="view-dashboard" class="tab-view">
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm clickable-card p-3" onclick="switchTab('weavers')">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <span class="text-muted fs-8 fw-semibold text-uppercase">Total Weavers</span>
+                <h3 class="fw-bold mb-0 text-success mt-1" id="dashWeaverCount">5</h3>
+              </div>
+              <div class="bg-success-subtle text-success p-3 rounded"><i class="bi bi-people fs-4"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm clickable-card p-3" onclick="switchTab('products')">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <span class="text-muted fs-8 fw-semibold text-uppercase">Registered Products</span>
+                <h3 class="fw-bold mb-0 text-primary mt-1">12</h3>
+              </div>
+              <div class="bg-primary-subtle text-primary p-3 rounded"><i class="bi bi-box-seam fs-4"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm clickable-card p-3" onclick="switchTab('nfc')">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <span class="text-muted fs-8 fw-semibold text-uppercase">Active NFC Tags</span>
+                <h3 class="fw-bold mb-0 text-info mt-1">8</h3>
+              </div>
+              <div class="bg-info-subtle text-info p-3 rounded"><i class="bi bi-cpu fs-4"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm clickable-card p-3" onclick="switchTab('logs')">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <span class="text-muted fs-8 fw-semibold text-uppercase">Scans Today</span>
+                <h3 class="fw-bold mb-0 text-warning mt-1">42</h3>
+              </div>
+              <div class="bg-warning-subtle text-warning p-3 rounded"><i class="bi bi-qr-code-scan fs-4"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card border-0 shadow-sm p-4">
+        <h6 class="fw-bold mb-3">Quick Actions</h6>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-person-plus"></i> Register New Weaver</button>
+          <button class="btn btn-outline-primary" onclick="switchTab('products')"><i class="bi bi-eye"></i> View Products Catalog</button>
+          <button class="btn btn-outline-secondary" onclick="switchTab('logs')"><i class="bi bi-file-earmark-text"></i> Audit Logs</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. WEAVERS VIEW -->
+    <div id="view-weavers" class="tab-view d-none">
       <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
           <h6 class="fw-bold mb-0">Registered Weavers & MSME Directory (<span id="weaverCount">5</span> Total)</h6>
@@ -130,14 +168,15 @@
                   <th width="15%">Contact</th>
                   <th width="12%">Barangay</th>
                   <th width="13%">Municipality</th>
+                  <th width="10%" class="text-end pe-3">Action</th>
                 </tr>
               </thead>
               <tbody id="directoryTable">
-                <tr><td>1</td><td class="fw-semibold">JOCELYN MIRANDA LOOMWEAVING</td><td>Jocelyn Miranda</td><td>09182345601</td><td>POBLACION</td><td>Sagada</td></tr>
-                <tr><td>2</td><td class="fw-semibold">JOSEPHINE FUCHADCHA HANDICRAFTS</td><td>Josephine Fuchadcha</td><td>09182345602</td><td>SAMOKI</td><td>Bontoc</td></tr>
-                <tr><td>3</td><td class="fw-semibold">JULIANA'S LOOM WEAVING</td><td>Juliana Walisen</td><td>09182345603</td><td>POBLACION</td><td>Sabangan</td></tr>
-                <tr><td>4</td><td class="fw-semibold">BRENDA ANONGOS TEXTILES</td><td>Brenda Anongos</td><td>09182345604</td><td>POBLACION</td><td>Tadian</td></tr>
-                <tr><td>5</td><td class="fw-semibold">FLORENCE ALIWENGWENG WEAVING</td><td>Florence Aliwengweng</td><td>09182345605</td><td>OTUCAN NORTE</td><td>Bauko</td></tr>
+                <tr><td>1</td><td class="fw-semibold">JOCELYN MIRANDA LOOMWEAVING</td><td>Jocelyn Miranda</td><td>09182345601</td><td>POBLACION</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+                <tr><td>2</td><td class="fw-semibold">JOSEPHINE FUCHADCHA HANDICRAFTS</td><td>Josephine Fuchadcha</td><td>09182345602</td><td>SAMOKI</td><td>Bontoc</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+                <tr><td>3</td><td class="fw-semibold">JULIANA'S LOOM WEAVING</td><td>Juliana Walisen</td><td>09182345603</td><td>POBLACION</td><td>Sabangan</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+                <tr><td>4</td><td class="fw-semibold">BRENDA ANONGOS TEXTILES</td><td>Brenda Anongos</td><td>09182345604</td><td>POBLACION</td><td>Tadian</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+                <tr><td>5</td><td class="fw-semibold">FLORENCE ALIWENGWENG WEAVING</td><td>Florence Aliwengweng</td><td>09182345605</td><td>OTUCAN NORTE</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -145,12 +184,98 @@
       </div>
     </div>
 
-    <!-- Dynamic Section Placeholder -->
-    <div id="view-generic" class="tab-view d-none">
-      <div class="card border-0 shadow-sm p-5 text-center">
-        <i class="bi bi-folder-check text-success display-4 mb-3"></i>
-        <h5 class="fw-bold" id="genericHeading">Section View</h5>
-        <p class="text-muted mb-0" id="genericContent">Content for this module loaded successfully.</p>
+    <!-- 3. PRODUCTS CATALOG VIEW -->
+    <div id="view-products" class="tab-view d-none">
+      <div class="card border-0 shadow-sm p-4">
+        <h6 class="fw-bold mb-3">Traditional Products Catalog</h6>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 fs-7">
+            <thead class="table-light">
+              <tr>
+                <th>Product Item</th>
+                <th>Category</th>
+                <th>Origin</th>
+                <th>Price</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="fw-semibold">Pinagpagan Pattern Blanket</td><td>Woven Fabric</td><td>Sagada</td><td>₱3,500.00</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0" onclick="alert('Viewing product specs')">Details</button></td></tr>
+              <tr><td class="fw-semibold">Inabel Table Runner</td><td>Home Decor</td><td>Bontoc</td><td>₱1,200.00</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0" onclick="alert('Viewing product specs')">Details</button></td></tr>
+              <tr><td class="fw-semibold">Traditional Suklang Hat Integration</td><td>Handicraft</td><td>Bauko</td><td>₱850.00</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0" onclick="alert('Viewing product specs')">Details</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ASSOCIATIONS VIEW -->
+    <div id="view-associations" class="tab-view d-none">
+      <div class="card border-0 shadow-sm p-4">
+        <h6 class="fw-bold mb-3">Weaver Cooperatives & Associations</h6>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="alert('Viewing Sagada Weavers Association Profile')">
+            <div>
+              <h6 class="mb-0 fw-semibold">Sagada Weavers Association</h6>
+              <small class="text-muted">Sagada, Mountain Province • 24 Registered Members</small>
+            </div>
+            <span class="badge bg-success rounded-pill">Active</span>
+          </a>
+          <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="alert('Viewing Samoki Weavers Guild Profile')">
+            <div>
+              <h6 class="mb-0 fw-semibold">Samoki Weavers Guild</h6>
+              <small class="text-muted">Bontoc, Mountain Province • 18 Registered Members</small>
+            </div>
+            <span class="badge bg-success rounded-pill">Active</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. NFC MANAGEMENT VIEW -->
+    <div id="view-nfc" class="tab-view d-none">
+      <div class="card border-0 shadow-sm p-4">
+        <h6 class="fw-bold mb-3">NFC Hardware Tag Assignments</h6>
+        <button class="btn btn-sm btn-dti mb-3 align-self-start" onclick="alert('Ready to encode new NFC chip...')"><i class="bi bi-cpu"></i> Encode New Tag</button>
+        <div class="table-responsive">
+          <table class="table table-hover fs-7">
+            <thead class="table-light">
+              <tr>
+                <th>Hardware UID</th>
+                <th>Assigned Entity</th>
+                <th>Verification Status</th>
+                <th class="text-end">Controls</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>04:NC:88:C2</code></td><td>Jocelyn Miranda Loomweaving</td><td><span class="badge bg-success">Linked</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="alert('Tag unlinked')">Unlink Tag</button></td></tr>
+              <tr><td><code>04:NC:77:D9</code></td><td>Josephine Fuchadcha Handicrafts</td><td><span class="badge bg-success">Linked</span></td><td class="text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="alert('Tag unlinked')">Unlink Tag</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. VERIFICATION LOGS VIEW -->
+    <div id="view-logs" class="tab-view d-none">
+      <div class="card border-0 shadow-sm p-4">
+        <h6 class="fw-bold mb-3">System Verification Logs</h6>
+        <div class="table-responsive">
+          <table class="table table-striped fs-7">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>UID</th>
+                <th>Action Result</th>
+                <th>Hub Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2026-04-03 14:22:10</td><td><code>04:NC:88:C2</code></td><td><span class="text-success fw-bold"><i class="bi bi-check-circle"></i> Authenticated</span></td><td>NC Bontoc</td></tr>
+              <tr><td>2026-04-03 12:05:44</td><td><code>04:NC:77:D9</code></td><td><span class="text-success fw-bold"><i class="bi bi-check-circle"></i> Authenticated</span></td><td>NC Sagada</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
@@ -164,27 +289,12 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Business / Artisan Entity</label>
-            <input type="text" id="addBusiness" class="form-control" placeholder="e.g. Caneo Weavers Guild">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Proprietor / Lead Weaver</label>
-            <input type="text" id="addProprietor" class="form-control" placeholder="e.g. Maria Santos">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Contact Number</label>
-            <input type="text" id="addContact" class="form-control" placeholder="e.g. 09191234567">
-          </div>
+          <div class="mb-3"><label class="form-label">Business / Artisan Entity</label><input type="text" id="addBusiness" class="form-control" placeholder="e.g. Caneo Weavers Guild"></div>
+          <div class="mb-3"><label class="form-label">Proprietor / Lead Weaver</label><input type="text" id="addProprietor" class="form-control" placeholder="e.g. Maria Santos"></div>
+          <div class="mb-3"><label class="form-label">Contact Number</label><input type="text" id="addContact" class="form-control" placeholder="e.g. 09191234567"></div>
           <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Barangay</label>
-              <input type="text" id="addBarangay" class="form-control" placeholder="e.g. Poblacion">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Municipality</label>
-              <input type="text" id="addMunicipality" class="form-control" placeholder="e.g. Bontoc">
-            </div>
+            <div class="col-md-6 mb-3"><label class="form-label">Barangay</label><input type="text" id="addBarangay" class="form-control" placeholder="e.g. Poblacion"></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Municipality</label><input type="text" id="addMunicipality" class="form-control" placeholder="e.g. Bontoc"></div>
           </div>
         </div>
         <div class="modal-footer">
@@ -197,14 +307,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Tab switching handler
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     const sectionTitle = document.getElementById('sectionTitle');
     const sectionSub = document.getElementById('sectionSub');
-    const weaversView = document.getElementById('view-weavers');
-    const genericView = document.getElementById('view-generic');
-    const genericHeading = document.getElementById('genericHeading');
-    const genericContent = document.getElementById('genericContent');
 
     const tabData = {
       dashboard: ["Dashboard Overview", "Summary metrics and overall network activity"],
@@ -215,41 +320,36 @@
       logs: ["Verification Logs", "Audit trail of scanned products and authentications"]
     };
 
+    function switchTab(tabKey) {
+      navLinks.forEach(l => {
+        if (l.getAttribute('data-tab') === tabKey) l.classList.add('active');
+        else l.classList.remove('active');
+      });
+
+      const [title, sub] = tabData[tabKey] || ["Module", "Management Section"];
+      sectionTitle.textContent = title;
+      sectionSub.textContent = sub;
+
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('d-none'));
+      const activeView = document.getElementById(`view-${tabKey}`);
+      if (activeView) activeView.classList.remove('d-none');
+    }
+
     navLinks.forEach(link => {
       link.addEventListener('click', function(e) {
         e.preventDefault();
-        navLinks.forEach(l => l.classList.remove('active'));
-        this.classList.add('active');
-
-        const tabKey = this.getAttribute('data-tab');
-        const [title, sub] = tabData[tabKey] || ["Module", "Management Section"];
-
-        sectionTitle.textContent = title;
-        sectionSub.textContent = sub;
-
-        if (tabKey === 'weavers') {
-          weaversView.classList.remove('d-none');
-          genericView.classList.add('d-none');
-        } else {
-          weaversView.classList.add('d-none');
-          genericView.classList.remove('d-none');
-          genericHeading.textContent = title;
-          genericContent.textContent = `You are currently interacting with the ${title} module.`;
-        }
+        switchTab(this.getAttribute('data-tab'));
       });
     });
 
-    // Live search filter
     function filterDirectory() {
       const input = document.getElementById('searchInput').value.toLowerCase();
       const rows = document.querySelectorAll('#directoryTable tr');
       rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(input) ? '' : 'none';
+        row.style.display = row.innerText.toLowerCase().includes(input) ? '' : 'none';
       });
     }
 
-    // Modal save record handler
     function saveWeaver() {
       const biz = document.getElementById('addBusiness').value;
       const prop = document.getElementById('addProprietor').value;
@@ -273,12 +373,13 @@
         <td>${contact || 'N/A'}</td>
         <td>${brgy.toUpperCase() || 'N/A'}</td>
         <td>${muni || 'N/A'}</td>
+        <td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td>
       `;
 
       table.appendChild(tr);
       document.getElementById('weaverCount').textContent = rowCount;
+      document.getElementById('dashWeaverCount').textContent = rowCount;
 
-      // Reset form and hide modal
       document.getElementById('addBusiness').value = '';
       document.getElementById('addProprietor').value = '';
       document.getElementById('addContact').value = '';
@@ -288,7 +389,15 @@
       bootstrap.Modal.getInstance(document.getElementById('addWeaverModal')).hide();
     }
 
-    // Logout handler
+    function deleteRow(btn) {
+      if(confirm('Remove this weaver record?')) {
+        btn.closest('tr').remove();
+        const count = document.querySelectorAll('#directoryTable tr').length;
+        document.getElementById('weaverCount').textContent = count;
+        document.getElementById('dashWeaverCount').textContent = count;
+      }
+    }
+
     function handleLogout() {
       if (confirm('Are you sure you want to log out?')) {
         localStorage.clear();
