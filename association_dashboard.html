@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weaver-ID | Association Dashboard</title>
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
             --sidebar-bg: #0F5B38;
@@ -22,7 +26,7 @@
             color: #2b2b2b;
         }
 
-        /* Fixed Sidebar Navigation */
+        /* Sidebar Styling */
         .sidebar {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -153,7 +157,7 @@
             color: #adb5bd;
         }
 
-        /* Top Metric Cards Matching Screenshot */
+        /* Metric Cards */
         .kpi-card {
             background-color: #ffffff;
             border-radius: 12px;
@@ -203,7 +207,6 @@
             margin-top: 4px;
         }
 
-        /* Content Framing */
         .content-card {
             background-color: #ffffff;
             border-radius: 12px;
@@ -212,7 +215,7 @@
             height: 100%;
         }
 
-        /* Scan Feed Items */
+        /* Activity Items */
         .activity-item {
             display: flex;
             align-items: flex-start;
@@ -238,19 +241,6 @@
 
         .icon-success { background-color: #e6f4ea; color: #137333; }
         .icon-warning { background-color: #fef7e0; color: #b06000; }
-        .icon-danger { background-color: #fce8e6; color: #c5221f; }
-
-        .chart-placeholder {
-            background-color: #f8fafc;
-            border: 2px dashed #e2e8f0;
-            border-radius: 12px;
-            height: 280px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #94a3b8;
-        }
 
         .view-panel { display: none; }
         .view-panel.active-panel { display: block; }
@@ -278,15 +268,8 @@
 
             <div class="sidebar-section-title">NFC & VERIFICATION</div>
             <ul class="sidebar-menu">
-                <li><a href="scan.php" class="nav-link"><i class="bi bi-wifi"></i> NFC Tag Management</a></li>
-                <li><a class="nav-link" onclick="switchTab('dashboard', this)"><i class="bi bi-clock-history"></i> Scan Logs</a></li>
+                <li><a class="nav-link" onclick="switchTab('logs', this)"><i class="bi bi-clock-history"></i> Scan Logs</a></li>
             </ul>
-
-            <!-- <div class="sidebar-section-title">ADMINISTRATION</div>
-            <ul class="sidebar-menu">
-                <li><a href="dti_dashboard.php" class="nav-link"><i class="bi bi-building"></i> Switch to DTI Admin</a></li>
-                <li><a class="nav-link" onclick="alert('Generating Association Inventory Report...')"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
-            </ul> -->
         </div>
 
         <div class="sidebar-user">
@@ -300,33 +283,31 @@
 
     <!-- Main Workspace Area -->
     <div class="main-wrapper">
-        
-        <!-- Tab 1: Dashboard Panel (Matches Image Exact Visuals) -->
-        <div id="panel-dashboard" class="view-panel active-panel">
-            <div class="top-header">
-                <div>
-                    <h4 class="fw-bold m-0">Dashboard</h4>
-                    <small class="text-muted">Overview of the Weaver-ID system</small>
-                </div>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <div class="search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="globalSearchInput" class="form-control" onkeyup="filterFeed()" placeholder="Search weavers, products, NFC tag">
-                    </div>
-                    <button class="btn btn-light rounded-circle p-2 border" style="width: 38px; height: 38px;">
-                        <i class="bi bi-bell"></i>
-                    </button>
-                </div>
+        <div class="top-header">
+            <div>
+                <h4 class="fw-bold m-0" id="page-title">Dashboard</h4>
+                <small class="text-muted" id="page-subtitle">Overview of the Weaver-ID system</small>
             </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="globalSearchInput" class="form-control" onkeyup="filterTablesAndFeed()" placeholder="Search weavers, products, NFC tag">
+                </div>
+                <button class="btn btn-light rounded-circle p-2 border" style="width: 38px; height: 38px;" onclick="alert('No new notifications.')">
+                    <i class="bi bi-bell"></i>
+                </button>
+            </div>
+        </div>
 
-            <!-- Top KPI Cards -->
+        <!-- Panel 1: Dashboard -->
+        <div id="panel-dashboard" class="view-panel active-panel">
             <div class="row g-3 mb-4">
                 <div class="col-md-3">
                     <div class="kpi-card">
                         <span class="growth-badge"><i class="bi bi-arrow-up"></i> 12%</span>
                         <div class="kpi-icon-wrapper kpi-green"><i class="bi bi-people-fill"></i></div>
-                        <div class="kpi-value">42</div>
+                        <div class="kpi-value" id="kpi-weaver-count">42</div>
                         <div class="kpi-label">Registered Weavers</div>
                     </div>
                 </div>
@@ -334,7 +315,7 @@
                     <div class="kpi-card">
                         <span class="growth-badge"><i class="bi bi-arrow-up"></i> 8%</span>
                         <div class="kpi-icon-wrapper kpi-blue"><i class="bi bi-box-seam-fill"></i></div>
-                        <div class="kpi-value">318</div>
+                        <div class="kpi-value" id="kpi-product-count">318</div>
                         <div class="kpi-label">Products Registered</div>
                     </div>
                 </div>
@@ -356,19 +337,17 @@
                 </div>
             </div>
 
-            <!-- Middle Section: Chart and Scan Activity Feed -->
             <div class="row g-4">
                 <div class="col-md-8">
                     <div class="content-card">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h6 class="fw-bold m-0">Verification Trends</h6>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exporting Association trends...')">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exporting chart report...')">
                                 <i class="bi bi-download me-1"></i> Export
                             </button>
                         </div>
-                        <div class="chart-placeholder">
-                            <i class="bi bi-image fs-1 mb-2"></i>
-                            <p class="m-0 text-secondary fw-medium">Monthly scan verification chart will render here</p>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="trendChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -380,7 +359,7 @@
                         </div>
 
                         <div id="activityFeed">
-                            <div class="activity-item">
+                            <div class="activity-item search-item">
                                 <div class="activity-icon icon-success"><i class="bi bi-check-lg"></i></div>
                                 <div class="flex-grow-1">
                                     <div class="fw-semibold" style="font-size: 0.875rem;">Authentic Product Verified</div>
@@ -389,7 +368,7 @@
                                 <span class="text-muted" style="font-size: 0.725rem;">2 min ago</span>
                             </div>
 
-                            <div class="activity-item">
+                            <div class="activity-item search-item">
                                 <div class="activity-icon icon-warning"><i class="bi bi-exclamation-lg"></i></div>
                                 <div class="flex-grow-1">
                                     <div class="fw-semibold" style="font-size: 0.875rem;">Unregistered Tag Scanned</div>
@@ -398,7 +377,7 @@
                                 <span class="text-muted" style="font-size: 0.725rem;">15 min ago</span>
                             </div>
 
-                            <div class="activity-item">
+                            <div class="activity-item search-item">
                                 <div class="activity-icon icon-success"><i class="bi bi-check-lg"></i></div>
                                 <div class="flex-grow-1">
                                     <div class="fw-semibold" style="font-size: 0.875rem;">Authentic Product Verified</div>
@@ -412,50 +391,60 @@
             </div>
         </div>
 
-        <!-- Tab 2: Weavers Panel -->
+        <!-- Panel 2: Weavers -->
         <div id="panel-weavers" class="view-panel">
-            <h4 class="fw-bold mb-3">Association Weavers Roster</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0">Association Weavers Roster</h5>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add New Weaver
+                </button>
+            </div>
             <div class="content-card">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle search-table" id="weaversTable">
                     <thead class="table-light">
-                        <tr><th>Name</th><th>Location</th><th>Status</th></tr>
+                        <tr><th>ID</th><th>Name</th><th>Location</th><th>Status</th><th>Action</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Lanie Gaongen</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td></tr>
-                        <tr><td>Rose Ann Wangdali</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td></tr>
-                        <tr><td>Juliana (Juliana's Loom)</td><td>Bauko, Mountain Province</td><td><span class="badge bg-success">Active</span></td></tr>
+                        <tr><td>#101</td><td>Lanie Gaongen</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
+                        <tr><td>#102</td><td>Rose Ann Wangdali</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
+                        <tr><td>#103</td><td>Juliana Pawid</td><td>Bauko, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Tab 3: Products Panel -->
+        <!-- Panel 3: Products -->
         <div id="panel-products" class="view-panel">
-            <h4 class="fw-bold mb-3">Association Product List</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0">Association Product Catalog</h5>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="bi bi-plus-lg me-1"></i> Register Product
+                </button>
+            </div>
             <div class="content-card">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle search-table" id="productsTable">
                     <thead class="table-light">
-                        <tr><th>NFC Code</th><th>Product</th><th>Weaver</th></tr>
+                        <tr><th>NFC Code</th><th>Product Name</th><th>Assigned Weaver</th><th>Action</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>WVID-8842</td><td>Sagada Woven Backpack</td><td>Lanie Gaongen</td></tr>
-                        <tr><td>WVID-8843</td><td>Eton Woven Shoulder Bag</td><td>Rose Ann Wangdali</td></tr>
-                        <tr><td>WVID-7721</td><td>Traditional Pattern Blanket</td><td>Sabangan Weavers</td></tr>
+                        <tr><td><span class="badge bg-secondary">WVID-8842</span></td><td>Sagada Woven Backpack</td><td>Lanie Gaongen</td><td><button class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
+                        <tr><td><span class="badge bg-secondary">WVID-8843</span></td><td>Eton Woven Shoulder Bag</td><td>Rose Ann Wangdali</td><td><button class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
+                        <tr><td><span class="badge bg-secondary">WVID-7721</span></td><td>Traditional Pattern Blanket</td><td>Juliana Pawid</td><td><button class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Tab 4: Associations Panel -->
+        <!-- Panel 4: Associations -->
         <div id="panel-associations" class="view-panel">
-            <h4 class="fw-bold mb-3">Mountain Province Weaving Groups</h4>
+            <h5 class="fw-bold mb-3">Mountain Province Weaving Groups</h5>
             <div class="content-card">
                 <div class="list-group">
-                    <div class="list-group-item d-flex justify-content-between p-3">
+                    <div class="list-group-item d-flex justify-content-between p-3 search-item">
                         <div><strong>Montañosa Weavers Association</strong><br><small class="text-muted">Sagada Chapter</small></div>
                         <span class="badge bg-success rounded-pill align-self-center">42 Active Weavers</span>
                     </div>
-                    <div class="list-group-item d-flex justify-content-between p-3">
+                    <div class="list-group-item d-flex justify-content-between p-3 search-item">
                         <div><strong>Sabangan Weavers Association</strong><br><small class="text-muted">Sabangan Chapter</small></div>
                         <span class="badge bg-success rounded-pill align-self-center">28 Active Weavers</span>
                     </div>
@@ -463,27 +452,180 @@
             </div>
         </div>
 
+        <!-- Panel 5: Scan Logs -->
+        <div id="panel-logs" class="view-panel">
+            <h5 class="fw-bold mb-3">System Verification Logs</h5>
+            <div class="content-card">
+                <table class="table table-striped align-middle search-table">
+                    <thead class="table-light">
+                        <tr><th>Timestamp</th><th>NFC UID</th><th>Result</th><th>Location</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>2026-03-30 10:14</td><td>WVID-8842</td><td><span class="badge bg-success">Verified</span></td><td>Sagada Shop</td></tr>
+                        <tr><td>2026-03-30 09:42</td><td>UNKNOWN_992</td><td><span class="badge bg-danger">Invalid Card</span></td><td>Bauko Market</td></tr>
+                        <tr><td>2026-03-30 08:15</td><td>WVID-7721</td><td><span class="badge bg-success">Verified</span></td><td>Bontoc Center</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal: Add Weaver -->
+    <div class="modal fade" id="addWeaverModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register New Weaver</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addWeaverForm">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="weaver-name-input" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location / Barangay</label>
+                            <input type="text" id="weaver-location-input" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Save Weaver</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Product -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="mb-3">
+                            <label class="form-label">NFC Code / UID</label>
+                            <input type="text" id="prod-nfc-input" class="form-control" placeholder="e.g. WVID-9900" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Product Name</label>
+                            <input type="text" id="prod-name-input" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Assigned Weaver</label>
+                            <input type="text" id="prod-weaver-input" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Save Product</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Working Tab Switcher
+        // Interactive Tab Switcher
         function switchTab(tabId, element) {
             document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-panel'));
             document.querySelectorAll('.sidebar-menu .nav-link').forEach(l => l.classList.remove('active'));
             
             document.getElementById('panel-' + tabId).classList.add('active-panel');
             if(element) element.classList.add('active');
+
+            // Update header text
+            const titles = {
+                'dashboard': ['Dashboard', 'Overview of the Weaver-ID system'],
+                'weavers': ['Weavers Directory', 'Manage registered association weavers'],
+                'products': ['Product Catalog', 'Track verified woven products and tags'],
+                'associations': ['Associations', 'Mountain Province weaving chapters'],
+                'logs': ['Scan Audit Logs', 'Real-time history of NFC tag verifications']
+            };
+            
+            if (titles[tabId]) {
+                document.getElementById('page-title').textContent = titles[tabId][0];
+                document.getElementById('page-subtitle').textContent = titles[tabId][1];
+            }
         }
 
-        // Live Feed Search Filter
-        function filterFeed() {
+        // Global Search Filter across tables and feeds
+        function filterTablesAndFeed() {
             const query = document.getElementById('globalSearchInput').value.toLowerCase();
-            const items = document.querySelectorAll('.activity-item');
-            items.forEach(item => {
+            
+            // Filter lists and activity feeds
+            document.querySelectorAll('.search-item').forEach(item => {
                 item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
             });
+
+            // Filter Table Rows
+            document.querySelectorAll('.search-table tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
         }
+
+        // Handle Dynamic Weaver Addition
+        document.getElementById('addWeaverForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('weaver-name-input').value;
+            const location = document.getElementById('weaver-location-input').value;
+
+            const table = document.getElementById('weaversTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            newRow.innerHTML = `<td>#${100 + table.rows.length + 1}</td><td>${name}</td><td>${location}</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary">View</button></td>`;
+
+            // Update KPI count
+            const weaverKpi = document.getElementById('kpi-weaver-count');
+            weaverKpi.textContent = parseInt(weaverKpi.textContent) + 1;
+
+            bootstrap.Modal.getInstance(document.getElementById('addWeaverModal')).hide();
+            this.reset();
+        });
+
+        // Handle Dynamic Product Addition
+        document.getElementById('addProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nfc = document.getElementById('prod-nfc-input').value;
+            const name = document.getElementById('prod-name-input').value;
+            const weaver = document.getElementById('prod-weaver-input').value;
+
+            const table = document.getElementById('productsTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            newRow.innerHTML = `<td><span class="badge bg-secondary">${nfc}</span></td><td>${name}</td><td>${weaver}</td><td><button class="btn btn-sm btn-outline-success">Edit</button></td>`;
+
+            // Update KPI count
+            const prodKpi = document.getElementById('kpi-product-count');
+            prodKpi.textContent = parseInt(prodKpi.textContent) + 1;
+
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            this.reset();
+        });
+
+        // Render Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Verifications',
+                        data: [120, 190, 300, 250, 420, 841],
+                        borderColor: '#0F5B38',
+                        backgroundColor: 'rgba(15, 91, 56, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        });
     </script>
 </body>
 </html>
