@@ -260,15 +260,15 @@
 
             <div class="sidebar-section-title">MAIN</div>
             <ul class="sidebar-menu">
-                <li><a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
-                <li><a class="nav-link" onclick="switchTab('weavers', this)"><i class="bi bi-people"></i> Weavers</a></li>
-                <li><a class="nav-link" onclick="switchTab('products', this)"><i class="bi bi-box-seam"></i> Products</a></li>
-                <li><a class="nav-link" onclick="switchTab('associations', this)"><i class="bi bi-building"></i> Associations</a></li>
+                <li><a href="javascript:void(0)" class="nav-link active" onclick="switchTab('dashboard', this)"><i class="bi bi-grid-fill"></i> Dashboard</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" onclick="switchTab('weavers', this)"><i class="bi bi-people"></i> Weavers</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" onclick="switchTab('products', this)"><i class="bi bi-box-seam"></i> Products</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" onclick="switchTab('associations', this)"><i class="bi bi-building"></i> Associations</a></li>
             </ul>
 
             <div class="sidebar-section-title">NFC & VERIFICATION</div>
             <ul class="sidebar-menu">
-                <li><a class="nav-link" onclick="switchTab('logs', this)"><i class="bi bi-clock-history"></i> Scan Logs</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" onclick="switchTab('logs', this)"><i class="bi bi-clock-history"></i> Scan Logs</a></li>
             </ul>
         </div>
 
@@ -292,9 +292,9 @@
             <div class="d-flex align-items-center gap-3">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" id="globalSearchInput" class="form-control" onkeyup="filterTablesAndFeed()" placeholder="Search weavers, products, NFC tag">
+                    <input type="text" id="globalSearchInput" class="form-control" oninput="filterTablesAndFeed()" placeholder="Search weavers, products, NFC tag">
                 </div>
-                <button class="btn btn-light rounded-circle p-2 border" style="width: 38px; height: 38px;" onclick="alert('No new notifications.')">
+                <button type="button" class="btn btn-light rounded-circle p-2 border" style="width: 38px; height: 38px;" onclick="alert('No new notifications.')">
                     <i class="bi bi-bell"></i>
                 </button>
             </div>
@@ -307,7 +307,7 @@
                     <div class="kpi-card">
                         <span class="growth-badge"><i class="bi bi-arrow-up"></i> 12%</span>
                         <div class="kpi-icon-wrapper kpi-green"><i class="bi bi-people-fill"></i></div>
-                        <div class="kpi-value" id="kpi-weaver-count">42</div>
+                        <div class="kpi-value" id="kpi-weaver-count">3</div>
                         <div class="kpi-label">Registered Weavers</div>
                     </div>
                 </div>
@@ -315,7 +315,7 @@
                     <div class="kpi-card">
                         <span class="growth-badge"><i class="bi bi-arrow-up"></i> 8%</span>
                         <div class="kpi-icon-wrapper kpi-blue"><i class="bi bi-box-seam-fill"></i></div>
-                        <div class="kpi-value" id="kpi-product-count">318</div>
+                        <div class="kpi-value" id="kpi-product-count">3</div>
                         <div class="kpi-label">Products Registered</div>
                     </div>
                 </div>
@@ -342,7 +342,7 @@
                     <div class="content-card">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h6 class="fw-bold m-0">Verification Trends</h6>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exporting chart report...')">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="alert('Exporting chart report...')">
                                 <i class="bi bi-download me-1"></i> Export
                             </button>
                         </div>
@@ -395,7 +395,7 @@
         <div id="panel-weavers" class="view-panel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold m-0">Association Weavers Roster</h5>
-                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal">
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal">
                     <i class="bi bi-plus-lg me-1"></i> Add New Weaver
                 </button>
             </div>
@@ -405,9 +405,9 @@
                         <tr><th>ID</th><th>Name</th><th>Location</th><th>Status</th><th>Action</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>#101</td><td>Lanie Gaongen</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
-                        <tr><td>#102</td><td>Rose Ann Wangdali</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
-                        <tr><td>#103</td><td>Juliana Pawid</td><td>Bauko, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
+                        <tr><td>#101</td><td>Lanie Gaongen</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button type="button" class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
+                        <tr><td>#102</td><td>Rose Ann Wangdali</td><td>Sagada, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button type="button" class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
+                        <tr><td>#103</td><td>Juliana Pawid</td><td>Bauko, Mountain Province</td><td><span class="badge bg-success">Active</span></td><td><button type="button" class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -417,7 +417,7 @@
         <div id="panel-products" class="view-panel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold m-0">Association Product Catalog</h5>
-                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
                     <i class="bi bi-plus-lg me-1"></i> Register Product
                 </button>
             </div>
@@ -427,9 +427,9 @@
                         <tr><th>NFC Code</th><th>Product Name</th><th>Assigned Weaver</th><th>Action</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><span class="badge bg-secondary">WVID-8842</span></td><td>Sagada Woven Backpack</td><td>Lanie Gaongen</td><td><button class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
-                        <tr><td><span class="badge bg-secondary">WVID-8843</span></td><td>Eton Woven Shoulder Bag</td><td>Rose Ann Wangdali</td><td><button class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
-                        <tr><td><span class="badge bg-secondary">WVID-7721</span></td><td>Traditional Pattern Blanket</td><td>Juliana Pawid</td><td><button class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
+                        <tr><td><span class="badge bg-secondary">WVID-8842</span></td><td>Sagada Woven Backpack</td><td>Lanie Gaongen</td><td><button type="button" class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
+                        <tr><td><span class="badge bg-secondary">WVID-8843</span></td><td>Eton Woven Shoulder Bag</td><td>Rose Ann Wangdali</td><td><button type="button" class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
+                        <tr><td><span class="badge bg-secondary">WVID-7721</span></td><td>Traditional Pattern Blanket</td><td>Juliana Pawid</td><td><button type="button" class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -472,12 +472,12 @@
     </div>
 
     <!-- Modal: Add Weaver -->
-    <div class="modal fade" id="addWeaverModal" tabindex="-1">
+    <div class="modal fade" id="addWeaverModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Register New Weaver</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="addWeaverForm">
@@ -497,12 +497,12 @@
     </div>
 
     <!-- Modal: Add Product -->
-    <div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Register New Product</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="addProductForm">
@@ -527,15 +527,28 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Interactive Tab Switcher
+        // Switch between sidebar tabs
         function switchTab(tabId, element) {
-            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-panel'));
-            document.querySelectorAll('.sidebar-menu .nav-link').forEach(l => l.classList.remove('active'));
-            
-            document.getElementById('panel-' + tabId).classList.add('active-panel');
-            if(element) element.classList.add('active');
+            // Hide all panels
+            const panels = document.querySelectorAll('.view-panel');
+            panels.forEach(p => p.classList.remove('active-panel'));
 
-            // Update header text
+            // Remove active class from links
+            const navLinks = document.querySelectorAll('.sidebar-menu .nav-link');
+            navLinks.forEach(l => l.classList.remove('active'));
+
+            // Activate target panel
+            const targetPanel = document.getElementById('panel-' + tabId);
+            if (targetPanel) {
+                targetPanel.classList.add('active-panel');
+            }
+
+            // Set active navigation styling
+            if (element) {
+                element.classList.add('active');
+            }
+
+            // Update top bar text
             const titles = {
                 'dashboard': ['Dashboard', 'Overview of the Weaver-ID system'],
                 'weavers': ['Weavers Directory', 'Manage registered association weavers'],
@@ -543,88 +556,99 @@
                 'associations': ['Associations', 'Mountain Province weaving chapters'],
                 'logs': ['Scan Audit Logs', 'Real-time history of NFC tag verifications']
             };
-            
+
             if (titles[tabId]) {
                 document.getElementById('page-title').textContent = titles[tabId][0];
                 document.getElementById('page-subtitle').textContent = titles[tabId][1];
             }
         }
 
-        // Global Search Filter across tables and feeds
+        // Live Search Filter Across Tables & Activity Items
         function filterTablesAndFeed() {
-            const query = document.getElementById('globalSearchInput').value.toLowerCase();
-            
-            // Filter lists and activity feeds
+            const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
+
             document.querySelectorAll('.search-item').forEach(item => {
                 item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
             });
 
-            // Filter Table Rows
             document.querySelectorAll('.search-table tbody tr').forEach(row => {
                 row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
             });
         }
 
-        // Handle Dynamic Weaver Addition
+        // Add Weaver Form Handler
         document.getElementById('addWeaverForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('weaver-name-input').value;
             const location = document.getElementById('weaver-location-input').value;
 
-            const table = document.getElementById('weaversTable').getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow();
-            newRow.innerHTML = `<td>#${100 + table.rows.length + 1}</td><td>${name}</td><td>${location}</td><td><span class="badge bg-success">Active</span></td><td><button class="btn btn-sm btn-outline-primary">View</button></td>`;
+            const tbody = document.getElementById('weaversTable').querySelector('tbody');
+            const rowCount = tbody.rows.length + 1;
+            
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `<td>#${100 + rowCount}</td><td>${name}</td><td>${location}</td><td><span class="badge bg-success">Active</span></td><td><button type="button" class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td>`;
+            tbody.appendChild(newRow);
 
-            // Update KPI count
+            // Update Metric Count
             const weaverKpi = document.getElementById('kpi-weaver-count');
-            weaverKpi.textContent = parseInt(weaverKpi.textContent) + 1;
+            weaverKpi.textContent = parseInt(weaverKpi.textContent || '0') + 1;
 
-            bootstrap.Modal.getInstance(document.getElementById('addWeaverModal')).hide();
+            // Close Modal & Reset Form
+            const modalEl = document.getElementById('addWeaverModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInstance.hide();
             this.reset();
         });
 
-        // Handle Dynamic Product Addition
+        // Add Product Form Handler
         document.getElementById('addProductForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const nfc = document.getElementById('prod-nfc-input').value;
             const name = document.getElementById('prod-name-input').value;
             const weaver = document.getElementById('prod-weaver-input').value;
 
-            const table = document.getElementById('productsTable').getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow();
-            newRow.innerHTML = `<td><span class="badge bg-secondary">${nfc}</span></td><td>${name}</td><td>${weaver}</td><td><button class="btn btn-sm btn-outline-success">Edit</button></td>`;
+            const tbody = document.getElementById('productsTable').querySelector('tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `<td><span class="badge bg-secondary">${nfc}</span></td><td>${name}</td><td>${weaver}</td><td><button type="button" class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td>`;
+            tbody.appendChild(newRow);
 
-            // Update KPI count
+            // Update Metric Count
             const prodKpi = document.getElementById('kpi-product-count');
-            prodKpi.textContent = parseInt(prodKpi.textContent) + 1;
+            prodKpi.textContent = parseInt(prodKpi.textContent || '0') + 1;
 
-            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            // Close Modal & Reset Form
+            const modalEl = document.getElementById('addProductModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInstance.hide();
             this.reset();
         });
 
-        // Render Chart
+        // Initialize Chart on Load
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Verifications',
-                        data: [120, 190, 300, 250, 420, 841],
-                        borderColor: '#0F5B38',
-                        backgroundColor: 'rgba(15, 91, 56, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
+            const canvas = document.getElementById('trendChart');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Verifications',
+                            data: [120, 190, 300, 250, 420, 841],
+                            borderColor: '#0F5B38',
+                            backgroundColor: 'rgba(15, 91, 56, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
         });
     </script>
 </body>
