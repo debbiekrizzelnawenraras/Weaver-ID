@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFC Tag Verification Result</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>Weaver-ID | NFC Verification</title>
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>
@@ -19,72 +18,136 @@
             min-height: 100vh;
             margin: 0;
         }
-        .verification-card {
+        .card-container {
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            padding: 32px;
             max-width: 420px;
             width: 100%;
             border: 1px solid #edf2f7;
         }
-        .status-icon-box {
-            width: 60px;
-            height: 60px;
+        .status-icon {
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 16px auto;
-            font-size: 1.8rem;
+            font-size: 2rem;
         }
-        .status-icon-box.success { background-color: #dcfce7; color: #15803d; }
-        .status-icon-box.error { background-color: #fee2e2; color: #dc2626; }
-        .data-row {
+        .status-icon.success { background-color: #dcfce7; color: #15803d; }
+        .status-icon.error { background-color: #fee2e2; color: #dc2626; }
+        
+        .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #f1f5f9;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e2e8f0;
             font-size: 0.9rem;
         }
-        .data-row:last-child { border-bottom: none; }
+        .detail-row:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
-    <div class="verification-card">
+    <div class="card-container text-center">
+        <!-- LOADING STATE -->
+        <div id="state-loading">
+            <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="fw-bold">Verifying NFC Tag...</h5>
+            <p class="text-muted small">Checking database records</p>
+        </div>
+
         <!-- SUCCESS STATE -->
-        <div class="text-center">
-            <div class="status-icon-box success">
+        <div id="state-success" class="d-none">
+            <div class="status-icon success">
                 <i class="bi bi-shield-check"></i>
             </div>
             <h5 class="fw-bold mb-1">Authentication Successful</h5>
-            <p class="text-muted small mb-4">Valid Weaver NFC Tag</p>
+            <p class="text-muted small mb-4">Valid Weaver NFC Identification</p>
+
+            <div class="bg-light p-3 rounded-3 text-start mb-4">
+                <div class="detail-row">
+                    <span class="text-muted">Weaver ID:</span>
+                    <span class="fw-bold" id="weaver-id">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="text-muted">Weaver Name:</span>
+                    <span class="fw-bold" id="weaver-name">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="text-muted">Business / Guild:</span>
+                    <span class="fw-bold" id="weaver-business">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="text-muted">Status:</span>
+                    <span class="badge bg-success">Active</span>
+                </div>
+            </div>
         </div>
 
-        <div class="bg-light p-3 rounded mb-3">
-            <div class="data-row">
-                <span class="text-muted">Weaver ID:</span>
-                <span class="fw-bold">#102</span>
+        <!-- ERROR STATE -->
+        <div id="state-error" class="d-none">
+            <div class="status-icon error">
+                <i class="bi bi-exclamation-triangle"></i>
             </div>
-            <div class="data-row">
-                <span class="text-muted">Weaver Name:</span>
-                <span class="fw-bold">Maria Pawid</span>
-            </div>
-            <div class="data-row">
-                <span class="text-muted">Business / Guild:</span>
-                <span class="fw-bold">Sagada Weavers Coop</span>
-            </div>
-            <div class="data-row">
-                <span class="text-muted">Status:</span>
-                <span class="badge bg-success">Active</span>
-            </div>
+            <h5 class="fw-bold mb-1">Verification Failed</h5>
+            <p class="text-danger small fw-semibold mb-4" id="error-message">An error occurred.</p>
         </div>
 
-        <button class="btn btn-outline-secondary w-100 btn-sm" onclick="window.history.back()">
-            <i class="bi bi-arrow-left"></i> Scan Another Tag
-        </button>
+        <!-- ACTION BUTTON -->
+        <a href="javascript:history.back()" id="action-btn" class="btn btn-outline-secondary w-100 btn-sm d-none">
+            <i class="bi bi-arrow-left"></i> Scan Another NFC Tag
+        </a>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get 'nfc_uid' parameter from URL (e.g. verify_nfc.html?nfc_uid=12345)
+            const urlParams = new URLSearchParams(window.location.search);
+            const nfcUid = urlParams.get('nfc_uid');
+
+            const loadingState = document.getElementById('state-loading');
+            const successState = document.getElementById('state-success');
+            const errorState = document.getElementById('state-error');
+            const actionBtn = document.getElementById('action-btn');
+
+            if (!nfcUid) {
+                showError('NFC UID is required.');
+                return;
+            }
+
+            // Fetch verification data from backend API
+            fetch(`api_verify_nfc.php?nfc_uid=${encodeURIComponent(nfcUid)}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingState.classList.add('d-none');
+                    actionBtn.classList.remove('d-none');
+
+                    if (data.status === 'success') {
+                        document.getElementById('weaver-id').textContent = '#' + data.data.id;
+                        document.getElementById('weaver-name').textContent = data.data.name;
+                        document.getElementById('weaver-business').textContent = data.data.business;
+                        successState.classList.remove('d-none');
+                    } else {
+                        showError(data.message || 'Verification failed.');
+                    }
+                })
+                .catch(() => {
+                    showError('Server connection error.');
+                });
+
+            function showError(msg) {
+                loadingState.classList.add('d-none');
+                document.getElementById('error-message').textContent = msg;
+                errorState.classList.remove('d-none');
+                actionBtn.classList.remove('d-none');
+            }
+        });
+    </script>
 </body>
 </html>
