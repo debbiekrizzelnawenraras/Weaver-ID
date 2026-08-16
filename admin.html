@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weaver & MSME Directory</title>
+    <title>Complete MSME & Weaver Directory</title>
     <style>
         * {
             box-sizing: border-box;
@@ -19,7 +19,7 @@
         .header {
             text-align: center;
             margin-bottom: 16px;
-            padding: 10px;
+            padding: 12px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -34,7 +34,7 @@
             margin-top: 4px;
         }
         
-        /* Mobile-First Layout (Stacked Cards) */
+        /* Mobile Stacked Card View */
         .directory-list {
             display: flex;
             flex-direction: column;
@@ -45,7 +45,7 @@
             border-radius: 10px;
             padding: 14px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-            border-left: 4px solid #2563eb;
+            border-left: 4px solid #007bff;
         }
         .card-header {
             display: flex;
@@ -56,8 +56,8 @@
             border-bottom: 1px solid #f1f5f9;
         }
         .card-num {
-            background: #eff6ff;
-            color: #2563eb;
+            background: #e7f1ff;
+            color: #007bff;
             font-weight: bold;
             font-size: 0.8rem;
             padding: 2px 8px;
@@ -70,7 +70,7 @@
         }
         .info-row {
             display: flex;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
             font-size: 0.88rem;
         }
         .info-label {
@@ -88,7 +88,7 @@
             font-style: italic;
         }
 
-        /* Desktop Mode (Converts back to Table on wide screens) */
+        /* Desktop Table View */
         @media (min-width: 768px) {
             body { padding: 24px; }
             .directory-list { display: block; }
@@ -101,11 +101,12 @@
                 box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             }
             .desktop-table th {
-                background: #2563eb;
+                background: #007bff;
                 color: #fff;
                 padding: 12px;
                 text-align: left;
                 font-size: 0.85rem;
+                text-transform: uppercase;
             }
             .desktop-table td {
                 padding: 10px 12px;
@@ -123,18 +124,17 @@
 <body>
 
     <div class="header">
-        <h1>Weaver ID Master List</h1>
-        <p>Total Records: 59</p>
+        <h1>MSME & Weaver Master Directory</h1>
+        <p>Total Registered Records: 59</p>
     </div>
 
-    <!-- Desktop Table View -->
+    <!-- Desktop View -->
     <table class="desktop-table">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Business Name</th>
-                <th>Last Name</th>
-                <th>First Name</th>
+                <th>MSME / Business Name</th>
+                <th>Owner / Client Name</th>
                 <th>Mobile Number</th>
                 <th>Barangay</th>
                 <th>Municipality</th>
@@ -143,103 +143,102 @@
         <tbody id="table-body"></tbody>
     </table>
 
-    <!-- Mobile Cards View -->
+    <!-- Mobile View -->
     <div class="directory-list" id="card-list"></div>
 
     <script>
-        const weavers = [
-            { id: 1, business: "JOCELYN MIRANDA", last: "MIRANDA", first: "JOCELYN", mobile: "9128367338", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
-            { id: 2, business: "JOSEPHINE FUCHADCHA", last: "FUCHADCHA", first: "JOSEPHINE", mobile: "", barangay: "", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 3, business: "JULIANA'S LOOM WEAVING MANUFACTURING", last: "WALISEN", first: "JULIANA", mobile: "9993761663", barangay: "GUINZADAN NORTE", municipality: "Bauko Mountain Province" },
-            { id: 4, business: "KAMOWAN SOUVENIRS", last: "ANONGOS", first: "BRENDA", mobile: "9194127474", barangay: "PATAY", municipality: "Sagada Mountain Province" },
-            { id: 5, business: "KINAYAN HANDLOOM WOVEN PRODUCTS", last: "ALIWENGWENG", first: "FLORENCE", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
-            { id: 6, business: "", last: "Coteng", first: "Marisa", mobile: "9451644407", barangay: "Laylaya", municipality: "Besao Mountain Province" },
-            { id: 7, business: "LANIE GAONGEN", last: "GAONGEN", first: "LANIE", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
-            { id: 8, business: "Letang Young Mothers", last: "Tagaban", first: "Felipa", mobile: "9457956160", barangay: "Tapapan", municipality: "Bauko Mountain Province" },
-            { id: 9, business: "LINA'S RUGS MANUFACTURING", last: "UNOS", first: "LINA", mobile: "", barangay: "Tamboan", municipality: "Besao Mountain Province" },
-            { id: 10, business: "LINGAYO'S HANDLOOM WOVEN PRODUCTS", last: "Wangdali", first: "Rose Ann", mobile: "9502033126", barangay: "Demang", municipality: "Sagada Mountain Province" },
-            { id: 11, business: "LOIDA BANIAGA", last: "BANIAGA", first: "LOIDA", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
-            { id: 12, business: "MARILYN'S WOVEN PRODUCTS", last: "DAO-ASEN", first: "MARILYN", mobile: "9466896101", barangay: "GUINZADAN SUR", municipality: "Bauko Mountain Province" },
-            { id: 13, business: "MARINA VARIETY STORE", last: "BALANIYAN", first: "MARINA", mobile: "09300907000", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 14, business: "MARY'S WOVEN PRODUCTS", last: "TUKAKI", first: "MARY", mobile: "9.07E+09", barangay: "GUINZADAN NORTE", municipality: "Bauko Mountain Province" },
-            { id: 15, business: "MAY-ENG LOOM WEAVING MANUFACTURING", last: "MAY-ENG", first: "DAISY", mobile: "9061298652", barangay: "AMBAGUIO", municipality: "Besao Mountain Province" },
-            { id: 16, business: "MIMYAH'S WOVEN PRODUCTS", last: "PIAYAS", first: "HERMINIA", mobile: "9668971195", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 17, business: "MODAWAN WOVEN PRODUCTS", last: "MODAWAN", first: "MARY ANN", mobile: "9484600525", barangay: "GUINZADAN SUR", municipality: "Bauko Mountain Province" },
-            { id: 18, business: "MONTAÑOSA WEAVERS ASSOCIATION", last: "Wangdali", first: "Rose Ann", mobile: "9502033126", barangay: "Demang", municipality: "Sagada Mountain Province" },
-            { id: 19, business: "N AND C GLASS AND ALUMINUM SUPPLY", last: "CALINGLING", first: "CATHERINE", mobile: "", barangay: "ABATAN", municipality: "Bauko Mountain Province" },
-            { id: 20, business: "NEWLOOM WOVEN PRODUCTS", last: "DULAY", first: "ROSE", mobile: "9108700467", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
-            { id: 21, business: "OCHASAN'S LOOM WEAVING", last: "OCHASAN", first: "EVELYN", mobile: "9354595908", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 22, business: "ONGA-ONG'S LOOM WEAVING PRODUCTS", last: "ONGA-ONG", first: "KIMBERLY", mobile: "9165633839", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 23, business: "OYAOY'S CLOTHING BOUTIQUE", last: "CHUMEL-ANG", first: "RODILYN", mobile: "9702091747", barangay: "Samoki", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 24, business: "PAMANA ORGANIZATION", last: "PINASEN", first: "CHRISTOPHER", mobile: "9128242841", barangay: "MASLA", municipality: "Tadian Mountain Province" },
-            { id: 25, business: "Pangayapang Handicrafts Association", last: "Pineda", first: "Julien", mobile: "9467344884", barangay: "Poblacion", municipality: "Bauko Mountain Province" },
-            { id: 26, business: "PAULINA'S LOOM WEAVING MANUFACTURING", last: "CAYANGA", first: "BRENDO", mobile: "9502032739", barangay: "AMBAGUIO", municipality: "Besao Mountain Province" },
-            { id: 27, business: "PIGACABUBA WEAVES ASSOCIATION", last: "ANOYAN", first: "JOY", mobile: "9398711035", barangay: "CAMATAGAN", municipality: "Sabangan Mountain Province" },
-            { id: 28, business: "Pinagpagan Womens Workers Association", last: "Omaweng", first: "Virginia", mobile: "9978178644", barangay: "Demang", municipality: "Sagada Mountain Province" },
-            { id: 29, business: "PRAY'S KEENLYCRAFT SEWING SERVICE", last: "BAN-ANG", first: "PRAY KEEN", mobile: "9467509774", barangay: "AMBASING", municipality: "Sagada Mountain Province" },
-            { id: 30, business: "REGINA BALAGTAS", last: "BALAGTAS", first: "REGINA", mobile: "9812499300", barangay: "KIN-IWAY", municipality: "Besao Mountain Province" },
-            { id: 31, business: "RIVER GREEN VARIETY SHOP", last: "TAULI", first: "ALICE", mobile: "9123798171", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 32, business: "Rose Ann's Loom Art Gallery", last: "WANGDALI", first: "ROSE ANN", mobile: "9636113510", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
-            { id: 33, business: "SABANGAN WEAVERS ASSOCIATIION", last: "DAO", first: "RANNIE", mobile: "9101572596", barangay: "POBLACION", municipality: "Sabangan Mountain Province" },
-            { id: 34, business: "SAGADA COLLECTIONS SOUVENIR SHOP", last: "BAGYAN", first: "LUCIANO", mobile: "9517475183", barangay: "PATAY", municipality: "Sagada Mountain Province" },
-            { id: 35, business: "SAGADA ETHNIC HANDICRAFTS MANUFACTURING", last: "BACOLONG", first: "REGEELYN", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
-            { id: 36, business: "SAGADA HAND LOOM WOVEN PRODUCT", last: "CACAY", first: "ESTHER", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
-            { id: 37, business: "SAGADA HANGINGVIEW SOUVENIR", last: "AGPAD", first: "JESSICA", mobile: "9608972889", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
-            { id: 38, business: "SAGADA KOOL'TOUR ARTS AND CRAFTS MANUFACTURING", last: "KOLLIN", first: "METHUSELAH", mobile: "9079768758", barangay: "AMBASING", municipality: "Sagada Mountain Province" },
-            { id: 39, business: "SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING", last: "CADIOGAN", first: "AGNES", mobile: "9121527484", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
-            { id: 40, business: "", last: "CADIOGAN", first: "REBECCA", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
-            { id: 41, business: "SAGADA NORTH WEAVING", last: "BOLINGET", first: "BANGIYAD", mobile: "9061495265", barangay: "AGUID", municipality: "Sagada Mountain Province" },
-            { id: 42, business: "SAGADA SUNRISE HANDICRAFTS AND SOUVENIRS", last: "MASLIYAN", first: "PATRICIO", mobile: "9.07E+09", barangay: "Ambasing", municipality: "Sagada Mountain Province" },
-            { id: 43, business: "SAGADA WEAVING AND SOUVENIR SHOP", last: "ARANDUQUE", first: "EZRA KIETHLEY", mobile: "", barangay: "PATAY", municipality: "Sagada Mountain Province" },
-            { id: 44, business: "", last: "ARANDUQUE", first: "FELIXA GEORGIA", mobile: "", barangay: "PATAY", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 45, business: "SEIGRID ANN POTTERY", last: "BANGYAY", first: "SEIGRID ANN", mobile: "9165426447", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
-            { id: 46, business: "Solenn Stitches", last: "Aluyen", first: "Rufina", mobile: "9308144979", barangay: "Demang", municipality: "Sagada Mountain Province" },
-            { id: 47, business: "SOMETHING SAGADA SOUVENIRS KLEARING APPAREL MANUF", last: "LIKIGAN", first: "FLORENCE", mobile: "9562543413", barangay: "PATAY", municipality: "Sagada Mountain Province" },
-            { id: 48, business: "SUPHINA LOOM WEAVING MANUFACTURING", last: "MARCONI", first: "IRENE", mobile: "9150668685", barangay: "LUBON", municipality: "Tadian Mountain Province" },
-            { id: 49, business: "SUTADA WEAVER'S ASSOCIATION", last: "PUYONGAN", first: "SALDY", mobile: "9151578041", barangay: "SUPANG", municipality: "Sabangan Mountain Province" },
-            { id: 50, business: "SYDAL'G HANDLOOM WOVEN PRODUCTS", last: "WADINGAN", first: "GLADYS", mobile: "9957141183", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 51, business: "TANGAFAN ORGANIZATION INC", last: "COFULAN", first: "PAULA", mobile: "", barangay: "SAMOKI", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 52, business: "TAWID CLOTHING SHOP", last: "CHANGAT", first: "ELOIZA JEAN", mobile: "09193106595", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 53, business: "TAYNODAN HANDLOOM WOVEN PRODUCTS", last: "AMOGAWEN", first: "PHOEBE", mobile: "", barangay: "PATAY", municipality: "Sagada Mountain Province" },
-            { id: 54, business: "TIRIZA'S HANDICRAFTS TRADING", last: "ABAD", first: "MARIA TERESA", mobile: "9391814622", barangay: "PATAY", municipality: "Sagada Mountain Province" },
-            { id: 55, business: "", last: "ABAD", first: "MARITES", mobile: "9391814622", barangay: "PATAY", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 56, business: "Viewhill Womens Organization", last: "Codod", first: "Ruth Kathleen", mobile: "9085604319", barangay: "Guinzadan Central", municipality: "Bauko Mountain Province" },
-            { id: 57, business: "YHUAN YHATZ BAGS AND ACCESSORIES SHOP", last: "KIWANG", first: "CAREN", mobile: "9108279230", barangay: "Samoki", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 58, business: "ZEPHYRA'S CLOSET ONLINE SHOP", last: "SORIA", first: "KRYS IVONNE JOY", mobile: "09151527501", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
-            { id: 59, business: "ZK CLOTHING BOUTIQUE", last: "JULIANO", first: "MICHAEL IVAN", mobile: "9069220433", barangay: "Poblacion", municipality: "Paracelis Mountain Province" }
+        const msmes = [
+            { id: 1, business: "JOCELYN MIRANDA", name: "JOCELYN MIRANDA", mobile: "9128367338", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 2, business: "", name: "JOSEPHINE FUCHADCHA", mobile: "", barangay: "", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 3, business: "JULIANA'S LOOM WEAVING MANUFACTURING", name: "JULIANA WALISEN", mobile: "9993761663", barangay: "GUINZADAN NORTE", municipality: "Bauko Mountain Province" },
+            { id: 4, business: "KAMOWAN SOUVENIRS", name: "BRENDA ANONGOS", mobile: "9194127474", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 5, business: "KINAYAN HANDLOOM WOVEN PRODUCTS", name: "FLORENCE ALIWENGWENG", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 6, business: "", name: "Marisa Coteng", mobile: "9451644407", barangay: "Laylaya", municipality: "Besao Mountain Province" },
+            { id: 7, business: "LANIE GAONGEN", name: "LANIE GAONGEN", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 8, business: "Letang Young Mothers", name: "Felipa Tagaban", mobile: "9457956160", barangay: "Tapapan", municipality: "Bauko Mountain Province" },
+            { id: 9, business: "LINA'S RUGS MANUFACTURING", name: "LINA UNOS", mobile: "", barangay: "Tamboan", municipality: "Besao Mountain Province" },
+            { id: 10, business: "LINGAYO'S HANDLOOM WOVEN PRODUCTS", name: "Rose Ann Wangdali", mobile: "9502033126", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 11, business: "LOIDA BANIAGA", name: "LOIDA BANIAGA", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 12, business: "MARILYN'S WOVEN PRODUCTS", name: "MARILYN DAO-ASEN", mobile: "9466896101", barangay: "GUINZADAN SUR", municipality: "Bauko Mountain Province" },
+            { id: 13, business: "MARINA VARIETY STORE", name: "MARINA BALANIYAN", mobile: "09300907000", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 14, business: "MARY'S WOVEN PRODUCTS", name: "MARY TUKAKI", mobile: "9.07E+09", barangay: "GUINZADAN NORTE", municipality: "Bauko Mountain Province" },
+            { id: 15, business: "MAY-ENG LOOM WEAVING MANUFACTURING", name: "DAISY MAY-ENG", mobile: "9061298652", barangay: "AMBAGUIO", municipality: "Besao Mountain Province" },
+            { id: 16, business: "MIMYAH'S WOVEN PRODUCTS", name: "HERMINIA PIAYAS", mobile: "9668971195", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 17, business: "MODAWAN WOVEN PRODUCTS", name: "MARY ANN MODAWAN", mobile: "9484600525", barangay: "GUINZADAN SUR", municipality: "Bauko Mountain Province" },
+            { id: 18, business: "MONTAÑOSA WEAVERS ASSOCIATION", name: "Rose Ann Wangdali", mobile: "9502033126", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 19, business: "N AND C GLASS AND ALUMINUM SUPPLY", name: "CATHERINE CALINGLING", mobile: "", barangay: "ABATAN", municipality: "Bauko Mountain Province" },
+            { id: 20, business: "NEWLOOM WOVEN PRODUCTS", name: "ROSE DULAY", mobile: "9108700467", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 21, business: "OCHASAN'S LOOM WEAVING", name: "EVELYN OCHASAN", mobile: "9354595908", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 22, business: "ONGA-ONG'S LOOM WEAVING PRODUCTS", name: "KIMBERLY ONGA-ONG", mobile: "9165633839", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 23, business: "OYAOY'S CLOTHING BOUTIQUE", name: "RODILYN CHUMEL-ANG", mobile: "9702091747", barangay: "Samoki", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 24, business: "PAMANA ORGANIZATION", name: "CHRISTOPHER PINASEN", mobile: "9128242841", barangay: "MASLA", municipality: "Tadian Mountain Province" },
+            { id: 25, business: "Pangayapang Handicrafts Association", name: "Julien Pineda", mobile: "9467344884", barangay: "Poblacion", municipality: "Bauko Mountain Province" },
+            { id: 26, business: "PAULINA'S LOOM WEAVING MANUFACTURING", name: "BRENDO CAYANGA", mobile: "9502032739", barangay: "AMBAGUIO", municipality: "Besao Mountain Province" },
+            { id: 27, business: "PIGACABUBA WEAVES ASSOCIATION", name: "JOY ANOYAN", mobile: "9398711035", barangay: "CAMATAGAN", municipality: "Sabangan Mountain Province" },
+            { id: 28, business: "Pinagpagan Womens Workers Association", name: "Virginia Omaweng", mobile: "9978178644", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 29, business: "PRAY'S KEENLYCRAFT SEWING SERVICE", name: "PRAY KEEN BAN-ANG", mobile: "9467509774", barangay: "AMBASING", municipality: "Sagada Mountain Province" },
+            { id: 30, business: "REGINA BALAGTAS", name: "REGINA BALAGTAS", mobile: "9812499300", barangay: "KIN-IWAY", municipality: "Besao Mountain Province" },
+            { id: 31, business: "RIVER GREEN VARIETY SHOP", name: "ALICE TAULI", mobile: "9123798171", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 32, business: "Rose Ann's Loom Art Gallery", name: "ROSE ANN WANGDALI", mobile: "9636113510", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 33, business: "SABANGAN WEAVERS ASSOCIATIION", name: "RANNIE DAO", mobile: "9101572596", barangay: "POBLACION", municipality: "Sabangan Mountain Province" },
+            { id: 34, business: "SAGADA COLLECTIONS SOUVENIR SHOP", name: "LUCIANO BAGYAN", mobile: "9517475183", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 35, business: "SAGADA ETHNIC HANDICRAFTS MANUFACTURING", name: "REGEELYN BACOLONG", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 36, business: "SAGADA HAND LOOM WOVEN PRODUCT", name: "ESTHER CACAY", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 37, business: "SAGADA HANGINGVIEW SOUVENIR", name: "JESSICA AGPAD", mobile: "9608972889", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 38, business: "SAGADA KOOL'TOUR ARTS AND CRAFTS MANUFACTURING", name: "METHUSELAH KOLLIN", mobile: "9079768758", barangay: "AMBASING", municipality: "Sagada Mountain Province" },
+            { id: 39, business: "SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING", name: "AGNES CADIOGAN", mobile: "9121527484", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 40, business: "", name: "REBECCA CADIOGAN", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 41, business: "SAGADA NORTH WEAVING", name: "BANGIYAD BOLINGET", mobile: "9061495265", barangay: "AGUID", municipality: "Sagada Mountain Province" },
+            { id: 42, business: "SAGADA SUNRISE HANDICRAFTS AND SOUVENIRS", name: "PATRICIO MASLIYAN", mobile: "9.07E+09", barangay: "Ambasing", municipality: "Sagada Mountain Province" },
+            { id: 43, business: "SAGADA WEAVING AND SOUVENIR SHOP", name: "EZRA KIETHLEY ARANDUQUE", mobile: "", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 44, business: "", name: "FELIXA GEORGIA ARANDUQUE", mobile: "", barangay: "PATAY", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 45, business: "SEIGRID ANN POTTERY", name: "SEIGRID ANN BANGYAY", mobile: "9165426447", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 46, business: "Solenn Stitches", name: "Rufina Aluyen", mobile: "9308144979", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 47, business: "SOMETHING SAGADA SOUVENIRS KLEARING APPAREL MANUF", name: "FLORENCE LIKIGAN", mobile: "9562543413", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 48, business: "SUPHINA LOOM WEAVING MANUFACTURING", name: "IRENE MARCONI", mobile: "9150668685", barangay: "LUBON", municipality: "Tadian Mountain Province" },
+            { id: 49, business: "SUTADA WEAVER'S ASSOCIATION", name: "SALDY PUYONGAN", mobile: "9151578041", barangay: "SUPANG", municipality: "Sabangan Mountain Province" },
+            { id: 50, business: "SYDAL'G HANDLOOM WOVEN PRODUCTS", name: "GLADYS WADINGAN", mobile: "9957141183", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 51, business: "TANGAFAN ORGANIZATION INC", name: "PAULA COFULAN", mobile: "", barangay: "SAMOKI", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 52, business: "TAWID CLOTHING SHOP", name: "ELOIZA JEAN CHANGAT", mobile: "09193106595", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 53, business: "TAYNODAN HANDLOOM WOVEN PRODUCTS", name: "PHOEBE AMOGAWEN", mobile: "", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 54, business: "TIRIZA'S HANDICRAFTS TRADING", name: "MARIA TERESA ABAD", mobile: "9391814622", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 55, business: "", name: "MARITES ABAD", mobile: "9391814622", barangay: "PATAY", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 56, business: "Viewhill Womens Organization", name: "Ruth Kathleen Codod", mobile: "9085604319", barangay: "Guinzadan Central", municipality: "Bauko Mountain Province" },
+            { id: 57, business: "YHUAN YHATZ BAGS AND ACCESSORIES SHOP", name: "CAREN KIWANG", mobile: "9108279230", barangay: "Samoki", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 58, business: "ZEPHYRA'S CLOSET ONLINE SHOP", name: "KRYS IVONNE JOY SORIA", mobile: "09151527501", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 59, business: "ZK CLOTHING BOUTIQUE", name: "MICHAEL IVAN JULIANO", mobile: "9069220433", barangay: "Poblacion", municipality: "Paracelis Mountain Province" }
         ];
 
         const tableBody = document.getElementById('table-body');
         const cardList = document.getElementById('card-list');
 
-        weavers.forEach(w => {
-            const bName = w.business || '<span class="empty">N/A</span>';
-            const mob = w.mobile || '<span class="empty">N/A</span>';
-            const bgry = w.barangay || '<span class="empty">N/A</span>';
+        msmes.forEach(m => {
+            const bName = m.business ? m.business : '<span class="empty">N/A</span>';
+            const mob = m.mobile ? m.mobile : '<span class="empty">N/A</span>';
+            const bgry = m.barangay ? m.barangay : '<span class="empty">N/A</span>';
 
-            // Table Rows
+            // Populate Desktop Table
             tableBody.innerHTML += `
                 <tr>
-                    <td>${w.id}</td>
-                    <td>${bName}</td>
-                    <td>${w.last}</td>
-                    <td>${w.first}</td>
+                    <td>${m.id}</td>
+                    <td><strong>${bName}</strong></td>
+                    <td>${m.name}</td>
                     <td>${mob}</td>
                     <td>${bgry}</td>
-                    <td>${w.municipality}</td>
+                    <td>${m.municipality}</td>
                 </tr>
             `;
 
-            // Mobile Cards
+            // Populate Mobile Cards
             cardList.innerHTML += `
                 <div class="card">
                     <div class="card-header">
-                        <span class="client-name">${w.first} ${w.last}</span>
-                        <span class="card-num">#${w.id}</span>
+                        <span class="client-name">${m.name}</span>
+                        <span class="card-num">#${m.id}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Business:</span>
-                        <span class="info-value">${bName}</span>
+                        <span class="info-label">MSME Name:</span>
+                        <span class="info-value"><strong>${bName}</strong></span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Mobile:</span>
@@ -251,7 +250,7 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Municipality:</span>
-                        <span class="info-value">${w.municipality}</span>
+                        <span class="info-value">${m.municipality}</span>
                     </div>
                 </div>
             `;
