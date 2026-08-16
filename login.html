@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weaver-ID | Authentication</title>
+  <title>Weaver-ID | Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
   <style>
@@ -20,15 +20,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      margin: 0;
     }
 
-    .auth-card {
+    .login-card {
       background: #ffffff;
       border-radius: 16px;
       border: 1px solid #eaeaea;
       box-shadow: 0 4px 20px rgba(0,0,0,0.05);
       width: 100%;
-      max-width: 440px;
+      max-width: 400px;
       padding: 2.5rem;
     }
 
@@ -53,154 +54,44 @@
 </head>
 <body>
 
-  <div class="auth-card">
+  <div class="login-card">
     <!-- Header -->
     <div class="text-center mb-4">
       <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success rounded-circle mb-2" style="width: 56px; height: 56px;">
         <i class="bi bi-building-check fs-2"></i>
       </div>
       <h5 class="fw-bold mb-0 text-success">Weaver-ID Portal</h5>
-      <p class="text-muted fs-7" id="authSubtitle">Sign in to your Association Hub Account</p>
+      <p class="text-muted fs-7">Sign in to your Association Account</p>
     </div>
 
-    <!-- Alert Box -->
-    <div id="authAlert" class="alert alert-danger d-none fs-7 py-2" role="alert"></div>
-
-    <!-- LOGIN FORM -->
-    <form id="loginForm" onsubmit="handleLogin(event)">
+    <!-- HTML Form -->
+    <form action="AssociationDashboard.html" method="GET">
+      
       <div class="mb-3">
-        <label class="form-label fs-7 fw-semibold">Hub Email / Username</label>
+        <label for="email" class="form-label fs-7 fw-semibold">Email Address</label>
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
-          <input type="email" id="loginEmail" class="form-control border-start-0 ps-0" placeholder="hub@montanosa.org" required>
+          <input type="email" id="email" name="email" class="form-control border-start-0 ps-0" placeholder="hub@montanosa.org" required>
         </div>
       </div>
 
       <div class="mb-3">
-        <label class="form-label fs-7 fw-semibold">Password</label>
+        <label for="password" class="form-label fs-7 fw-semibold">Password</label>
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
-          <input type="password" id="loginPassword" class="form-control border-start-0 ps-0" placeholder="••••••••" required>
+          <input type="password" id="password" name="password" class="form-control border-start-0 ps-0" placeholder="••••••••" required>
         </div>
       </div>
 
+      <!-- Native HTML Link Directing to Dashboard on Submit -->
       <button type="submit" class="btn btn-dti w-100 py-2 mb-3">Sign In</button>
-      
+
       <div class="text-center fs-7">
-        <span class="text-muted">Need a hub account?</span>
-        <a href="#" class="text-success fw-semibold text-decoration-none ms-1" onclick="toggleAuthMode('register')">Register Hub</a>
+        <a href="AssociationDashboard.html" class="text-success fw-semibold text-decoration-none">Continue without signing in &rarr;</a>
       </div>
+
     </form>
-
-    <!-- REGISTRATION FORM -->
-    <form id="registerForm" class="d-none" onsubmit="handleRegister(event)">
-      <div class="mb-3">
-        <label class="form-label fs-7 fw-semibold">Association Name</label>
-        <input type="text" id="regAssocName" class="form-control" placeholder="Montañosa Weavers Association" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label fs-7 fw-semibold">Location / Municipality</label>
-        <input type="text" id="regLocation" class="form-control" placeholder="Sagada, Mountain Province" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label fs-7 fw-semibold">Hub Email Address</label>
-        <input type="email" id="regEmail" class="form-control" placeholder="hub@montanosa.org" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label fs-7 fw-semibold">Account Password</label>
-        <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
-      </div>
-
-      <button type="submit" class="btn btn-dti w-100 py-2 mb-3">Create Hub Account</button>
-      
-      <div class="text-center fs-7">
-        <span class="text-muted">Already registered?</span>
-        <a href="#" class="text-success fw-semibold text-decoration-none ms-1" onclick="toggleAuthMode('login')">Sign In</a>
-      </div>
-    </form>
-
   </div>
 
-  <script>
-    // Initialize Local Storage Database
-    if (!localStorage.getItem('weaver_hubs')) {
-      const defaultUsers = [
-        {
-          assocName: "Montañosa Weavers Association",
-          location: "Sagada, Mountain Province",
-          email: "hub@montanosa.org",
-          password: "password123",
-          hubId: "HUB-SAG-01"
-        }
-      ];
-      localStorage.setItem('weaver_hubs', JSON.stringify(defaultUsers));
-    }
-
-    function toggleAuthMode(mode) {
-      document.getElementById('authAlert').classList.add('d-none');
-      if (mode === 'register') {
-        document.getElementById('loginForm').classList.add('d-none');
-        document.getElementById('registerForm').classList.remove('d-none');
-        document.getElementById('authSubtitle').textContent = "Register a new Association Hub";
-      } else {
-        document.getElementById('registerForm').classList.add('d-none');
-        document.getElementById('loginForm').classList.remove('d-none');
-        document.getElementById('authSubtitle').textContent = "Sign in to your Association Hub Account";
-      }
-    }
-
-    function handleRegister(e) {
-      e.preventDefault();
-      const assocName = document.getElementById('regAssocName').value;
-      const location = document.getElementById('regLocation').value;
-      const email = document.getElementById('regEmail').value.toLowerCase().trim();
-      const password = document.getElementById('regPassword').value;
-
-      let hubs = JSON.parse(localStorage.getItem('weaver_hubs')) || [];
-
-      if (hubs.some(h => h.email === email)) {
-        showAlert('An account with this email already exists.');
-        return;
-      }
-
-      const newHub = {
-        assocName,
-        location,
-        email,
-        password,
-        hubId: 'HUB-' + Math.floor(100 + Math.random() * 900)
-      };
-
-      hubs.push(newHub);
-      localStorage.setItem('weaver_hubs', JSON.stringify(hubs));
-      localStorage.setItem('active_hub', JSON.stringify(newHub));
-      window.location.href = './AssociationDashboard.html';
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.toLowerCase().trim();
-      const password = document.getElementById('loginPassword').value;
-
-      let hubs = JSON.parse(localStorage.getItem('weaver_hubs')) || [];
-      const user = hubs.find(h => h.email === email && h.password === password);
-
-      if (user) {
-        localStorage.setItem('active_hub', JSON.stringify(user));
-        window.location.href = './AssociationDashboard.html';
-      } else {
-        showAlert('Invalid email or password. Please try again.');
-      }
-    }
-
-    function showAlert(message) {
-      const alertBox = document.getElementById('authAlert');
-      alertBox.textContent = message;
-      alertBox.classList.remove('d-none');
-    }
-  </script>
 </body>
 </html>
