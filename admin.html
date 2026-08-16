@@ -9,12 +9,10 @@
 </head>
 <body class="bg-light">
 
-  <!-- Auth Verification Overlay -->
   <div id="authCheckOverlay" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex align-items-center justify-content-center z-3">
     <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Verifying session...</span></div>
   </div>
 
-  <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-3">
     <a class="navbar-brand fw-bold" href="#">WEAVER-ID Super Admin</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
@@ -32,13 +30,11 @@
   </nav>
 
   <div class="container py-4">
-    <!-- Action Bar -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>System Management</h2>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerWeaverModal"><i class="bi bi-person-plus-fill"></i> Register New Weaver</button>
     </div>
 
-    <!-- Weaver Table -->
     <div class="card shadow-sm mb-4">
       <div class="card-header bg-white fw-bold">Registered Weaver Profiles</div>
       <div class="card-body p-0">
@@ -53,57 +49,9 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="weaverTableBody">
-              <!-- Dynamically populated via API -->
-            </tbody>
+            <tbody id="weaverTableBody"></tbody>
           </table>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Register Weaver Modal -->
-  <div class="modal fade" id="registerWeaverModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form id="weaverRegisterForm" onsubmit="handleWeaverSubmit(event)">
-          <div class="modal-header">
-            <!-- <h5 class="modal-title">Register Weaver Profile</h5> -->
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Full Name</label>
-              <input type="text" id="weaverFullName" class="form-control" required>
-            </div>
-            <div class="row g-2 mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Barangay</label>
-                <input type="text" id="weaverBarangay" class="form-control" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Municipality</label>
-                <input type="text" id="weaverMunicipality" class="form-control" required>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Association Affiliation</label>
-              <input type="text" id="weaverAssociation" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">DTI/OTOP Registration # (Optional)</label>
-              <input type="text" id="weaverDtiOtopReg" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Contact Number</label>
-              <input type="tel" id="weaverContact" class="form-control" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Weaver Profile</button>
-          </div>
-        </form>
       </div>
     </div>
   </div>
@@ -113,7 +61,6 @@
     const API_BASE = '/api';
     let idleTimer;
 
-    // Session Validation & Auto Logout (15 min idle)
     function resetIdleTimer() {
       clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
@@ -125,7 +72,7 @@
     window.onload = function() {
       const token = localStorage.getItem('jwt_token');
       if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = '/weaver-id/login.html';
         return;
       }
       document.getElementById('authCheckOverlay').classList.add('d-none');
@@ -137,7 +84,9 @@
 
     function handleLogout() {
       localStorage.removeItem('jwt_token');
-      window.location.href = '/login.html';
+      localStorage.removeItem('user_role');
+      localStorage.removeItem('user_name');
+      window.location.href = '/weaver-id/login.html';
     }
 
     async function fetchWeavers() {
@@ -163,30 +112,6 @@
         `).join('');
       } catch (err) {
         console.error(err);
-      }
-    }
-
-    async function handleWeaverSubmit(e) {
-      e.preventDefault();
-      const token = localStorage.getItem('jwt_token');
-      const payload = {
-        fullName: document.getElementById('weaverFullName').value,
-        barangay: document.getElementById('weaverBarangay').value,
-        municipality: document.getElementById('weaverMunicipality').value,
-        associationAffiliation: document.getElementById('weaverAssociation').value,
-        dtiOtopRegNum: document.getElementById('weaverDtiOtopReg').value,
-        contactNumber: document.getElementById('weaverContact').value
-      };
-
-      const res = await fetch(`${API_BASE}/weavers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        bootstrap.Modal.getInstance(document.getElementById('registerWeaverModal')).hide();
-        fetchWeavers();
       }
     }
   </script>
