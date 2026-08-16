@@ -3,529 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Client Directory</title>
+    <title>Weaver & MSME Directory</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #ffffff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-            text-transform: uppercase;
-            font-size: 0.85em;
-            letter-spacing: 0.05em;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        ul {
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding-left: 20px;
+            padding: 0;
         }
-        .empty-field {
-            color: #888;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 12px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            color: #1a365d;
+        }
+        .header p {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        /* Mobile-First Layout (Stacked Cards) */
+        .directory-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            border-left: 4px solid #2563eb;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .card-num {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .client-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 4px;
+            font-size: 0.88rem;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #64748b;
+            width: 110px;
+            flex-shrink: 0;
+        }
+        .info-value {
+            color: #1e293b;
+            word-break: break-word;
+        }
+        .empty {
+            color: #94a3b8;
             font-style: italic;
+        }
+
+        /* Desktop Mode (Converts back to Table on wide screens) */
+        @media (min-width: 768px) {
+            body { padding: 24px; }
+            .directory-list { display: block; }
+            .desktop-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: #fff;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            }
+            .desktop-table th {
+                background: #2563eb;
+                color: #fff;
+                padding: 12px;
+                text-align: left;
+                font-size: 0.85rem;
+            }
+            .desktop-table td {
+                padding: 10px 12px;
+                border-bottom: 1px solid #e2e8f0;
+                font-size: 0.9rem;
+            }
+            .desktop-table tr:hover { background: #f8fafc; }
+            .card { display: none; }
+        }
+        @media (max-width: 767px) {
+            .desktop-table { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <h2>Client & Business Directory</h2>
+    <div class="header">
+        <h1>Weaver ID Master List</h1>
+        <p>Total Records: 59</p>
+    </div>
 
-    <table>
+    <!-- Desktop Table View -->
+    <table class="desktop-table">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Client Name</th>
-                <th>Business / Association Name(s)</th>
+                <th>Business Name</th>
+                <th>Last Name</th>
+                <th>First Name</th>
                 <th>Mobile Number</th>
                 <th>Barangay</th>
                 <th>Municipality</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>JOCELYN MIRANDA</td>
-                <td>JOCELYN MIRANDA</td>
-                <td>9128367338</td>
-                <td>DAGDAG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>JOSEPHINE FUCHADCHA</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td><span class="empty-field">N/A</span></td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>JULIANA WALISEN</td>
-                <td>JULIANA'S LOOM WEAVING MANUFACTURING</td>
-                <td>9993761663</td>
-                <td>GUINZADAN NORTE</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>BRENDA ANONGOS</td>
-                <td>KAMOWAN SOUVENIRS</td>
-                <td>9194127474</td>
-                <td>PATAY</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>FLORENCE ALIWENGWENG</td>
-                <td>KINAYAN HANDLOOM WOVEN PRODUCTS</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>DEMANG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>Marisa Coteng</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>9451644407</td>
-                <td>Laylaya</td>
-                <td>Besao</td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>LANIE GAONGEN</td>
-                <td>LANIE GAONGEN</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>DEMANG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td>Felipa Tagaban</td>
-                <td>Letang Young Mothers</td>
-                <td>9457956160</td>
-                <td>Tapapan</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>9</td>
-                <td>LINA UNOS</td>
-                <td>LINA'S RUGS MANUFACTURING</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>Tamboan</td>
-                <td>Besao</td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td>Rose Ann Wangdali</td>
-                <td>
-                    <ul>
-                        <li>LINGAYO'S HANDLOOM WOVEN PRODUCTS</li>
-                        <li>MONTAÑOSA WEAVERS ASSOCIATION</li>
-                        <li>Rose Ann's Loom Art Gallery</li>
-                    </ul>
-                </td>
-                <td>9502033126</td>
-                <td>Demang</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>11</td>
-                <td>LOIDA BANIAGA</td>
-                <td>LOIDA BANIAGA</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>DAGDAG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>12</td>
-                <td>MARILYN DAO-ASEN</td>
-                <td>MARILYN'S WOVEN PRODUCTS</td>
-                <td>9466896101</td>
-                <td>GUINZADAN SUR</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>13</td>
-                <td>MARINA BALANIYAN</td>
-                <td>MARINA VARIETY STORE</td>
-                <td>09300907000</td>
-                <td>POBLACION</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>14</td>
-                <td>MARY TUKAKI</td>
-                <td>MARY'S WOVEN PRODUCTS</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>GUINZADAN NORTE</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>15</td>
-                <td>DAISY MAY-ENG</td>
-                <td>MAY-ENG LOOM WEAVING MANUFACTURING</td>
-                <td>9061298652</td>
-                <td>AMBAGUIO</td>
-                <td>Besao</td>
-            </tr>
-            <tr>
-                <td>16</td>
-                <td>HERMINIA PIAYAS</td>
-                <td>MIMYAH'S WOVEN PRODUCTS</td>
-                <td>9668971195</td>
-                <td>CAN-EO</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>17</td>
-                <td>MARY ANN MODAWAN</td>
-                <td>MODAWAN WOVEN PRODUCTS</td>
-                <td>9484600525</td>
-                <td>GUINZADAN SUR</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>18</td>
-                <td>CATHERINE CALINGLING</td>
-                <td>N AND C GLASS AND ALUMINUM SUPPLY</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>ABATAN</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>19</td>
-                <td>ROSE DULAY</td>
-                <td>NEWLOOM WOVEN PRODUCTS</td>
-                <td>9108700467</td>
-                <td>DAGDAG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>20</td>
-                <td>EVELYN OCHASAN</td>
-                <td>OCHASAN'S LOOM WEAVING</td>
-                <td>9354595908</td>
-                <td>CAN-EO</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>21</td>
-                <td>KIMBERLY ONGA-ONG</td>
-                <td>ONGA-ONG'S LOOM WEAVING PRODUCTS</td>
-                <td>9165633839</td>
-                <td>CAN-EO</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>22</td>
-                <td>RODILYN CHUMEL-ANG</td>
-                <td>OYAOY'S CLOTHING BOUTIQUE</td>
-                <td>9702091747</td>
-                <td>Samoki</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>23</td>
-                <td>CHRISTOPHER PINASEN</td>
-                <td>PAMANA ORGANIZATION</td>
-                <td>9128242841</td>
-                <td>MASLA</td>
-                <td>Tadian</td>
-            </tr>
-            <tr>
-                <td>24</td>
-                <td>Julien Pineda</td>
-                <td>Pangayapang Handicrafts Association</td>
-                <td>9467344884</td>
-                <td>Poblacion</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>25</td>
-                <td>BRENDO CAYANGA</td>
-                <td>PAULINA'S LOOM WEAVING MANUFACTURING</td>
-                <td>9502032739</td>
-                <td>AMBAGUIO</td>
-                <td>Besao</td>
-            </tr>
-            <tr>
-                <td>26</td>
-                <td>JOY ANOYAN</td>
-                <td>PIGACABUBA WEAVES ASSOCIATION</td>
-                <td>9398711035</td>
-                <td>CAMATAGAN</td>
-                <td>Sabangan</td>
-            </tr>
-            <tr>
-                <td>27</td>
-                <td>Virginia Omaweng</td>
-                <td>Pinagpagan Womens Workers Association</td>
-                <td>9978178644</td>
-                <td>Demang</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>28</td>
-                <td>PRAY KEEN BAN-ANG</td>
-                <td>PRAY'S KEENLYCRAFT SEWING SERVICE</td>
-                <td>9467509774</td>
-                <td>AMBASING</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>29</td>
-                <td>REGINA BALAGTAS</td>
-                <td>REGINA BALAGTAS</td>
-                <td>9812499300</td>
-                <td>KIN-IWAY</td>
-                <td>Besao</td>
-            </tr>
-            <tr>
-                <td>30</td>
-                <td>ALICE TAULI</td>
-                <td>RIVER GREEN VARIETY SHOP</td>
-                <td>9123798171</td>
-                <td>POBLACION</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>31</td>
-                <td>RANNIE DAO</td>
-                <td>SABANGAN WEAVERS ASSOCIATIION</td>
-                <td>9101572596</td>
-                <td>POBLACION</td>
-                <td>Sabangan</td>
-            </tr>
-            <tr>
-                <td>32</td>
-                <td>LUCIANO BAGYAN</td>
-                <td>SAGADA COLLECTIONS SOUVENIR SHOP</td>
-                <td>9517475183</td>
-                <td>PATAY</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>33</td>
-                <td>REGEELYN BACOLONG</td>
-                <td>SAGADA ETHNIC HANDICRAFTS MANUFACTURING</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>DAGDAG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>34</td>
-                <td>ESTHER CACAY</td>
-                <td>SAGADA HAND LOOM WOVEN PRODUCT</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>DAGDAG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>35</td>
-                <td>JESSICA AGPAD</td>
-                <td>SAGADA HANGINGVIEW SOUVENIR</td>
-                <td>9608972889</td>
-                <td>DEMANG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>36</td>
-                <td>METHUSELAH KOLLIN</td>
-                <td>SAGADA KOOL'TOUR ARTS AND CRAFTS MANUFACTURING</td>
-                <td>9079768758</td>
-                <td>AMBASING</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>37</td>
-                <td>AGNES CADIOGAN</td>
-                <td>SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING</td>
-                <td>9121527484</td>
-                <td>DEMANG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>38</td>
-                <td>REBECCA CADIOGAN</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>DEMANG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>39</td>
-                <td>BANGIYAD BOLINGET</td>
-                <td>SAGADA NORTH WEAVING</td>
-                <td>9061495265</td>
-                <td>AGUID</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>40</td>
-                <td>PATRICIO MASLIYAN</td>
-                <td>SAGADA SUNRISE HANDICRAFTS AND SOUVENIRS</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>Ambasing</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>41</td>
-                <td>EZRA KIETHLEY ARANDUQUE</td>
-                <td>SAGADA WEAVING AND SOUVENIR SHOP</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>PATAY</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>42</td>
-                <td>FELIXA GEORGIA ARANDUQUE</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>PATAY</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>43</td>
-                <td>SEIGRID ANN BANGYAY</td>
-                <td>SEIGRID ANN POTTERY</td>
-                <td>9165426447</td>
-                <td>DAGDAG</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>44</td>
-                <td>Rufina Aluyen</td>
-                <td>Solenn Stitches</td>
-                <td>9308144979</td>
-                <td>Demang</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>45</td>
-                <td>FLORENCE LIKIGAN</td>
-                <td>SOMETHING SAGADA SOUVENIRS KLEARING APPAREL MANUF</td>
-                <td>9562543413</td>
-                <td>PATAY</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>46</td>
-                <td>IRENE MARCONI</td>
-                <td>SUPHINA LOOM WEAVING MANUFACTURING</td>
-                <td>9150668685</td>
-                <td>LUBON</td>
-                <td>Tadian</td>
-            </tr>
-            <tr>
-                <td>47</td>
-                <td>SALDY PUYONGAN</td>
-                <td>SUTADA WEAVER'S ASSOCIATION</td>
-                <td>9151578041</td>
-                <td>SUPANG</td>
-                <td>Sabangan</td>
-            </tr>
-            <tr>
-                <td>48</td>
-                <td>GLADYS WADINGAN</td>
-                <td>SYDAL'G HANDLOOM WOVEN PRODUCTS</td>
-                <td>9957141183</td>
-                <td>CAN-EO</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>49</td>
-                <td>PAULA COFULAN</td>
-                <td>TANGAFAN ORGANIZATION INC</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>SAMOKI</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>50</td>
-                <td>ELOIZA JEAN CHANGAT</td>
-                <td>TAWID CLOTHING SHOP</td>
-                <td>09193106595</td>
-                <td>POBLACION</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>51</td>
-                <td>PHOEBE AMOGAWEN</td>
-                <td>TAYNODAN HANDLOOM WOVEN PRODUCTS</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>PATAY</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>52</td>
-                <td>MARIA TERESA ABAD</td>
-                <td>TIRIZA'S HANDICRAFTS TRADING</td>
-                <td>9391814622</td>
-                <td>PATAY</td>
-                <td>Sagada</td>
-            </tr>
-            <tr>
-                <td>53</td>
-                <td>MARITES ABAD</td>
-                <td><span class="empty-field">N/A</span></td>
-                <td>9391814622</td>
-                <td>PATAY</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>54</td>
-                <td>Ruth Kathleen Codod</td>
-                <td>Viewhill Womens Organization</td>
-                <td>9085604319</td>
-                <td>Guinzadan Central</td>
-                <td>Bauko</td>
-            </tr>
-            <tr>
-                <td>55</td>
-                <td>CAREN KIWANG</td>
-                <td>YHUAN YHATZ BAGS AND ACCESSORIES SHOP</td>
-                <td>9108279230</td>
-                <td>Samoki</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>56</td>
-                <td>KRYS IVONNE JOY SORIA</td>
-                <td>ZEPHYRA'S CLOSET ONLINE SHOP</td>
-                <td>09151527501</td>
-                <td>POBLACION</td>
-                <td>Bontoc</td>
-            </tr>
-            <tr>
-                <td>57</td>
-                <td>MICHAEL IVAN JULIANO</td>
-                <td>ZK CLOTHING BOUTIQUE</td>
-                <td>9069220433</td>
-                <td>Poblacion</td>
-                <td>Paracelis</td>
-            </tr>
-        </tbody>
+        <tbody id="table-body"></tbody>
     </table>
 
+    <!-- Mobile Cards View -->
+    <div class="directory-list" id="card-list"></div>
+
+    <script>
+        const weavers = [
+            { id: 1, business: "JOCELYN MIRANDA", last: "MIRANDA", first: "JOCELYN", mobile: "9128367338", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 2, business: "JOSEPHINE FUCHADCHA", last: "FUCHADCHA", first: "JOSEPHINE", mobile: "", barangay: "", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 3, business: "JULIANA'S LOOM WEAVING MANUFACTURING", last: "WALISEN", first: "JULIANA", mobile: "9993761663", barangay: "GUINZADAN NORTE", municipality: "Bauko Mountain Province" },
+            { id: 4, business: "KAMOWAN SOUVENIRS", last: "ANONGOS", first: "BRENDA", mobile: "9194127474", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 5, business: "KINAYAN HANDLOOM WOVEN PRODUCTS", last: "ALIWENGWENG", first: "FLORENCE", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 6, business: "", last: "Coteng", first: "Marisa", mobile: "9451644407", barangay: "Laylaya", municipality: "Besao Mountain Province" },
+            { id: 7, business: "LANIE GAONGEN", last: "GAONGEN", first: "LANIE", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 8, business: "Letang Young Mothers", last: "Tagaban", first: "Felipa", mobile: "9457956160", barangay: "Tapapan", municipality: "Bauko Mountain Province" },
+            { id: 9, business: "LINA'S RUGS MANUFACTURING", last: "UNOS", first: "LINA", mobile: "", barangay: "Tamboan", municipality: "Besao Mountain Province" },
+            { id: 10, business: "LINGAYO'S HANDLOOM WOVEN PRODUCTS", last: "Wangdali", first: "Rose Ann", mobile: "9502033126", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 11, business: "LOIDA BANIAGA", last: "BANIAGA", first: "LOIDA", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 12, business: "MARILYN'S WOVEN PRODUCTS", last: "DAO-ASEN", first: "MARILYN", mobile: "9466896101", barangay: "GUINZADAN SUR", municipality: "Bauko Mountain Province" },
+            { id: 13, business: "MARINA VARIETY STORE", last: "BALANIYAN", first: "MARINA", mobile: "09300907000", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 14, business: "MARY'S WOVEN PRODUCTS", last: "TUKAKI", first: "MARY", mobile: "9.07E+09", barangay: "GUINZADAN NORTE", municipality: "Bauko Mountain Province" },
+            { id: 15, business: "MAY-ENG LOOM WEAVING MANUFACTURING", last: "MAY-ENG", first: "DAISY", mobile: "9061298652", barangay: "AMBAGUIO", municipality: "Besao Mountain Province" },
+            { id: 16, business: "MIMYAH'S WOVEN PRODUCTS", last: "PIAYAS", first: "HERMINIA", mobile: "9668971195", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 17, business: "MODAWAN WOVEN PRODUCTS", last: "MODAWAN", first: "MARY ANN", mobile: "9484600525", barangay: "GUINZADAN SUR", municipality: "Bauko Mountain Province" },
+            { id: 18, business: "MONTAÑOSA WEAVERS ASSOCIATION", last: "Wangdali", first: "Rose Ann", mobile: "9502033126", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 19, business: "N AND C GLASS AND ALUMINUM SUPPLY", last: "CALINGLING", first: "CATHERINE", mobile: "", barangay: "ABATAN", municipality: "Bauko Mountain Province" },
+            { id: 20, business: "NEWLOOM WOVEN PRODUCTS", last: "DULAY", first: "ROSE", mobile: "9108700467", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 21, business: "OCHASAN'S LOOM WEAVING", last: "OCHASAN", first: "EVELYN", mobile: "9354595908", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 22, business: "ONGA-ONG'S LOOM WEAVING PRODUCTS", last: "ONGA-ONG", first: "KIMBERLY", mobile: "9165633839", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 23, business: "OYAOY'S CLOTHING BOUTIQUE", last: "CHUMEL-ANG", first: "RODILYN", mobile: "9702091747", barangay: "Samoki", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 24, business: "PAMANA ORGANIZATION", last: "PINASEN", first: "CHRISTOPHER", mobile: "9128242841", barangay: "MASLA", municipality: "Tadian Mountain Province" },
+            { id: 25, business: "Pangayapang Handicrafts Association", last: "Pineda", first: "Julien", mobile: "9467344884", barangay: "Poblacion", municipality: "Bauko Mountain Province" },
+            { id: 26, business: "PAULINA'S LOOM WEAVING MANUFACTURING", last: "CAYANGA", first: "BRENDO", mobile: "9502032739", barangay: "AMBAGUIO", municipality: "Besao Mountain Province" },
+            { id: 27, business: "PIGACABUBA WEAVES ASSOCIATION", last: "ANOYAN", first: "JOY", mobile: "9398711035", barangay: "CAMATAGAN", municipality: "Sabangan Mountain Province" },
+            { id: 28, business: "Pinagpagan Womens Workers Association", last: "Omaweng", first: "Virginia", mobile: "9978178644", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 29, business: "PRAY'S KEENLYCRAFT SEWING SERVICE", last: "BAN-ANG", first: "PRAY KEEN", mobile: "9467509774", barangay: "AMBASING", municipality: "Sagada Mountain Province" },
+            { id: 30, business: "REGINA BALAGTAS", last: "BALAGTAS", first: "REGINA", mobile: "9812499300", barangay: "KIN-IWAY", municipality: "Besao Mountain Province" },
+            { id: 31, business: "RIVER GREEN VARIETY SHOP", last: "TAULI", first: "ALICE", mobile: "9123798171", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 32, business: "Rose Ann's Loom Art Gallery", last: "WANGDALI", first: "ROSE ANN", mobile: "9636113510", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 33, business: "SABANGAN WEAVERS ASSOCIATIION", last: "DAO", first: "RANNIE", mobile: "9101572596", barangay: "POBLACION", municipality: "Sabangan Mountain Province" },
+            { id: 34, business: "SAGADA COLLECTIONS SOUVENIR SHOP", last: "BAGYAN", first: "LUCIANO", mobile: "9517475183", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 35, business: "SAGADA ETHNIC HANDICRAFTS MANUFACTURING", last: "BACOLONG", first: "REGEELYN", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 36, business: "SAGADA HAND LOOM WOVEN PRODUCT", last: "CACAY", first: "ESTHER", mobile: "", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 37, business: "SAGADA HANGINGVIEW SOUVENIR", last: "AGPAD", first: "JESSICA", mobile: "9608972889", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 38, business: "SAGADA KOOL'TOUR ARTS AND CRAFTS MANUFACTURING", last: "KOLLIN", first: "METHUSELAH", mobile: "9079768758", barangay: "AMBASING", municipality: "Sagada Mountain Province" },
+            { id: 39, business: "SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING", last: "CADIOGAN", first: "AGNES", mobile: "9121527484", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 40, business: "", last: "CADIOGAN", first: "REBECCA", mobile: "", barangay: "DEMANG", municipality: "Sagada Mountain Province" },
+            { id: 41, business: "SAGADA NORTH WEAVING", last: "BOLINGET", first: "BANGIYAD", mobile: "9061495265", barangay: "AGUID", municipality: "Sagada Mountain Province" },
+            { id: 42, business: "SAGADA SUNRISE HANDICRAFTS AND SOUVENIRS", last: "MASLIYAN", first: "PATRICIO", mobile: "9.07E+09", barangay: "Ambasing", municipality: "Sagada Mountain Province" },
+            { id: 43, business: "SAGADA WEAVING AND SOUVENIR SHOP", last: "ARANDUQUE", first: "EZRA KIETHLEY", mobile: "", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 44, business: "", last: "ARANDUQUE", first: "FELIXA GEORGIA", mobile: "", barangay: "PATAY", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 45, business: "SEIGRID ANN POTTERY", last: "BANGYAY", first: "SEIGRID ANN", mobile: "9165426447", barangay: "DAGDAG", municipality: "Sagada Mountain Province" },
+            { id: 46, business: "Solenn Stitches", last: "Aluyen", first: "Rufina", mobile: "9308144979", barangay: "Demang", municipality: "Sagada Mountain Province" },
+            { id: 47, business: "SOMETHING SAGADA SOUVENIRS KLEARING APPAREL MANUF", last: "LIKIGAN", first: "FLORENCE", mobile: "9562543413", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 48, business: "SUPHINA LOOM WEAVING MANUFACTURING", last: "MARCONI", first: "IRENE", mobile: "9150668685", barangay: "LUBON", municipality: "Tadian Mountain Province" },
+            { id: 49, business: "SUTADA WEAVER'S ASSOCIATION", last: "PUYONGAN", first: "SALDY", mobile: "9151578041", barangay: "SUPANG", municipality: "Sabangan Mountain Province" },
+            { id: 50, business: "SYDAL'G HANDLOOM WOVEN PRODUCTS", last: "WADINGAN", first: "GLADYS", mobile: "9957141183", barangay: "CAN-EO", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 51, business: "TANGAFAN ORGANIZATION INC", last: "COFULAN", first: "PAULA", mobile: "", barangay: "SAMOKI", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 52, business: "TAWID CLOTHING SHOP", last: "CHANGAT", first: "ELOIZA JEAN", mobile: "09193106595", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 53, business: "TAYNODAN HANDLOOM WOVEN PRODUCTS", last: "AMOGAWEN", first: "PHOEBE", mobile: "", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 54, business: "TIRIZA'S HANDICRAFTS TRADING", last: "ABAD", first: "MARIA TERESA", mobile: "9391814622", barangay: "PATAY", municipality: "Sagada Mountain Province" },
+            { id: 55, business: "", last: "ABAD", first: "MARITES", mobile: "9391814622", barangay: "PATAY", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 56, business: "Viewhill Womens Organization", last: "Codod", first: "Ruth Kathleen", mobile: "9085604319", barangay: "Guinzadan Central", municipality: "Bauko Mountain Province" },
+            { id: 57, business: "YHUAN YHATZ BAGS AND ACCESSORIES SHOP", last: "KIWANG", first: "CAREN", mobile: "9108279230", barangay: "Samoki", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 58, business: "ZEPHYRA'S CLOSET ONLINE SHOP", last: "SORIA", first: "KRYS IVONNE JOY", mobile: "09151527501", barangay: "POBLACION", municipality: "Bontoc (Capital) Mountain Province" },
+            { id: 59, business: "ZK CLOTHING BOUTIQUE", last: "JULIANO", first: "MICHAEL IVAN", mobile: "9069220433", barangay: "Poblacion", municipality: "Paracelis Mountain Province" }
+        ];
+
+        const tableBody = document.getElementById('table-body');
+        const cardList = document.getElementById('card-list');
+
+        weavers.forEach(w => {
+            const bName = w.business || '<span class="empty">N/A</span>';
+            const mob = w.mobile || '<span class="empty">N/A</span>';
+            const bgry = w.barangay || '<span class="empty">N/A</span>';
+
+            // Table Rows
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${w.id}</td>
+                    <td>${bName}</td>
+                    <td>${w.last}</td>
+                    <td>${w.first}</td>
+                    <td>${mob}</td>
+                    <td>${bgry}</td>
+                    <td>${w.municipality}</td>
+                </tr>
+            `;
+
+            // Mobile Cards
+            cardList.innerHTML += `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="client-name">${w.first} ${w.last}</span>
+                        <span class="card-num">#${w.id}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Business:</span>
+                        <span class="info-value">${bName}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Mobile:</span>
+                        <span class="info-value">${mob}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Barangay:</span>
+                        <span class="info-value">${bgry}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Municipality:</span>
+                        <span class="info-value">${w.municipality}</span>
+                    </div>
+                </div>
+            `;
+        });
+    </script>
 </body>
 </html>
