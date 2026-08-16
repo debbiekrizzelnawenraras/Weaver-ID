@@ -266,7 +266,7 @@
           <div class="fw-bold fs-7 text-truncate">Provincial Admin</div>
           <div class="text-muted fs-8 text-truncate" id="loggedUserDisplay">admin@weaverid.gov.ph</div>
         </div>
-        <button onclick="handleLogout()" class="btn btn-sm btn-light border-0" title="Logout"><i class="bi bi-box-arrow-right text-danger"></i></button>
+        <button type="button" onclick="handleLogout()" class="btn btn-sm btn-light border-0" title="Logout"><i class="bi bi-box-arrow-right text-danger"></i></button>
       </div>
     </aside>
 
@@ -706,14 +706,12 @@
     }
 
     function handleLogout() {
-      if (confirm("Log out of the Weaver-ID Admin Control Panel?")) {
-        document.getElementById('app-container').classList.add('d-none');
-        document.getElementById('view-login').classList.remove('d-none');
-        document.getElementById('loginPassword').value = '';
-        
-        // Reset navigation back to Dashboard view for next login
-        switchTab('dashboard');
-      }
+      // Direct screen toggle without confirm popup
+      document.getElementById('app-container').classList.add('d-none');
+      document.getElementById('view-login').classList.remove('d-none');
+      document.getElementById('loginPassword').value = '';
+      
+      switchTab('dashboard');
     }
 
     // --- 3. RENDER FUNCTIONS ---
