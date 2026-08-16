@@ -38,7 +38,7 @@
     </div>
 
     <div class="card-body p-4">
-      <!-- Generic Authentication Error Alert (FR-AUTH-01) -->
+      <!-- Generic Authentication Error Alert -->
       <div id="errorAlert" class="alert alert-danger d-none fs-7" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
         <span>Invalid credentials provided. Please try again.</span>
@@ -83,7 +83,7 @@
     </div>
   </div>
 
-  <!-- Forgot Password Modal (FR-AUTH-03) -->
+  <!-- Forgot Password Modal -->
   <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -147,14 +147,12 @@
         const data = await response.json();
 
         if (response.ok && data.token) {
-          // Store JWT token and user info (NFR-09)
           localStorage.setItem('jwt_token', data.token);
           localStorage.setItem('user_role', data.role);
           localStorage.setItem('user_name', data.name);
           
           redirectToDashboard(data.role);
         } else {
-          // Display generic error without indicating email vs password invalidity (FR-AUTH-01)
           errorAlert.classList.remove('d-none');
         }
       } catch (err) {
@@ -187,13 +185,14 @@
       }
     }
 
+    // UPDATED ROUTING WITH SUBFOLDER PATH
     function redirectToDashboard(role) {
       if (role === 'SUPER_ADMIN') {
-        window.location.href = '/admin.html';
+        window.location.href = '/weaver-id/admin.html';
       } else if (role === 'ADMIN') {
-        window.location.href = '/association_dashboard.html';
+        window.location.href = '/weaver-id/association_dashboard.html';
       } else {
-        window.location.href = '/login.html';
+        window.location.href = '/weaver-id/login.html';
       }
     }
   </script>
