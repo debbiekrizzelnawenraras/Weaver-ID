@@ -467,25 +467,35 @@
 
     function renderCatalog(data) {
       const tbody = document.getElementById('catalogTableBody');
-      tbody.innerHTML = data.map(item => `
-        <tr>
-          <td class="fw-semibold">${item.title}</td>
-          <td>${item.category}</td>
-          <td>${item.weaver}</td>
-          <td>
-            ${item.tagged 
-              ? `<span class="badge bg-success-subtle text-success border">Linked: <code>${item.id}</code></span>` 
-              : `<span class="badge bg-warning-subtle text-warning border">Untagged</span>`}
-          </td>
-          <td class="text-end pe-3">
-            ${item.tagged 
-              ? `<button class="btn btn-sm btn-outline-danger py-0" onclick="unlinkTag('${item.id}')">Unlink</button>` 
-              : `<button class="btn btn-sm btn-outline-success py-0" onclick="quickAssignTag('${item.title}')">Assign Tag</button>`}
-          </td>
-        </tr>
-      `).join('');
-    }
+      tbody.innerHTML = data.map(item => {
+        let statusBadge, actionBtn;
 
+        if (item.tagged) {
+          statusBadge = `<span class="badge bg-success-subtle text-success border">Linked: <code>${item.id}</code></span>`;
+          actionBtn = `<button class="btn btn-sm btn-outline-danger py-0" onclick="unlinkTag('${item.id}')">Unlink</button>`;
+        } else if (item.id === 'Pending Approval') {
+          statusBadge = `<span class="badge bg-info-subtle text-info border">Pending DTI Approval</span>`;
+          actionBtn = `<button class="btn btn-sm btn-outline-secondary py-0" disabled>Awaiting Review</button>`;
+        } else if (item.id === 'Rejected') {
+          statusBadge = `<span class="badge bg-danger-subtle text-danger border">Request Rejected</span>`;
+          actionBtn = `<button class="btn btn-sm btn-outline-success py-0" onclick="requestTagIssuance('${item.title}')">Request Again</button>`;
+        } else {
+          statusBadge = `<span class="badge bg-warning-subtle text-warning border">Untagged</span>`;
+          actionBtn = `<button class="btn btn-sm btn-outline-success py-0" onclick="requestTagIssuance('${item.title}')">Request Tag</button>`;
+        }
+
+        return `
+          <tr>
+            <td class="fw-semibold">${item.title}</td>
+            <td>${item.category}</td>
+            <td>${item.weaver}</td>
+            <td>${statusBadge}</td>
+            <td class="text-end pe-3">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+    
     function renderNFC(data) {
       const tbody = document.getElementById('nfcTableBody');
       tbody.innerHTML = data.map(tag => `
@@ -549,15 +559,65 @@
       document.getElementById('inputWeaver').value = '';
     }
 
-    function quickAssignTag(itemTitle) {
-      const newTagId = 'WVID-' + Math.floor(1000 + Math.random() * 9000);
-      const item = catalogData.find(i => i.title === itemTitle);
-      if(item) {
-        item.tagged = true;
-        item.id = newTagId;
-        renderCatalog(catalogData);
+    // TEMPORARY MOCK — uses localStorage as a stand-in shared "database" so
+    // this can be tested against admin.html in the same browser. Replace
+    // with a real POST to /api/nfc-requests once the backend is ready.
+    function getMockRequests() {
+      return JSON.parse(localStorage.getItem('mockNfcRequests') || '[]');
+    }
+    function saveMockRequests(requests) {
+      localStorage.setItem('mockNfcRequests', JSON.stringify(requests));
+    }
 
-        nfcData.unshift({ tagId: newTagId, item: itemTitle, date: new Date().toISOString().split('T')[0], status: 'Active' });
+    function requestTagIssuance(itemTitle) {
+      const item = catalogData.find(i => i.title === itemTitle);
+      if (!item) return;
+
+      const requests = getMockRequests();
+      requests.push({
+        requestId: 'REQ-' + Date.now(),
+        itemTitle,
+        weaver: item.weaver,
+        municipality: sessionStorage.getItem('weaverid_municipality') || 'Sagada',
+        status: 'pending',
+        tagId: null,
+        rejectionReason: null
+      });
+      saveMockRequests(requests);
+
+      item.id = 'Pending Approval';
+      item.tagged = false;
+      renderCatalog(catalogData);
+
+      alert('Tag request submitted. Waiting for DTI approval.');
+    }
+
+    // Checks localStorage for requests DTI has approved or rejected,
+    // and updates the local catalog to match.
+    function syncApprovedRequests() {
+      const requests = getMockRequests();
+      let changed = false;
+
+      requests.forEach(r => {
+        const item = catalogData.find(i => i.title === r.itemTitle);
+        if (!item) return;
+
+        if (r.status === 'approved' && item.id !== r.tagId) {
+          item.id = r.tagId;
+          item.tagged = true;
+          changed = true;
+          if (!nfcData.find(t => t.tagId === r.tagId)) {
+            nfcData.unshift({ tagId: r.tagId, item: r.itemTitle, date: new Date().toISOString().split('T')[0], status: 'Active' });
+          }
+        }
+        if (r.status === 'rejected' && item.id === 'Pending Approval') {
+          item.id = 'Rejected';
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        renderCatalog(catalogData);
         renderNFC(nfcData);
       }
     }
@@ -602,6 +662,7 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      syncApprovedRequests();
       renderCatalog(catalogData);
       renderNFC(nfcData);
     });

@@ -409,6 +409,25 @@
 
     <!-- 5. NFC TAGS VIEW -->
     <div id="view-nfc" class="tab-view d-none">
+      <div class="dashboard-card mb-3">
+        <h6 class="fw-bold mb-3">Pending Tag Requests</h6>
+        <div class="table-responsive">
+          <table class="table table-hover fs-7 text-nowrap">
+            <thead class="table-light">
+              <tr>
+                <th>Product</th>
+                <th>Weaver</th>
+                <th>Municipality</th>
+                <th class="text-end">Controls</th>
+              </tr>
+            </thead>
+            <tbody id="pendingRequestsTable">
+              <tr><td colspan="4" class="text-muted text-center py-3">No pending requests.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="dashboard-card">
         <h6 class="fw-bold mb-3">NFC Tags Issued</h6>
         <div class="table-responsive">
@@ -545,7 +564,7 @@
       { id: 3, name: "Suklang Woven Backpack", category: "Bag / Accessory", origin: "Bauko", material: "Rattan & Handwoven Canvas", nfc: "WVID-8842", weaver: "Juliana's Loom Weaving", desc: "Durable travel backpack combining traditional Cordilleran basketry trim with handloom woven fabric panels." }
     ];
 
-    const associationsData = [
+    const MOCK_ASSOCIATIONS = [
       { name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
       { name: "Sabangan Weavers Association", lead: "Rannie Dao", phone: "9101572596", location: "Poblacion, Sabangan" },
       { name: "Pinagpagan Womens Workers Association", lead: "Virginia Omaweng", phone: "9978178644", location: "Demang, Sagada" },
@@ -563,7 +582,7 @@
       { name: "Sagada Mountainside Handicrafts Manufacturing", lead: "Agnes Cadiogan", phone: "9121527484", location: "Demang, Sagada" }
     ];
 
-    let weaversData = [
+    const MOCK_WEAVERS = [
       { id: 1, name: "JOCELYN MIRANDA", proprietor: "JOCELYN MIRANDA", municipality: "Sagada" },
       { id: 2, name: "JOSEPHINE FUCHADCHA", proprietor: "JOSEPHINE FUCHADCHA", municipality: "Bontoc" },
       { id: 3, name: "JULIANA'S LOOM WEAVING", proprietor: "JULIANA WALISEN", municipality: "Bauko" },
@@ -625,14 +644,31 @@
       { id: 59, name: "VANAG LOOM CRAFTS", proprietor: "SOPHIA VANAG", municipality: "Bauko" }
     ];
 
+    // Mutable holders — populated by loadDashboardData() before first render
+    let weaversData = [];
+    let associationsData = [];
+
     const tabTitles = {
       dashboard: "Dashboard",
-      weavers: `Registered Weavers (${weaversData.length})`,
-      associations: `Associations (${associationsData.length})`,
+      weavers: "Registered Weavers",
+      associations: "Associations",
       products: "Cataloged Products",
       nfc: "NFC Tags",
       logs: "Audit Logs"
     };
+
+    // TEMPORARY MOCK — simulates fetching this data from the backend.
+    // Replace the inside of this function with real fetch() calls to
+    // GET /api/weavers and GET /api/associations once the backend is ready.
+    function loadDashboardData() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          weaversData = MOCK_WEAVERS;
+          associationsData = MOCK_ASSOCIATIONS;
+          resolve();
+        }, 400);
+      });
+    }
 
     // --- 2. RENDER FUNCTIONS ---
     function updateWeaverCounters() {
@@ -818,58 +854,82 @@
       alert("Exporting verification report (CSV)...");
     }
 
+    // TEMPORARY MOCK — reads/writes the same localStorage key that
+    // association_dashboard.html uses, so requests submitted there show up
+    // here. Replace with real GET/POST calls to /api/nfc-requests.
+    function getMockRequests() {
+      return JSON.parse(localStorage.getItem('mockNfcRequests') || '[]');
+    }
+    function saveMockRequests(requests) {
+      localStorage.setItem('mockNfcRequests', JSON.stringify(requests));
+    }
+
+    function renderPendingRequests() {
+      const requests = getMockRequests().filter(r => r.status === 'pending');
+      const tbody = document.getElementById('pendingRequestsTable');
+
+      if (requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-muted text-center py-3">No pending requests.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = requests.map(r => `
+        <tr>
+          <td class="fw-semibold">${r.itemTitle}</td>
+          <td>${r.weaver}</td>
+          <td>${r.municipality}</td>
+          <td class="text-end pe-3">
+            <button class="btn btn-sm btn-success py-0" onclick="approveRequest('${r.requestId}')">Approve</button>
+            <button class="btn btn-sm btn-outline-danger py-0" onclick="rejectRequest('${r.requestId}')">Reject</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function approveRequest(requestId) {
+      const requests = getMockRequests();
+      const req = requests.find(r => r.requestId === requestId);
+      if (!req) return;
+
+      req.status = 'approved';
+      req.tagId = 'WVID-' + Math.floor(1000 + Math.random() * 9000);
+      saveMockRequests(requests);
+
+      alert(`Approved. UID ${req.tagId} generated — ready for the Negosyo Center to write to a physical tag.`);
+      renderPendingRequests();
+    }
+
+    function rejectRequest(requestId) {
+      const reason = prompt('Reason for rejection:');
+      if (!reason) return;
+
+      const requests = getMockRequests();
+      const req = requests.find(r => r.requestId === requestId);
+      if (!req) return;
+
+      req.status = 'rejected';
+      req.rejectionReason = reason;
+      saveMockRequests(requests);
+
+      renderPendingRequests();
+    }
+
      function handleLogout() {
-      if (confirm('Log out from Association Hub?')) {
+      if (confirm('Log out from Admin Dashboard?')) {
         window.location.href = 'login.html';
       }
     }
 
     // --- 5. INITIALIZATION ---
-    window.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadDashboardData();
       updateWeaverCounters();
+      tabTitles.associations = `Associations (${associationsData.length})`;
       renderWeavers(weaversData);
       renderAssociations(associationsData);
       renderProducts(productsData);
-
-      // Render Verification Trends Chart using Chart.js
-      const ctx = document.getElementById('verificationTrendChart');
-      if (ctx) {
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-              label: 'Verifications',
-              data: [65, 90, 120, 185, 230, 281],
-              borderColor: '#0a4d2e',
-              backgroundColor: 'rgba(10, 77, 46, 0.08)',
-              fill: true,
-              tension: 0.35,
-              borderWidth: 2,
-              pointRadius: 3,
-              pointBackgroundColor: '#0a4d2e'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              x: {
-                grid: { display: false },
-                ticks: { font: { size: 10 } }
-              },
-              y: {
-                grid: { borderDash: [4, 4], color: '#e2e8f0' },
-                ticks: { font: { size: 10 } }
-              }
-            }
-          }
-        });
-      }
+      renderPendingRequests();
     });
-  </script>
+    </script>
 </body>
 </html>
