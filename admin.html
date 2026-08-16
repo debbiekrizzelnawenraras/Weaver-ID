@@ -495,7 +495,7 @@
     })('dti_admin');
 
     // --- 1. FULL DATA DATASETS ---
-    const associationsData = [
+    const MOCK_ASSOCIATIONS = [
       { name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
       { name: "Sabangan Weavers Association", lead: "Rannie Dao", phone: "9101572596", location: "Poblacion, Sabangan" },
       { name: "Pinagpagan Womens Workers Association", lead: "Virginia Omaweng", phone: "9978178644", location: "Demang, Sagada" },
@@ -513,7 +513,7 @@
       { name: "Sagada Mountainside Handicrafts Manufacturing", lead: "Agnes Cadiogan", phone: "9121527484", location: "Demang, Sagada" }
     ];
 
-    const weaversData = [
+    const MOCK_WEAVERS = [
       { id: 1, name: "JOCELYN MIRANDA", proprietor: "JOCELYN MIRANDA", municipality: "Sagada" },
       { id: 2, name: "JOSEPHINE FUCHADCHA", proprietor: "JOSEPHINE FUCHADCHA", municipality: "Bontoc" },
       { id: 3, name: "JULIANA'S LOOM WEAVING", proprietor: "JULIANA WALISEN", municipality: "Bauko" },
@@ -574,6 +574,23 @@
       { id: 58, name: "TOCUCAN WEAVING GROUP", proprietor: "NORMA TOCUCAN", municipality: "Bontoc" },
       { id: 59, name: "VANAG LOOM CRAFTS", proprietor: "SOPHIA VANAG", municipality: "Bauko" }
     ];
+
+    // Mutable holders — populated by loadDashboardData() below
+    let associationsData = [];
+    let weaversData = [];
+
+    // TEMPORARY MOCK — simulates fetching this data scoped to the logged-in
+    // user. Replace the inside of this function with a real fetch() to
+    // GET /api/weavers and GET /api/associations once the backend is ready.
+    function loadDashboardData() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          associationsData = MOCK_ASSOCIATIONS;
+          weaversData = MOCK_WEAVERS;
+          resolve();
+        }, 400);
+      });
+    }
 
     // --- 2. RENDER FUNCTIONS ---
     function renderWeavers(data) {
@@ -752,7 +769,8 @@
     }
 
     // Initialize on load
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadDashboardData();
       renderWeavers(weaversData);
       renderAssociations(associationsData);
     });
