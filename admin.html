@@ -39,6 +39,7 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      cursor: pointer;
     }
     .sidebar-nav .nav-link:hover {
       color: var(--dti-green);
@@ -78,12 +79,12 @@
         </div>
       </div>
       <nav class="sidebar-nav mt-3">
-        <a href="#" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a href="#" class="nav-link active"><i class="bi bi-people"></i> Weavers & MSMEs</a>
-        <a href="#" class="nav-link"><i class="bi bi-box-seam"></i> Products Catalog</a>
-        <a href="#" class="nav-link"><i class="bi bi-building"></i> Associations</a>
-        <a href="#" class="nav-link"><i class="bi bi-cpu"></i> NFC Management</a>
-        <a href="#" class="nav-link"><i class="bi bi-journal-check"></i> Verification Logs</a>
+        <a class="nav-link" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a class="nav-link active" data-tab="weavers"><i class="bi bi-people"></i> Weavers & MSMEs</a>
+        <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Products Catalog</a>
+        <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
+        <a class="nav-link" data-tab="nfc"><i class="bi bi-cpu"></i> NFC Management</a>
+        <a class="nav-link" data-tab="logs"><i class="bi bi-journal-check"></i> Verification Logs</a>
       </nav>
     </div>
 
@@ -102,155 +103,143 @@
   <main class="main-content">
     <div class="d-flex justify-content-between align-items-start mb-4">
       <div>
-        <h3 class="fw-bold mb-1">Weavers & MSMEs Directory</h3>
-        <p class="text-muted mb-0">Registered cultural loomweavers and local enterprises</p>
+        <h3 class="fw-bold mb-1" id="sectionTitle">Weavers & MSMEs Directory</h3>
+        <p class="text-muted mb-0" id="sectionSub">Registered cultural loomweavers and local enterprises</p>
       </div>
       <div class="d-flex gap-2">
-        <input type="text" id="searchInput" class="form-control" placeholder="Search across tables..." onkeyup="filterDirectory()">
-        <button class="btn btn-dti text-nowrap"><i class="bi bi-plus"></i> Weaver</button>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search entries..." onkeyup="filterDirectory()">
+        <button class="btn btn-dti text-nowrap" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-plus"></i> Add New</button>
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h6 class="fw-bold mb-0">Registered Weavers & MSME Directory (59 Total)</h6>
-        <button class="btn btn-dti btn-sm"><i class="bi bi-person-plus-fill"></i> Register New Weaver</button>
-      </div>
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 fs-7">
-            <thead class="table-light">
-              <tr>
-                <th width="5%">#</th>
-                <th width="30%">Business / Artisan Entity</th>
-                <th width="25%">Proprietor / Lead Weaver</th>
-                <th width="15%">Contact</th>
-                <th width="12%">Barangay</th>
-                <th width="13%">Municipality</th>
-              </tr>
-            </thead>
-            <tbody id="directoryTable">
-              <tr>
-                <td>1</td>
-                <td class="fw-semibold">JOCELYN MIRANDA LOOMWEAVING</td>
-                <td>Jocelyn Miranda</td>
-                <td>09182345601</td>
-                <td>POBLACION</td>
-                <td>Sagada</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td class="fw-semibold">JOSEPHINE FUCHADCHA HANDICRAFTS</td>
-                <td>Josephine Fuchadcha</td>
-                <td>09182345602</td>
-                <td>SAMOKI</td>
-                <td>Bontoc</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td class="fw-semibold">JULIANA'S LOOM WEAVING</td>
-                <td>Juliana Walisen</td>
-                <td>09182345603</td>
-                <td>POBLACION</td>
-                <td>Sabangan</td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td class="fw-semibold">BRENDA ANONGOS TEXTILES</td>
-                <td>Brenda Anongos</td>
-                <td>09182345604</td>
-                <td>POBLACION</td>
-                <td>Tadian</td>
-              </tr>
-              <tr>
-                <td>5</td>
-                <td class="fw-semibold">FLORENCE ALIWENGWENG WEAVING</td>
-                <td>Florence Aliwengweng</td>
-                <td>09182345605</td>
-                <td>OTUCAN NORTE</td>
-                <td>Bauko</td>
-              </tr>
-              <tr>
-                <td>6</td>
-                <td class="fw-semibold">LANIE GAONGEN ENTERPRISE</td>
-                <td>Lanie Gaongen</td>
-                <td>09182345606</td>
-                <td>KINIWAY</td>
-                <td>Besao</td>
-              </tr>
-              <tr>
-                <td>7</td>
-                <td class="fw-semibold">FELIPA TAGABAN CULTURAL CRAFTS</td>
-                <td>Felipa Tagaban</td>
-                <td>09182345607</td>
-                <td>GAWANA</td>
-                <td>Barlig</td>
-              </tr>
-              <tr>
-                <td>8</td>
-                <td class="fw-semibold">LINA UNOS TRADITIONAL FABRICS</td>
-                <td>Lina Unos</td>
-                <td>09182345608</td>
-                <td>POBLACION</td>
-                <td>Sadanga</td>
-              </tr>
-              <tr>
-                <td>9</td>
-                <td class="fw-semibold">ROSE ANN WANGDALI HANDICRAFTS</td>
-                <td>Rose Ann Wangdali</td>
-                <td>09182345609</td>
-                <td>POBLACION</td>
-                <td>Natonin</td>
-              </tr>
-              <tr>
-                <td>10</td>
-                <td class="fw-semibold">LOIDA BANIAGA WEAVING GUILD</td>
-                <td>Loida Baniaga</td>
-                <td>09182345610</td>
-                <td>POBLACION</td>
-                <td>Paracelis</td>
-              </tr>
-              <tr>
-                <td>11</td>
-                <td class="fw-semibold">MARILYN DAO-ASEN LOOMWEAVING</td>
-                <td>Marilyn Dao-Asen</td>
-                <td>09182345611</td>
-                <td>DAGDAG</td>
-                <td>Sagada</td>
-              </tr>
-              <tr>
-                <td>12</td>
-                <td class="fw-semibold">MARINA BALANIYAN CULTURAL WEAVERS</td>
-                <td>Marina Balaniyan</td>
-                <td>09182345612</td>
-                <td>BONTOC ILI</td>
-                <td>Bontoc</td>
-              </tr>
-              <tr>
-                <td>13</td>
-                <td class="fw-semibold">MARY TUKAKI HANDICRAFTS</td>
-                <td>Mary Tukaki</td>
-                <td>09182345613</td>
-                <td>BAUKO POBLACION</td>
-                <td>Bauko</td>
-              </tr>
-              <tr>
-                <td>14</td>
-                <td class="fw-semibold">DAISY MAY-ENG TEXTILE SHOP</td>
-                <td>Daisy May-Eng</td>
-                <td>09182345614</td>
-                <td>BAGO</td>
-                <td>Barlig</td>
-              </tr>
-            </tbody>
-          </table>
+    <!-- Weavers View -->
+    <div id="view-weavers" class="tab-view">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0">Registered Weavers & MSME Directory (<span id="weaverCount">5</span> Total)</h6>
+          <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-person-plus-fill"></i> Register New Weaver</button>
         </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7">
+              <thead class="table-light">
+                <tr>
+                  <th width="5%">#</th>
+                  <th width="30%">Business / Artisan Entity</th>
+                  <th width="25%">Proprietor / Lead Weaver</th>
+                  <th width="15%">Contact</th>
+                  <th width="12%">Barangay</th>
+                  <th width="13%">Municipality</th>
+                </tr>
+              </thead>
+              <tbody id="directoryTable">
+                <tr><td>1</td><td class="fw-semibold">JOCELYN MIRANDA LOOMWEAVING</td><td>Jocelyn Miranda</td><td>09182345601</td><td>POBLACION</td><td>Sagada</td></tr>
+                <tr><td>2</td><td class="fw-semibold">JOSEPHINE FUCHADCHA HANDICRAFTS</td><td>Josephine Fuchadcha</td><td>09182345602</td><td>SAMOKI</td><td>Bontoc</td></tr>
+                <tr><td>3</td><td class="fw-semibold">JULIANA'S LOOM WEAVING</td><td>Juliana Walisen</td><td>09182345603</td><td>POBLACION</td><td>Sabangan</td></tr>
+                <tr><td>4</td><td class="fw-semibold">BRENDA ANONGOS TEXTILES</td><td>Brenda Anongos</td><td>09182345604</td><td>POBLACION</td><td>Tadian</td></tr>
+                <tr><td>5</td><td class="fw-semibold">FLORENCE ALIWENGWENG WEAVING</td><td>Florence Aliwengweng</td><td>09182345605</td><td>OTUCAN NORTE</td><td>Bauko</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Section Placeholder -->
+    <div id="view-generic" class="tab-view d-none">
+      <div class="card border-0 shadow-sm p-5 text-center">
+        <i class="bi bi-folder-check text-success display-4 mb-3"></i>
+        <h5 class="fw-bold" id="genericHeading">Section View</h5>
+        <p class="text-muted mb-0" id="genericContent">Content for this module loaded successfully.</p>
       </div>
     </div>
   </main>
 
+  <!-- Add Weaver Modal -->
+  <div class="modal fade" id="addWeaverModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Register New Weaver/MSME</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Business / Artisan Entity</label>
+            <input type="text" id="addBusiness" class="form-control" placeholder="e.g. Caneo Weavers Guild">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Proprietor / Lead Weaver</label>
+            <input type="text" id="addProprietor" class="form-control" placeholder="e.g. Maria Santos">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contact Number</label>
+            <input type="text" id="addContact" class="form-control" placeholder="e.g. 09191234567">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Barangay</label>
+              <input type="text" id="addBarangay" class="form-control" placeholder="e.g. Poblacion">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Municipality</label>
+              <input type="text" id="addMunicipality" class="form-control" placeholder="e.g. Bontoc">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-dti" onclick="saveWeaver()">Save Record</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Tab switching handler
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+    const sectionTitle = document.getElementById('sectionTitle');
+    const sectionSub = document.getElementById('sectionSub');
+    const weaversView = document.getElementById('view-weavers');
+    const genericView = document.getElementById('view-generic');
+    const genericHeading = document.getElementById('genericHeading');
+    const genericContent = document.getElementById('genericContent');
+
+    const tabData = {
+      dashboard: ["Dashboard Overview", "Summary metrics and overall network activity"],
+      weavers: ["Weavers & MSMEs Directory", "Registered cultural loomweavers and local enterprises"],
+      products: ["Products Catalog", "Registered traditional woven goods and handicrafts"],
+      associations: ["Weaver Associations", "Local weaver cooperatives and organizations"],
+      nfc: ["NFC Tag Management", "NFC UID assignments and hardware tag tracking"],
+      logs: ["Verification Logs", "Audit trail of scanned products and authentications"]
+    };
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+
+        const tabKey = this.getAttribute('data-tab');
+        const [title, sub] = tabData[tabKey] || ["Module", "Management Section"];
+
+        sectionTitle.textContent = title;
+        sectionSub.textContent = sub;
+
+        if (tabKey === 'weavers') {
+          weaversView.classList.remove('d-none');
+          genericView.classList.add('d-none');
+        } else {
+          weaversView.classList.add('d-none');
+          genericView.classList.remove('d-none');
+          genericHeading.textContent = title;
+          genericContent.textContent = `You are currently interacting with the ${title} module.`;
+        }
+      });
+    });
+
+    // Live search filter
     function filterDirectory() {
       const input = document.getElementById('searchInput').value.toLowerCase();
       const rows = document.querySelectorAll('#directoryTable tr');
@@ -260,9 +249,51 @@
       });
     }
 
+    // Modal save record handler
+    function saveWeaver() {
+      const biz = document.getElementById('addBusiness').value;
+      const prop = document.getElementById('addProprietor').value;
+      const contact = document.getElementById('addContact').value;
+      const brgy = document.getElementById('addBarangay').value;
+      const muni = document.getElementById('addMunicipality').value;
+
+      if (!biz || !prop) {
+        alert('Please fill in the required entity and proprietor fields.');
+        return;
+      }
+
+      const table = document.getElementById('directoryTable');
+      const rowCount = table.rows.length + 1;
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td>${rowCount}</td>
+        <td class="fw-semibold">${biz.toUpperCase()}</td>
+        <td>${prop}</td>
+        <td>${contact || 'N/A'}</td>
+        <td>${brgy.toUpperCase() || 'N/A'}</td>
+        <td>${muni || 'N/A'}</td>
+      `;
+
+      table.appendChild(tr);
+      document.getElementById('weaverCount').textContent = rowCount;
+
+      // Reset form and hide modal
+      document.getElementById('addBusiness').value = '';
+      document.getElementById('addProprietor').value = '';
+      document.getElementById('addContact').value = '';
+      document.getElementById('addBarangay').value = '';
+      document.getElementById('addMunicipality').value = '';
+
+      bootstrap.Modal.getInstance(document.getElementById('addWeaverModal')).hide();
+    }
+
+    // Logout handler
     function handleLogout() {
-      localStorage.clear();
-      window.location.replace('./Login.html');
+      if (confirm('Are you sure you want to log out?')) {
+        localStorage.clear();
+        window.location.href = './Login.html';
+      }
     }
   </script>
 </body>
