@@ -126,12 +126,12 @@
             <small class="text-muted">DTI Mountain Province</small>
         </div>
         <nav class="nav flex-column mt-3">
-            <a class="nav-link active" href="#" onclick="switchTab('dashboard', this)"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a class="nav-link" href="#" onclick="switchTab('weavers', this)"><i class="bi bi-people"></i> Weavers & MSMEs</a>
-            <a class="nav-link" href="#" onclick="switchTab('products', this)"><i class="bi bi-grid"></i> Products Catalog</a>
-            <a class="nav-link" href="#" onclick="switchTab('associations', this)"><i class="bi bi-building"></i> Associations</a>
-            <a class="nav-link" href="#" onclick="switchTab('nfc-management', this)"><i class="bi bi-nfc"></i> NFC Management</a>
-            <a class="nav-link" href="#" onclick="switchTab('logs', this)"><i class="bi bi-journal-text"></i> Verification Logs</a>
+            <a class="nav-link active" href="#" onclick="switchTab('dashboard', this); return false;"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-link" href="#" onclick="switchTab('weavers', this); return false;"><i class="bi bi-people"></i> Weavers & MSMEs</a>
+            <a class="nav-link" href="#" onclick="switchTab('products', this); return false;"><i class="bi bi-grid"></i> Products Catalog</a>
+            <a class="nav-link" href="#" onclick="switchTab('associations', this); return false;"><i class="bi bi-building"></i> Associations</a>
+            <a class="nav-link" href="#" onclick="switchTab('nfc-management', this); return false;"><i class="bi bi-nfc"></i> NFC Management</a>
+            <a class="nav-link" href="#" onclick="switchTab('logs', this); return false;"><i class="bi bi-journal-text"></i> Verification Logs</a>
         </nav>
         <div class="mt-auto p-3 border-top">
             <div class="d-flex align-items-center gap-2">
@@ -200,7 +200,7 @@
                     <div class="col-12 col-lg-8">
                         <div class="card border-0 shadow-sm p-3">
                             <h6 class="fw-bold mb-3">NFC Scan Verification Trend</h6>
-                            <div style="height: 280px;">
+                            <div style="position: relative; height: 280px; width: 100%;">
                                 <canvas id="trendChart"></canvas>
                             </div>
                         </div>
@@ -609,6 +609,8 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/bootstrap.bundle.min.js"></script>
     <script>
+        let trendChartInstance = null;
+
         // Tab Navigation Switcher
         function switchTab(panelId, element) {
             document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-panel'));
@@ -635,6 +637,13 @@
             if (titleMap[panelId]) {
                 document.getElementById('page-title').innerText = titleMap[panelId][0];
                 document.getElementById('page-subtitle').innerText = titleMap[panelId][1];
+            }
+
+            // Trigger Chart Resize when returning to Dashboard
+            if (panelId === 'dashboard' && trendChartInstance) {
+                setTimeout(() => {
+                    trendChartInstance.resize();
+                }, 50);
             }
         }
 
@@ -704,7 +713,8 @@
             `;
             grid.prepend(newCard);
 
-            bootstrap.Modal.getInstance(document.getElementById('addAssocModal')).hide();
+            const modalEl = document.getElementById('addAssocModal');
+            bootstrap.Modal.getInstance(modalEl).hide();
             document.getElementById('addAssocForm').reset();
         }
 
@@ -717,7 +727,7 @@
             const contact = document.getElementById('weaverContactInput').value || '—';
 
             const table = document.getElementById('weaversTable').getElementsByTagName('tbody')[0];
-            const rowCount = table.rows.length + 1;
+            const rowCount = table.querySelectorAll('tr').length + 1;
             const newRow = table.insertRow(0);
 
             newRow.innerHTML = `
@@ -733,7 +743,8 @@
             const kpiCount = document.getElementById('kpi-weaver-count');
             kpiCount.innerText = parseInt(kpiCount.innerText) + 1;
 
-            bootstrap.Modal.getInstance(document.getElementById('addWeaverModal')).hide();
+            const modalEl = document.getElementById('addWeaverModal');
+            bootstrap.Modal.getInstance(modalEl).hide();
             document.getElementById('addWeaverForm').reset();
         }
 
@@ -758,14 +769,15 @@
             const kpiCount = document.getElementById('kpi-product-count');
             kpiCount.innerText = parseInt(kpiCount.innerText) + 1;
 
-            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            const modalEl = document.getElementById('addProductModal');
+            bootstrap.Modal.getInstance(modalEl).hide();
             document.getElementById('addProductForm').reset();
         }
 
-        // Initialize Trend Chart
+        // Initialize Chart
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('trendChart').getContext('2d');
-            new Chart(ctx, {
+            trendChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
