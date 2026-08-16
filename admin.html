@@ -195,7 +195,7 @@
 
       <nav class="sidebar-nav mt-3">
         <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers (59)</a>
+        <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers (<span class="weavers-count">59</span>)</a>
         <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations (15)</a>
         <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Cataloged Products</a>
         <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
@@ -239,16 +239,14 @@
       
       <!-- 4 Metric Cards Grid -->
       <div class="row g-3 mb-4">
-        <!-- Card 1 -->
         <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="metric-icon icon-weavers"><i class="bi bi-people-fill"></i></div>
-            <h2 class="fw-bold mb-0" id="countWeavers">59</h2>
+            <h2 class="fw-bold mb-0 countWeaversDisplay">59</h2>
             <div class="text-muted fs-8 mt-1">Registered Weavers</div>
           </div>
         </div>
 
-        <!-- Card 2 -->
         <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="metric-icon icon-products"><i class="bi bi-box-seam-fill"></i></div>
@@ -257,7 +255,6 @@
           </div>
         </div>
 
-        <!-- Card 3 -->
         <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="metric-icon icon-nfc"><i class="bi bi-wifi"></i></div>
@@ -266,7 +263,6 @@
           </div>
         </div>
 
-        <!-- Card 4 -->
         <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="metric-icon icon-verifications"><i class="bi bi-check-circle-fill"></i></div>
@@ -276,10 +272,10 @@
         </div>
       </div>
 
-      <!-- SIDE-BY-SIDE ROW: Smaller Verification Trends + Recent Scans -->
+      <!-- SIDE-BY-SIDE ROW -->
       <div class="row g-3 mb-4">
         
-        <!-- Verification Trends Chart Card (Smaller Left Column) -->
+        <!-- Verification Trends Chart Card -->
         <div class="col-12 col-lg-5">
           <div class="dashboard-card d-flex flex-column justify-content-between">
             <div>
@@ -295,7 +291,7 @@
           </div>
         </div>
 
-        <!-- Recent Scans Card (Right Column) -->
+        <!-- Recent Scans Card -->
         <div class="col-12 col-lg-7">
           <div class="dashboard-card">
             <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-clock me-2"></i>Recent Scans</h6>
@@ -377,14 +373,13 @@
       </div>
     </div>
 
-    <!-- 3. ASSOCIATIONS VIEW (Card Boxes Grid Layout) -->
+    <!-- 3. ASSOCIATIONS VIEW -->
     <div id="view-associations" class="tab-view d-none">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0">Registered Associations & Cooperatives</h6>
         <span class="badge bg-success-subtle text-success border">Registry Cards View</span>
       </div>
       
-      <!-- Association Cards Grid Container -->
       <div class="row g-3" id="associationsContainer">
         <!-- Rendered dynamically as structured boxes -->
       </div>
@@ -404,10 +399,8 @@
                 <th class="text-end">Action</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td class="fw-semibold">Pinagpagan Pattern Blanket</td><td>Textile / Blanket</td><td>Sagada</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0">View Details</button></td></tr>
-              <tr><td class="fw-semibold">Inabel Table Runner</td><td>Home Decor</td><td>Bontoc</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0">View Details</button></td></tr>
-              <tr><td class="fw-semibold">Suklang Woven Backpack</td><td>Bag / Accessory</td><td>Bauko</td><td class="text-end"><button class="btn btn-sm btn-outline-success py-0">View Details</button></td></tr>
+            <tbody id="productsTable">
+              <!-- Populated dynamically by JavaScript -->
             </tbody>
           </table>
         </div>
@@ -483,9 +476,75 @@
     </div>
   </div>
 
+  <!-- Product Details Modal (WITHOUT PRICE) -->
+  <div class="modal fade" id="productDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="modalProductName">Product Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-5">
+              <div class="bg-light rounded p-4 text-center border d-flex flex-column align-items-center justify-content-center h-100">
+                <i class="bi bi-box-seam text-success" style="font-size: 4rem;"></i>
+                <div class="mt-2 text-muted fs-8" id="modalProductSku">SKU: WVID-PRD-001</div>
+                <span class="badge bg-success-subtle text-success border mt-2" id="modalProductTag">NFC Paired</span>
+              </div>
+            </div>
+            <div class="col-md-7">
+              <div class="mb-3">
+                <small class="text-muted d-block fs-8">Description</small>
+                <p class="fs-7 mb-0" id="modalProductDesc">-</p>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <div class="p-2 border rounded bg-light">
+                    <small class="text-muted d-block fs-8">Category</small>
+                    <span class="fw-semibold fs-7" id="modalProductCategory">-</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-2 border rounded bg-light">
+                    <small class="text-muted d-block fs-8">Origin</small>
+                    <span class="fw-semibold fs-7" id="modalProductOrigin">-</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="p-2 border rounded bg-light">
+                    <small class="text-muted d-block fs-8">Crafting Method / Material</small>
+                    <span class="fw-semibold fs-7" id="modalProductMaterial">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-2 border rounded bg-light mb-2">
+                <small class="text-muted d-block fs-8">Artisan / Enterprise</small>
+                <span class="fw-bold fs-7 text-dark" id="modalProductWeaver">-</span>
+              </div>
+              <div class="p-2 border rounded bg-light">
+                <small class="text-muted d-block fs-8">Linked NFC Tag ID</small>
+                <code id="modalProductNfc">WVID-8842</code>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // --- 1. FULL DATA DATASETS ---
+    // --- 1. DATASETS ---
+    const productsData = [
+      { id: 1, name: "Pinagpagan Pattern Blanket", category: "Textile / Blanket", origin: "Sagada", material: "Handloom Woven Cotton", nfc: "WVID-7721", weaver: "Pinagpagan Womens Workers Association", desc: "Traditional Sagada woven blanket featuring authentic ceremonial geometric weave patterns passed down through generations." },
+      { id: 2, name: "Inabel Table Runner", category: "Home Decor", origin: "Bontoc", material: "Polycotton Thread", nfc: "WVID-9012", weaver: "Bontoc Weaving Center", desc: "Vibrant table runner handcrafted with traditional Cordilleran geometric warp-faced weave." },
+      { id: 3, name: "Suklang Woven Backpack", category: "Bag / Accessory", origin: "Bauko", material: "Rattan & Handwoven Canvas", nfc: "WVID-8842", weaver: "Juliana's Loom Weaving", desc: "Durable travel backpack combining traditional Cordilleran basketry trim with handloom woven fabric panels." }
+    ];
+
     const associationsData = [
       { name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
       { name: "Sabangan Weavers Association", lead: "Rannie Dao", phone: "9101572596", location: "Poblacion, Sabangan" },
@@ -504,7 +563,7 @@
       { name: "Sagada Mountainside Handicrafts Manufacturing", lead: "Agnes Cadiogan", phone: "9121527484", location: "Demang, Sagada" }
     ];
 
-    const weaversData = [
+    let weaversData = [
       { id: 1, name: "JOCELYN MIRANDA", proprietor: "JOCELYN MIRANDA", municipality: "Sagada" },
       { id: 2, name: "JOSEPHINE FUCHADCHA", proprietor: "JOSEPHINE FUCHADCHA", municipality: "Bontoc" },
       { id: 3, name: "JULIANA'S LOOM WEAVING", proprietor: "JULIANA WALISEN", municipality: "Bauko" },
@@ -567,22 +626,76 @@
     ];
 
     // --- 2. RENDER FUNCTIONS ---
+    function updateWeaverCounters() {
+      const count = weaversData.length;
+      document.querySelectorAll('.weavers-count, .countWeaversDisplay').forEach(el => {
+        el.textContent = count;
+      });
+      tabTitles.weavers = `Registered Weavers (${count})`;
+      const activeTab = document.querySelector('.sidebar-nav .nav-link.active').getAttribute('data-tab');
+      if (activeTab === 'weavers') {
+        document.getElementById('sectionTitle').textContent = tabTitles.weavers;
+      }
+    }
+
     function renderWeavers(data) {
       const tbody = document.getElementById('directoryTable');
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No matching weaver entries found.</td></tr>`;
+        return;
+      }
       tbody.innerHTML = data.map(w => `
         <tr>
           <td>${w.id}</td>
           <td class="fw-semibold">${w.name}</td>
           <td>${w.proprietor}</td>
           <td><span class="badge bg-light text-dark border fs-8">${w.municipality}</span></td>
-          <td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td>
+          <td class="text-end pe-3">
+            <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteWeaver(${w.id})">Remove</button>
+          </td>
         </tr>
       `).join('');
     }
 
+    function renderProducts(data) {
+      const tbody = document.getElementById('productsTable');
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No matching products found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td class="fw-semibold">${p.name}</td>
+          <td>${p.category}</td>
+          <td>${p.origin}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-success py-0" onclick="showProductDetails(${p.id})">View Details</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showProductDetails(productId) {
+      const product = productsData.find(p => p.id === productId);
+      if (!product) return;
+
+      document.getElementById('modalProductName').textContent = product.name;
+      document.getElementById('modalProductSku').textContent = `SKU: WVID-PRD-00${product.id}`;
+      document.getElementById('modalProductDesc').textContent = product.desc;
+      document.getElementById('modalProductCategory').textContent = product.category;
+      document.getElementById('modalProductOrigin').textContent = product.origin;
+      document.getElementById('modalProductMaterial').textContent = product.material;
+      document.getElementById('modalProductWeaver').textContent = product.weaver;
+      document.getElementById('modalProductNfc').textContent = product.nfc;
+
+      const modalEl = document.getElementById('productDetailModal');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+
     function renderAssociations(data) {
       const container = document.getElementById('associationsContainer');
-      
       if (data.length === 0) {
         container.innerHTML = `<div class="col-12 text-muted text-center py-4">No matching associations found.</div>`;
         return;
@@ -613,13 +726,13 @@
       `).join('');
     }
 
-    // Tab Navigation Switcher
+    // --- 3. TAB NAVIGATION ---
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     const sectionTitle = document.getElementById('sectionTitle');
 
     const tabTitles = {
       dashboard: "Dashboard",
-      weavers: "Registered Weavers (59)",
+      weavers: `Registered Weavers (${weaversData.length})`,
       associations: "Registered Associations (15)",
       products: "Cataloged Products",
       nfc: "NFC Tags Issued",
@@ -646,7 +759,7 @@
       });
     });
 
-    // Verification Trends Chart Setup
+    // --- 4. CHART INITIALIZATION ---
     const ctx = document.getElementById('verificationTrendChart').getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 150);
     gradient.addColorStop(0, 'rgba(10, 77, 46, 0.25)');
@@ -678,72 +791,88 @@
       }
     });
 
-    // Dynamic Filter function
+    // --- 5. INTERACTION LOGIC ---
     function filterDirectory() {
-      const query = document.getElementById('adminSearchInput').value.toLowerCase();
-      
-      const filteredWeavers = weaversData.filter(w => 
-        w.name.toLowerCase().includes(query) || 
-        w.proprietor.toLowerCase().includes(query) || 
+      const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+
+      const filteredWeavers = weaversData.filter(w =>
+        w.name.toLowerCase().includes(query) ||
+        w.proprietor.toLowerCase().includes(query) ||
         w.municipality.toLowerCase().includes(query)
       );
       renderWeavers(filteredWeavers);
 
-      const filteredAssoc = associationsData.filter(a => 
-        a.name.toLowerCase().includes(query) || 
-        a.lead.toLowerCase().includes(query) || 
+      const filteredAssoc = associationsData.filter(a =>
+        a.name.toLowerCase().includes(query) ||
+        a.lead.toLowerCase().includes(query) ||
         a.location.toLowerCase().includes(query)
       );
       renderAssociations(filteredAssoc);
+
+      const filteredProducts = productsData.filter(p =>
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        p.origin.toLowerCase().includes(query)
+      );
+      renderProducts(filteredProducts);
     }
 
     function saveWeaver() {
-      const biz = document.getElementById('addBusiness').value;
-      const prop = document.getElementById('addProprietor').value;
-      const muni = document.getElementById('addMunicipality').value;
+      const bizInput = document.getElementById('addBusiness');
+      const propInput = document.getElementById('addProprietor');
+      const muniInput = document.getElementById('addMunicipality');
+
+      const biz = bizInput.value.trim();
+      const prop = propInput.value.trim();
+      const muni = muniInput.value.trim();
 
       if (!biz || !prop) {
         alert('Please fill in required fields.');
         return;
       }
 
-      const table = document.getElementById('directoryTable');
-      const rowCount = table.rows.length + 1;
-      const tr = document.createElement('tr');
+      const newId = weaversData.length ? Math.max(...weaversData.map(w => w.id)) + 1 : 1;
+      weaversData.push({
+        id: newId,
+        name: biz.toUpperCase(),
+        proprietor: prop.toUpperCase(),
+        municipality: muni || 'N/A'
+      });
 
-      tr.innerHTML = `
-        <td>${rowCount}</td>
-        <td class="fw-semibold">${biz}</td>
-        <td>${prop}</td>
-        <td><span class="badge bg-light text-dark border fs-8">${muni || 'N/A'}</span></td>
-        <td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td>
-      `;
+      updateWeaverCounters();
+      filterDirectory();
 
-      table.appendChild(tr);
-      bootstrap.Modal.getInstance(document.getElementById('addWeaverModal')).hide();
+      bizInput.value = '';
+      propInput.value = '';
+      muniInput.value = '';
+
+      const modalEl = document.getElementById('addWeaverModal');
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.hide();
     }
 
-    function deleteRow(btn) {
-      if(confirm('Remove this weaver record?')) {
-        btn.closest('tr').remove();
+    function deleteWeaver(id) {
+      if (confirm('Are you sure you want to remove this record?')) {
+        weaversData = weaversData.filter(w => w.id !== id);
+        updateWeaverCounters();
+        filterDirectory();
       }
     }
 
     function exportData() {
-      alert('Exporting verification trend dataset...');
+      alert('Exporting verification trends to CSV...');
     }
 
     function handleLogout() {
-      if (confirm('Log out from Admin Dashboard?')) {
-        window.location.href = './login.html';
+      if (confirm('Are you sure you want to logout?')) {
+        alert('Logged out successfully.');
       }
     }
 
-    // Initialize on load
-    document.addEventListener('DOMContentLoaded', () => {
-      renderWeavers(weaversData);
-      renderAssociations(associationsData);
-    });
+    // Initial Population
+    renderWeavers(weaversData);
+    renderAssociations(associationsData);
+    renderProducts(productsData);
   </script>
 </body>
 </html>
