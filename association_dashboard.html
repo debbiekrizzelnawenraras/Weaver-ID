@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <!-- Chart.js for analytics -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -26,7 +26,6 @@
             color: #2b2b2b;
         }
 
-        /* Sidebar Styling */
         .sidebar {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -123,7 +122,6 @@
             justify-content: center;
         }
 
-        /* Main Workspace Layout */
         .main-wrapper {
             margin-left: 260px;
             padding: 24px 32px;
@@ -157,7 +155,6 @@
             color: #adb5bd;
         }
 
-        /* Metric Cards */
         .kpi-card {
             background-color: #ffffff;
             border-radius: 12px;
@@ -215,7 +212,21 @@
             height: 100%;
         }
 
-        /* Activity Items */
+        .assoc-card {
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            background-color: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .assoc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            border-color: var(--sidebar-bg);
+        }
+
         .activity-item {
             display: flex;
             align-items: flex-start;
@@ -268,6 +279,7 @@
 
             <div class="sidebar-section-title">NFC & VERIFICATION</div>
             <ul class="sidebar-menu">
+                <li><a href="javascript:void(0)" class="nav-link" onclick="switchTab('nfc-management', this)"><i class="bi bi-wifi"></i> NFC Management</a></li>
                 <li><a href="javascript:void(0)" class="nav-link" onclick="switchTab('logs', this)"><i class="bi bi-clock-history"></i> Scan Logs</a></li>
             </ul>
         </div>
@@ -435,24 +447,139 @@
             </div>
         </div>
 
-        <!-- Panel 4: Associations -->
+        <!-- Panel 4: Associations (Interactive & Complete) -->
         <div id="panel-associations" class="view-panel">
-            <h5 class="fw-bold mb-3">Mountain Province Weaving Groups</h5>
-            <div class="content-card">
-                <div class="list-group">
-                    <div class="list-group-item d-flex justify-content-between p-3 search-item">
-                        <div><strong>Montañosa Weavers Association</strong><br><small class="text-muted">Sagada Chapter</small></div>
-                        <span class="badge bg-success rounded-pill align-self-center">42 Active Weavers</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between p-3 search-item">
-                        <div><strong>Sabangan Weavers Association</strong><br><small class="text-muted">Sabangan Chapter</small></div>
-                        <span class="badge bg-success rounded-pill align-self-center">28 Active Weavers</span>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0">Mountain Province Weaving Associations</h5>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAssocModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add Association
+                </button>
+            </div>
+
+            <div class="row g-3" id="associationGrid">
+
+                <!-- Association 1 -->
+                <div class="col-md-6 search-item">
+                    <div class="assoc-card" onclick="openAssocDetails('Montañosa Weavers Association', 'Sagada, Mountain Province', '42 Active Weavers', 'Traditional Backpacks, Shoulder Bags, Pouches', 'Lanie Gaongen (President)', '+63 917 123 4567')">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-2"></i>Montañosa Weavers Association</h6>
+                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Sagada, Mountain Province</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">42 Weavers</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row text-center g-2 mt-1">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Main Specialty</small>
+                                <strong class="small">Backpacks & Pouches</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Registered NFC Tags</small>
+                                <strong class="small text-primary">128 Tags Issued</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Association 2 -->
+                <div class="col-md-6 search-item">
+                    <div class="assoc-card" onclick="openAssocDetails('Sabangan Weavers Association', 'Sabangan, Mountain Province', '28 Active Weavers', 'Traditional Woven Blankets, Wraps, Tapestry', 'Juliana Pawid (Lead)', '+63 918 987 6543')">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-2"></i>Sabangan Weavers Association</h6>
+                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Sabangan, Mountain Province</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">28 Weavers</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row text-center g-2 mt-1">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Main Specialty</small>
+                                <strong class="small">Traditional Blankets</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Registered NFC Tags</small>
+                                <strong class="small text-primary">94 Tags Issued</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Association 3 -->
+                <div class="col-md-6 search-item">
+                    <div class="assoc-card" onclick="openAssocDetails('Bontoc Women Weavers Guild', 'Bontoc, Mountain Province', '35 Active Weavers', 'Inabel Sashes, Traditional Vests, Tapestries', 'Elena Changat (Head)', '+63 920 333 4455')">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-2"></i>Bontoc Women Weavers Guild</h6>
+                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Bontoc, Mountain Province</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">35 Weavers</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row text-center g-2 mt-1">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Main Specialty</small>
+                                <strong class="small">Inabel Vests & Sashes</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Registered NFC Tags</small>
+                                <strong class="small text-primary">73 Tags Issued</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Association 4 -->
+                <div class="col-md-6 search-item">
+                    <div class="assoc-card" onclick="openAssocDetails('Bauko Heritage Craft Collective', 'Bauko, Mountain Province', '19 Active Weavers', 'Custom Table Runners, Place Mats, Souvenir Bags', 'Maria Codiamat (Coordinator)', '+63 922 555 7788')">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-2"></i>Bauko Heritage Craft Collective</h6>
+                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>Bauko, Mountain Province</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">19 Weavers</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row text-center g-2 mt-1">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Main Specialty</small>
+                                <strong class="small">Table Runners & Mats</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Registered NFC Tags</small>
+                                <strong class="small text-primary">42 Tags Issued</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- Panel 5: Scan Logs -->
+        <!-- Panel 5: NFC Management -->
+        <div id="panel-nfc-management" class="view-panel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0">NFC Tag Allocation & Status</h5>
+                <button type="button" class="btn btn-primary btn-sm" onclick="alert('Ready to encode tag via WebNFC or Desktop reader...')">
+                    <i class="bi bi-wifi me-1"></i> Encode New Tag
+                </button>
+            </div>
+            <div class="content-card">
+                <table class="table table-hover align-middle search-table">
+                    <thead class="table-light">
+                        <tr><th>NFC UID</th><th>Status</th><th>Linked Product</th><th>Encoded Date</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>WVID-8842</td><td><span class="badge bg-success">Active & Linked</span></td><td>Sagada Woven Backpack</td><td>2026-03-01</td></tr>
+                        <tr><td>WVID-8843</td><td><span class="badge bg-success">Active & Linked</span></td><td>Eton Woven Shoulder Bag</td><td>2026-03-05</td></tr>
+                        <tr><td>WVID-9901</td><td><span class="badge bg-warning text-dark">Unlinked Tag</span></td><td><em>Unassigned</em></td><td>2026-03-28</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel 6: Scan Logs -->
         <div id="panel-logs" class="view-panel">
             <h5 class="fw-bold mb-3">System Verification Logs</h5>
             <div class="content-card">
@@ -471,7 +598,79 @@
 
     </div>
 
-    <!-- Modal: Add Weaver -->
+    <!-- Modals -->
+    <!-- Modal: View Association Details -->
+    <div class="modal fade" id="assocDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="modalAssocTitle">Association Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span id="modalAssocLocation">Location</span></p>
+                    <div class="mb-3">
+                        <span class="badge bg-success" id="modalAssocWeavers">42 Weavers</span>
+                        <span class="badge bg-primary">DTI Registered</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Primary Products:</strong>
+                        <p class="text-secondary m-0" id="modalAssocProducts">Products</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Primary Contact Person:</strong>
+                        <p class="text-secondary m-0" id="modalAssocLead">Lead</p>
+                    </div>
+
+                    <div>
+                        <strong>Contact Info:</strong>
+                        <p class="text-secondary m-0" id="modalAssocContact">Contact</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="alert('Exporting group catalog...')">Download NFC Catalog</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Association -->
+    <div class="modal fade" id="addAssocModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register New Weaving Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAssocForm">
+                        <div class="mb-3">
+                            <label class="form-label">Group / Association Name</label>
+                            <input type="text" id="assoc-name-input" class="form-control" required placeholder="e.g. Sadanga Weavers Guild">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Municipality / Location</label>
+                            <input type="text" id="assoc-location-input" class="form-control" required placeholder="e.g. Sadanga, Mountain Province">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Active Weaver Count</label>
+                            <input type="number" id="assoc-count-input" class="form-control" required placeholder="e.g. 15">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Main Specialty</label>
+                            <input type="text" id="assoc-specialty-input" class="form-control" required placeholder="e.g. Traditional Belts & Scarves">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Save Association</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for Weaver and Product -->
     <div class="modal fade" id="addWeaverModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -496,7 +695,6 @@
         </div>
     </div>
 
-    <!-- Modal: Add Product -->
     <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -527,48 +725,97 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Switch between sidebar tabs
+        // Tab switching function
         function switchTab(tabId, element) {
-            // Hide all panels
             const panels = document.querySelectorAll('.view-panel');
             panels.forEach(p => p.classList.remove('active-panel'));
 
-            // Remove active class from links
             const navLinks = document.querySelectorAll('.sidebar-menu .nav-link');
             navLinks.forEach(l => l.classList.remove('active'));
 
-            // Activate target panel
             const targetPanel = document.getElementById('panel-' + tabId);
             if (targetPanel) {
                 targetPanel.classList.add('active-panel');
             }
 
-            // Set active navigation styling
             if (element) {
                 element.classList.add('active');
             }
 
-            // Update top bar text
             const titles = {
                 'dashboard': ['Dashboard', 'Overview of the Weaver-ID system'],
                 'weavers': ['Weavers Directory', 'Manage registered association weavers'],
                 'products': ['Product Catalog', 'Track verified woven products and tags'],
-                'associations': ['Associations', 'Mountain Province weaving chapters'],
+                'associations': ['Associations & Weaving Groups', 'Complete list of registered groups across Mountain Province'],
+                'nfc-management': ['NFC Management', 'Monitor issued NFC chips and encoding status'],
                 'logs': ['Scan Audit Logs', 'Real-time history of NFC tag verifications']
             };
 
-            if (titles[tabId]) {
-                document.getElementById('page-title').textContent = titles[tabId][0];
-                document.getElementById('page-subtitle').textContent = titles[tabId][1];
-            }
+            const headerInfo = titles[tabId] || ['Dashboard', 'Overview of the Weaver-ID system'];
+            document.getElementById('page-title').textContent = headerInfo[0];
+            document.getElementById('page-subtitle').textContent = headerInfo[1];
         }
 
-        // Live Search Filter Across Tables & Activity Items
+        // Open Modal with complete Association details
+        function openAssocDetails(name, loc, count, products, lead, contact) {
+            document.getElementById('modalAssocTitle').textContent = name;
+            document.getElementById('modalAssocLocation').textContent = loc;
+            document.getElementById('modalAssocWeavers').textContent = count;
+            document.getElementById('modalAssocProducts').textContent = products;
+            document.getElementById('modalAssocLead').textContent = lead;
+            document.getElementById('modalAssocContact').textContent = contact;
+
+            const modal = new bootstrap.Modal(document.getElementById('assocDetailModal'));
+            modal.show();
+        }
+
+        // Association Submission
+        document.getElementById('addAssocForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('assoc-name-input').value;
+            const loc = document.getElementById('assoc-location-input').value;
+            const count = document.getElementById('assoc-count-input').value;
+            const specialty = document.getElementById('assoc-specialty-input').value;
+
+            const grid = document.getElementById('associationGrid');
+            const col = document.createElement('div');
+            col.className = 'col-md-6 search-item';
+            col.innerHTML = `
+                <div class="assoc-card" onclick="openAssocDetails('${name}', '${loc}', '${count} Active Weavers', '${specialty}', 'Unassigned Lead', '+63 900 000 0000')">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="fw-bold m-0 text-success"><i class="bi bi-building me-2"></i>${name}</h6>
+                            <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${loc}</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">${count} Weavers</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="row text-center g-2 mt-1">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Main Specialty</small>
+                            <strong class="small">${specialty}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Registered NFC Tags</small>
+                            <strong class="small text-primary">0 Tags Issued</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(col);
+
+            const modalEl = document.getElementById('addAssocModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInstance.hide();
+            this.reset();
+        });
+
+        // Filter function
         function filterTablesAndFeed() {
             const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
 
             document.querySelectorAll('.search-item').forEach(item => {
-                item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
+                item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
             });
 
             document.querySelectorAll('.search-table tbody tr').forEach(row => {
@@ -576,54 +823,7 @@
             });
         }
 
-        // Add Weaver Form Handler
-        document.getElementById('addWeaverForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('weaver-name-input').value;
-            const location = document.getElementById('weaver-location-input').value;
-
-            const tbody = document.getElementById('weaversTable').querySelector('tbody');
-            const rowCount = tbody.rows.length + 1;
-            
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `<td>#${100 + rowCount}</td><td>${name}</td><td>${location}</td><td><span class="badge bg-success">Active</span></td><td><button type="button" class="btn btn-sm btn-outline-primary" onclick="alert('Viewing Weaver profile...')">View</button></td>`;
-            tbody.appendChild(newRow);
-
-            // Update Metric Count
-            const weaverKpi = document.getElementById('kpi-weaver-count');
-            weaverKpi.textContent = parseInt(weaverKpi.textContent || '0') + 1;
-
-            // Close Modal & Reset Form
-            const modalEl = document.getElementById('addWeaverModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modalInstance.hide();
-            this.reset();
-        });
-
-        // Add Product Form Handler
-        document.getElementById('addProductForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const nfc = document.getElementById('prod-nfc-input').value;
-            const name = document.getElementById('prod-name-input').value;
-            const weaver = document.getElementById('prod-weaver-input').value;
-
-            const tbody = document.getElementById('productsTable').querySelector('tbody');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `<td><span class="badge bg-secondary">${nfc}</span></td><td>${name}</td><td>${weaver}</td><td><button type="button" class="btn btn-sm btn-outline-success" onclick="alert('Editing Product Details...')">Edit</button></td>`;
-            tbody.appendChild(newRow);
-
-            // Update Metric Count
-            const prodKpi = document.getElementById('kpi-product-count');
-            prodKpi.textContent = parseInt(prodKpi.textContent || '0') + 1;
-
-            // Close Modal & Reset Form
-            const modalEl = document.getElementById('addProductModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modalInstance.hide();
-            this.reset();
-        });
-
-        // Initialize Chart on Load
+        // Initialize Chart
         document.addEventListener('DOMContentLoaded', function() {
             const canvas = document.getElementById('trendChart');
             if (canvas) {
