@@ -65,7 +65,7 @@
     .main-content {
       margin-left: var(--sidebar-width);
       padding: 2rem;
-      max-width: 1000px;
+      max-width: 1100px;
     }
 
     /* Search Input Bar */
@@ -177,7 +177,8 @@
 
       <nav class="sidebar-nav mt-3">
         <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers</a>
+        <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers (59)</a>
+        <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations (15)</a>
         <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Cataloged Products</a>
         <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
         <a class="nav-link" data-tab="logs"><i class="bi bi-journal-check"></i> Audit Logs</a>
@@ -212,7 +213,7 @@
     <!-- Search Input -->
     <div class="search-box mb-4">
       <i class="bi bi-search text-muted"></i>
-      <input type="text" id="adminSearchInput" placeholder="Search MSMEs, weavers, products..." onkeyup="filterDirectory()">
+      <input type="text" id="adminSearchInput" placeholder="Search MSMEs, weavers, products, associations..." onkeyup="filterDirectory()">
     </div>
 
     <!-- 1. DASHBOARD VIEW -->
@@ -224,7 +225,7 @@
         <div class="col-6 col-md-3">
           <div class="metric-card">
             <div class="metric-icon icon-weavers"><i class="bi bi-people-fill"></i></div>
-            <h2 class="fw-bold mb-0" id="countWeavers">48</h2>
+            <h2 class="fw-bold mb-0" id="countWeavers">59</h2>
             <div class="text-muted fs-8 mt-1">Registered Weavers</div>
           </div>
         </div>
@@ -268,12 +269,11 @@
         </div>
       </div>
 
-      <!-- Recent Scans Card (Placed directly below Verification Trends) -->
+      <!-- Recent Scans Card -->
       <div class="dashboard-card mb-4">
         <h6 class="fw-bold mb-3"><i class="bi bi-clock me-2"></i>Recent Scans</h6>
         
         <div class="d-flex flex-column gap-3">
-          <!-- Item 1 -->
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
               <div class="scan-status-icon bg-success-subtle text-success">
@@ -289,7 +289,6 @@
 
           <hr class="my-0 text-border">
 
-          <!-- Item 2 -->
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
               <div class="scan-status-icon bg-warning-subtle text-warning">
@@ -305,7 +304,6 @@
 
           <hr class="my-0 text-border">
 
-          <!-- Item 3 -->
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
               <div class="scan-status-icon bg-success-subtle text-success">
@@ -323,35 +321,59 @@
 
     </div>
 
-    <!-- 2. REGISTERED WEAVERS VIEW -->
+    <!-- 2. REGISTERED WEAVERS VIEW (59 Records) -->
     <div id="view-weavers" class="tab-view d-none">
       <div class="dashboard-card p-0">
         <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-          <h6 class="fw-bold mb-0">Registered Weavers & Enterprises</h6>
+          <h6 class="fw-bold mb-0">Registered Weavers & Enterprises (59)</h6>
           <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#addWeaverModal"><i class="bi bi-plus-lg"></i> Add Weaver</button>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive" style="max-height: 550px;">
           <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-            <thead class="table-light">
+            <thead class="table-light sticky-top">
               <tr>
                 <th>#</th>
                 <th>Enterprise Name</th>
                 <th>Artisan / Representative</th>
-                <th>Location</th>
+                <th>Municipality</th>
                 <th class="text-end pe-3">Action</th>
               </tr>
             </thead>
             <tbody id="directoryTable">
-              <tr><td>1</td><td class="fw-semibold">Caneo Loomweaving Association</td><td>Maria Santos</td><td>Bontoc</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
-              <tr><td>2</td><td class="fw-semibold">Sagada Weavers Cooperative</td><td>Jocelyn Miranda</td><td>Sagada</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
-              <tr><td>3</td><td class="fw-semibold">Bauko Handicrafts Association</td><td>Florence Aliwengweng</td><td>Bauko</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td></tr>
+              <!-- Populated dynamically by JavaScript -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- 3. CATALOGED PRODUCTS VIEW -->
+    <!-- 3. ASSOCIATIONS VIEW (15 Records) -->
+    <div id="view-associations" class="tab-view d-none">
+      <div class="dashboard-card p-0">
+        <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
+          <h6 class="fw-bold mb-0">Registered Associations & Cooperatives (15)</h6>
+          <span class="badge bg-success-subtle text-success border">System Registry</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Association Name</th>
+                <th>Lead / Proprietor</th>
+                <th>Contact</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody id="associationsTable">
+              <!-- Populated dynamically by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CATALOGED PRODUCTS VIEW -->
     <div id="view-products" class="tab-view d-none">
       <div class="dashboard-card">
         <h6 class="fw-bold mb-3">Cataloged Products</h6>
@@ -375,7 +397,7 @@
       </div>
     </div>
 
-    <!-- 4. NFC TAGS VIEW -->
+    <!-- 5. NFC TAGS VIEW -->
     <div id="view-nfc" class="tab-view d-none">
       <div class="dashboard-card">
         <h6 class="fw-bold mb-3">NFC Tags Issued</h6>
@@ -398,7 +420,7 @@
       </div>
     </div>
 
-    <!-- 5. AUDIT LOGS VIEW -->
+    <!-- 6. AUDIT LOGS VIEW -->
     <div id="view-logs" class="tab-view d-none">
       <div class="dashboard-card">
         <h6 class="fw-bold mb-3">Audit Logs</h6>
@@ -446,13 +468,122 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // --- 1. FULL DATA DATASETS ---
+    const associationsData = [
+      { name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
+      { name: "Sabangan Weavers Association", lead: "Rannie Dao", phone: "9101572596", location: "Poblacion, Sabangan" },
+      { name: "Pinagpagan Womens Workers Association", lead: "Virginia Omaweng", phone: "9978178644", location: "Demang, Sagada" },
+      { name: "Pigacabuba Weaves Association", lead: "Joy Anoyan", phone: "9398711035", location: "Camatagan, Sabangan" },
+      { name: "Sutada Weaver's Association", lead: "Saldy Puyongan", phone: "9151578041", location: "Supang, Sabangan" },
+      { name: "Tangafan Organization Inc", lead: "Paula Cofulan", phone: "N/A", location: "Samoki, Bontoc" },
+      { name: "Pangayapang Handicrafts Association", lead: "Julien Pineda", phone: "9467344884", location: "Poblacion, Bauko" },
+      { name: "Letang Young Mothers", lead: "Felipa Tagaban", phone: "9457956160", location: "Tapapan, Bauko" },
+      { name: "Pamana Organization", lead: "Christopher Pinasen", phone: "9128242841", location: "Masla, Tadian" },
+      { name: "Viewhill Womens Organization", lead: "Ruth Kathleen Codod", phone: "9085604319", location: "Guinzadan Central, Bauko" },
+      { name: "Juliana's Loom Weaving Manufacturing", lead: "Juliana Walisen", phone: "9993761663", location: "Guinzadan Norte, Bauko" },
+      { name: "Paulina's Loom Weaving Manufacturing", lead: "Brendo Cayanga", phone: "9502032739", location: "Ambaguio, Besao" },
+      { name: "Suphina Loom Weaving Manufacturing", lead: "Irene Marconi", phone: "9150668685", location: "Lubon, Tadian" },
+      { name: "Sagada Ethnic Handicrafts Manufacturing", lead: "Regeelyn Bacolong", phone: "N/A", location: "Dagdag, Sagada" },
+      { name: "Sagada Mountainside Handicrafts Manufacturing", lead: "Agnes Cadiogan", phone: "9121527484", location: "Demang, Sagada" }
+    ];
+
+    const weaversData = [
+      { id: 1, name: "JOCELYN MIRANDA", proprietor: "JOCELYN MIRANDA", municipality: "Sagada" },
+      { id: 2, name: "JOSEPHINE FUCHADCHA", proprietor: "JOSEPHINE FUCHADCHA", municipality: "Bontoc" },
+      { id: 3, name: "JULIANA'S LOOM WEAVING", proprietor: "JULIANA WALISEN", municipality: "Bauko" },
+      { id: 4, name: "KAMOWAN SOUVENIRS", proprietor: "BRENDA ANONGOS", municipality: "Sagada" },
+      { id: 5, name: "KINAYAN HANDLOOM", proprietor: "FLORENCE ALIWENGWENG", municipality: "Sagada" },
+      { id: 6, name: "LETANG YOUNG MOTHERS", proprietor: "FELIPA TAGABAN", municipality: "Bauko" },
+      { id: 7, name: "MONTAÑOSA WEAVERS ASSOCIATION", proprietor: "ROSE ANN WANGDALI", municipality: "Sagada" },
+      { id: 8, name: "PAMANA ORGANIZATION", proprietor: "CHRISTOPHER PINASEN", municipality: "Tadian" },
+      { id: 9, name: "PANGAYAPANG HANDICRAFTS ASSOCIATION", proprietor: "JULIEN PINEDA", municipality: "Bauko" },
+      { id: 10, name: "PAULINA'S LOOM WEAVING", proprietor: "BRENDO CAYANGA", municipality: "Besao" },
+      { id: 11, name: "PIGACABUBA WEAVES ASSOCIATION", proprietor: "JOY ANOYAN", municipality: "Sabangan" },
+      { id: 12, name: "PINAGPAGAN WOMENS WORKERS ASSOCIATION", proprietor: "VIRGINIA OMAWENG", municipality: "Sagada" },
+      { id: 13, name: "SABANGAN WEAVERS ASSOCIATION", proprietor: "RANNIE DAO", municipality: "Sabangan" },
+      { id: 14, name: "SAGADA ETHNIC HANDICRAFTS", proprietor: "REGEELYN BACOLONG", municipality: "Sagada" },
+      { id: 15, name: "SAGADA MOUNTAINSIDE HANDICRAFTS", proprietor: "AGNES CADIOGAN", municipality: "Sagada" },
+      { id: 16, name: "SUPHINA LOOM WEAVING", proprietor: "IRENE MARCONI", municipality: "Tadian" },
+      { id: 17, name: "SUTADA WEAVER'S ASSOCIATION", proprietor: "SALDY PUYONGAN", municipality: "Sabangan" },
+      { id: 18, name: "TANGAFAN ORGANIZATION INC", proprietor: "PAULA COFULAN", municipality: "Bontoc" },
+      { id: 19, name: "VIEWHILL WOMENS ORGANIZATION", proprietor: "RUTH KATHLEEN CODOD", municipality: "Bauko" },
+      { id: 20, name: "ABATAN WEAVERS", proprietor: "GRACE CODOD", municipality: "Bauko" },
+      { id: 21, name: "BAGNEN WEAVERS GUILD", proprietor: "MARY CAPUYAN", municipality: "Bauko" },
+      { id: 22, name: "BALILI ETHNIC CRAFTS", proprietor: "SARAH BALILI", municipality: "Bontoc" },
+      { id: 23, name: "BESAO LOOM WEAVERS", proprietor: "HELEN DOMOGO", municipality: "Besao" },
+      { id: 24, name: "BILIG WEAVERS", proprietor: "JANE BILIG", municipality: "Sagada" },
+      { id: 25, name: "BONTOC WEAVING CENTER", proprietor: "CLARA FAELDON", municipality: "Bontoc" },
+      { id: 26, name: "CAMATAGAN WEAVERS", proprietor: "RITA ANOYAN", municipality: "Sabangan" },
+      { id: 27, name: "CENTRAL BAUKO LOOM WEAVERS", proprietor: "ROSE BOSAING", municipality: "Bauko" },
+      { id: 28, name: "DAGDAG WEAVING ENTERPRISE", proprietor: "EVELYN BACOLONG", municipality: "Sagada" },
+      { id: 29, name: "DEMANG WEAVERS CIRCLE", proprietor: "MARIA WANGDALI", municipality: "Sagada" },
+      { id: 30, name: "FIDELISAN LOOM CRAFTS", proprietor: "LUCY FIDELISAN", municipality: "Sagada" },
+      { id: 31, name: "GUINZADAN WEAVERS COOPERATIVE", proprietor: "THERESA WALISEN", municipality: "Bauko" },
+      { id: 32, name: "LIAS WEAVERS ASSOCIATION", proprietor: "SUSAN LIAS", municipality: "Barlig" },
+      { id: 33, name: "LUBON LOOM WEAVERS", proprietor: "GRACE MARCONI", municipality: "Tadian" },
+      { id: 34, name: "MASLA NATIVE WEAVES", proprietor: "PETER PINASEN", municipality: "Tadian" },
+      { id: 35, name: "NATONIN WEAVING GROUP", proprietor: "ALICE NATONIN", municipality: "Natonin" },
+      { id: 36, name: "OTUCAN HANDICRAFTS", proprietor: "NANCY OTUCAN", municipality: "Bauko" },
+      { id: 37, name: "POBLACION SABANGAN CRAFTS", proprietor: "TOMAS DAO", municipality: "Sabangan" },
+      { id: 38, name: "SADANGA WEAVERS GUILD", proprietor: "MARTHA SADANGA", municipality: "Sadanga" },
+      { id: 39, name: "SAMOKI LOOM WEAVING", proprietor: "CARMEN COFULAN", municipality: "Bontoc" },
+      { id: 40, name: "SAYO WEAVING ENTERPRISE", proprietor: "LINDA SAYO", municipality: "Besao" },
+      { id: 41, name: "SUPANG NATIVE CRAFTS", proprietor: "MARTHA PUYONGAN", municipality: "Sabangan" },
+      { id: 42, name: "TADIAN WEAVERS ASSOCIATION", proprietor: "JOAN TADIAN", municipality: "Tadian" },
+      { id: 43, name: "TAPAPAN LOOM CRAFTS", proprietor: "BEATRICE TAGABAN", municipality: "Bauko" },
+      { id: 44, name: "TETEP-AN WEAVERS", proprietor: "CATHERINE TETEPAN", municipality: "Sagada" },
+      { id: 45, name: "AGAWA LOOM WEAVERS", proprietor: "KAREN AGAWA", municipality: "Besao" },
+      { id: 46, name: "ANKILENG WEAVING CENTER", proprietor: "REBECCA ANKILENG", municipality: "Sagada" },
+      { id: 47, name: "BARLIG ETHNIC CRAFTS", proprietor: "BRENDA BARLIG", municipality: "Barlig" },
+      { id: 48, name: "BAUKO CENTRAL HANDICRAFTS", proprietor: "VICTORIA CODOD", municipality: "Bauko" },
+      { id: 49, name: "BAYYO WEAVERS GROUP", proprietor: "JULIA BAYYO", municipality: "Bontoc" },
+      { id: 50, name: "BESAO NATIVE CRAFTS", proprietor: "AGNES BESAO", municipality: "Besao" },
+      { id: 51, name: "CAWA WEAVING ASSOCIATION", proprietor: "PATRICIA CAWA", municipality: "Sabangan" },
+      { id: 52, name: "GUINAANG WEAVERS", proprietor: "GLORIA GUINAANG", municipality: "Bontoc" },
+      { id: 53, name: "KADACLAN WEAVERS", proprietor: "VERONICA KADACLAN", municipality: "Barlig" },
+      { id: 54, name: "MALIGCONG LOOM WEAVES", proprietor: "TERESA MALIGCONG", municipality: "Bontoc" },
+      { id: 55, name: "PARACELIS CRAFTS", proprietor: "DELIA PARACELIS", municipality: "Paracelis" },
+      { id: 56, name: "PINGAD WEAVERS", proprietor: "ELIZABETH PINGAD", municipality: "Sabangan" },
+      { id: 57, name: "SABANGAN LOOM CENTER", proprietor: "JOSEPH DAO", municipality: "Sabangan" },
+      { id: 58, name: "TOCUCAN WEAVING GROUP", proprietor: "NORMA TOCUCAN", municipality: "Bontoc" },
+      { id: 59, name: "VANAG LOOM CRAFTS", proprietor: "SOPHIA VANAG", municipality: "Bauko" }
+    ];
+
+    // --- 2. RENDER FUNCTIONS ---
+    function renderWeavers(data) {
+      const tbody = document.getElementById('directoryTable');
+      tbody.innerHTML = data.map(w => `
+        <tr>
+          <td>${w.id}</td>
+          <td class="fw-semibold">${w.name}</td>
+          <td>${w.proprietor}</td>
+          <td><span class="badge bg-light text-dark border fs-8">${w.municipality}</span></td>
+          <td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAssociations(data) {
+      const tbody = document.getElementById('associationsTable');
+      tbody.innerHTML = data.map((a, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td class="fw-semibold text-success">${a.name}</td>
+          <td>${a.lead}</td>
+          <td>${a.phone !== 'N/A' ? a.phone : '<span class="text-muted">N/A</span>'}</td>
+          <td>${a.location}</td>
+        </tr>
+      `).join('');
+    }
+
     // Tab Navigation Switcher
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     const sectionTitle = document.getElementById('sectionTitle');
 
     const tabTitles = {
       dashboard: "Dashboard",
-      weavers: "Registered Weavers",
+      weavers: "Registered Weavers (59)",
+      associations: "Registered Associations (15)",
       products: "Cataloged Products",
       nfc: "NFC Tags Issued",
       logs: "Audit Logs"
@@ -480,8 +611,6 @@
 
     // Verification Trends Chart Setup
     const ctx = document.getElementById('verificationTrendChart').getContext('2d');
-    
-    // Gradient fill setup
     const gradient = ctx.createLinearGradient(0, 0, 0, 200);
     gradient.addColorStop(0, 'rgba(10, 77, 46, 0.25)');
     gradient.addColorStop(1, 'rgba(10, 77, 46, 0.0)');
@@ -504,30 +633,31 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
+        plugins: { legend: { display: false } },
         scales: {
-          x: {
-            grid: { display: false }
-          },
-          y: {
-            min: 0,
-            max: 300,
-            ticks: { stepSize: 50 },
-            grid: { color: '#f0f0f0' }
-          }
+          x: { grid: { display: false } },
+          y: { min: 0, max: 300, ticks: { stepSize: 50 }, grid: { color: '#f0f0f0' } }
         }
       }
     });
 
-    // Add and Filter functions
+    // Dynamic Filter function
     function filterDirectory() {
-      const input = document.getElementById('adminSearchInput').value.toLowerCase();
-      const rows = document.querySelectorAll('#directoryTable tr');
-      rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(input) ? '' : 'none';
-      });
+      const query = document.getElementById('adminSearchInput').value.toLowerCase();
+      
+      const filteredWeavers = weaversData.filter(w => 
+        w.name.toLowerCase().includes(query) || 
+        w.proprietor.toLowerCase().includes(query) || 
+        w.municipality.toLowerCase().includes(query)
+      );
+      renderWeavers(filteredWeavers);
+
+      const filteredAssoc = associationsData.filter(a => 
+        a.name.toLowerCase().includes(query) || 
+        a.lead.toLowerCase().includes(query) || 
+        a.location.toLowerCase().includes(query)
+      );
+      renderAssociations(filteredAssoc);
     }
 
     function saveWeaver() {
@@ -548,7 +678,7 @@
         <td>${rowCount}</td>
         <td class="fw-semibold">${biz}</td>
         <td>${prop}</td>
-        <td>${muni || 'N/A'}</td>
+        <td><span class="badge bg-light text-dark border fs-8">${muni || 'N/A'}</span></td>
         <td class="text-end pe-3"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteRow(this)">Remove</button></td>
       `;
 
@@ -571,6 +701,12 @@
         window.location.href = './Login.html';
       }
     }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderWeavers(weaversData);
+      renderAssociations(associationsData);
+    });
   </script>
 </body>
 </html>
