@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WEAVER-ID | Association Dashboard</title>
   <style>
+    /* EXACT SAME CSS VARIABLES & STYLES AS ADMIN.HTML */
     :root {
       --primary-color: #0d5c3a;
       --accent-color: #c48b18;
@@ -130,6 +131,15 @@
       font-size: 0.9rem;
     }
 
+    .filter-group select {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
     .btn-group {
       display: flex;
       gap: 10px;
@@ -182,7 +192,7 @@
     }
 
     th, td {
-      padding: 12px 15px;
+      padding: 10px 14px;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
     }
@@ -279,45 +289,57 @@
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- HEADER (MATCHING ADMIN HEADER LAYOUT) -->
   <div class="header-container">
     <div class="logo-group">
       <img src="weaver-id-logo.png" alt="WEAVER-ID Logo">
       <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Department_of_Trade_and_Industry_%28DTI%29.svg/1200px-Department_of_Trade_and_Industry_%28DTI%29.svg.png" alt="DTI Logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Bagong_Pilipinas_logo.png" alt="Bagong Pilipinas Logo">
     </div>
     <div class="header-title">
-      <h1 id="assocNameHeader">MONTAÑOSA WEAVERS ASSOCIATION</h1>
-      <p>Association Management Dashboard | Sagada, Mountain Province</p>
+      <h1 id="associationTitle">SAGADA WEAVERS ASSOCIATION</h1>
+      <p>WEAVER-ID | Association Member Portal</p>
     </div>
   </div>
 
-  <!-- METRICS GRID -->
+  <!-- STATS METRICS (EXACT 4-CARD METRIC GRID) -->
   <div class="stats-grid">
     <div class="stat-card">
       <h3>Affiliated Weavers</h3>
-      <div class="number" id="statMemberCount">0</div>
+      <div class="number" id="statWeaverCount">0</div>
     </div>
     <div class="stat-card accent">
       <h3>Active NFC Cards</h3>
-      <div class="number" id="statActiveNfc">0</div>
+      <div class="number" id="statNfcCount">0</div>
     </div>
     <div class="stat-card dark">
-      <h3>Pending NFC Requests</h3>
+      <h3>Pending NFC Issues</h3>
       <div class="number" id="statPendingNfc">0</div>
     </div>
+    <div class="stat-card">
+      <h3>Municipality Hub</h3>
+      <div class="number" style="font-size: 1.2rem; font-weight: 600; margin-top: 12px;">Sagada</div>
+    </div>
   </div>
 
-  <!-- CONTROLS BAR -->
+  <!-- ACTIONS & FILTERS (IDENTICAL CONTROL BAR) -->
   <div class="action-bar">
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search member weaver by name or barangay..." onkeyup="filterWeavers()">
+      <input type="text" id="searchInput" placeholder="Search weaver name, mobile, or barangay..." onkeyup="filterTable()">
+    </div>
+    <div class="filter-group">
+      <select id="statusFilter" onchange="filterTable()">
+        <option value="ALL">All Statuses</option>
+        <option value="Issued">NFC Issued</option>
+        <option value="Pending">NFC Pending</option>
+      </select>
     </div>
     <div class="btn-group">
-      <button class="btn btn-accent" onclick="openModal('addWeaverModal')">+ Register Member Weaver</button>
+      <button class="btn btn-accent" onclick="openModal('weaverModal')">+ Add Member Weaver</button>
     </div>
   </div>
 
-  <!-- TABLE: ASSOCIATION WEAVERS -->
+  <!-- INDIVIDUAL WEAVERS TABLE -->
   <div class="section-title">Association Member Weavers Directory</div>
   <table>
     <thead>
@@ -330,14 +352,14 @@
         <th>NFC Tag Status</th>
       </tr>
     </thead>
-    <tbody id="assocWeaverTableBody"></tbody>
+    <tbody id="weaverTableBody"></tbody>
   </table>
 
   <!-- MODAL: REGISTER MEMBER WEAVER -->
-  <div class="modal-overlay" id="addWeaverModal">
+  <div class="modal-overlay" id="weaverModal">
     <div class="modal-card">
-      <h3>Register New Association Member</h3>
-      <form id="assocWeaverForm" onsubmit="addWeaver(event)">
+      <h3>Register Member Weaver</h3>
+      <form id="weaverForm" onsubmit="addWeaver(event)">
         <div class="form-group">
           <label>Full Name</label>
           <input type="text" id="wName" placeholder="e.g., Virginia Omaweng" required>
@@ -355,16 +377,16 @@
           <input type="text" id="wMunicipality" value="Sagada" readonly style="background: #f1f5f9;">
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('addWeaverModal')">Cancel</button>
-          <button type="submit" class="btn btn-accent">Save Weaver</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('weaverModal')">Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Member</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    // ASSOCIATION SPECIFIC WEAVER DATA
-    let memberWeavers = [
+    // MEMBER WEAVERS SPECIFIC TO THIS ASSOCIATION
+    let weaverList = [
       { name: "Virginia Omaweng", mobile: "09978178644", barangay: "Demang", municipality: "Sagada", nfcStatus: "Issued" },
       { name: "Rose Ann Wangdali", mobile: "09502033126", barangay: "Demang", municipality: "Sagada", nfcStatus: "Issued" },
       { name: "Florence Aliwengweng", mobile: "09171234567", barangay: "Demang", municipality: "Sagada", nfcStatus: "Pending" },
@@ -375,13 +397,14 @@
       { name: "Grace Peg-ang", mobile: "09384567893", barangay: "Poblacion", municipality: "Sagada", nfcStatus: "Pending" }
     ];
 
+    // RENDER TABLE AND STATS
     function render() {
-      const tableBody = document.getElementById("assocWeaverTableBody");
-      tableBody.innerHTML = "";
+      const weaverBody = document.getElementById("weaverTableBody");
+      weaverBody.innerHTML = "";
 
-      memberWeavers.forEach((item, index) => {
+      weaverList.forEach((item, index) => {
         const badgeClass = item.nfcStatus === "Issued" ? "badge-success" : "badge-warning";
-        tableBody.innerHTML += `
+        weaverBody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
             <td><strong>${item.name}</strong></td>
@@ -393,17 +416,18 @@
         `;
       });
 
-      document.getElementById("statMemberCount").innerText = memberWeavers.length;
-      document.getElementById("statActiveNfc").innerText = memberWeavers.filter(w => w.nfcStatus === "Issued").length;
-      document.getElementById("statPendingNfc").innerText = memberWeavers.filter(w => w.nfcStatus === "Pending").length;
+      document.getElementById("statWeaverCount").innerText = weaverList.length;
+      document.getElementById("statNfcCount").innerText = weaverList.filter(w => w.nfcStatus === "Issued").length;
+      document.getElementById("statPendingNfc").innerText = weaverList.filter(w => w.nfcStatus === "Pending").length;
     }
 
+    // MODAL CONTROL
     function openModal(id) { document.getElementById(id).style.display = "flex"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
 
     function addWeaver(e) {
       e.preventDefault();
-      memberWeavers.push({
+      weaverList.push({
         name: document.getElementById("wName").value,
         mobile: document.getElementById("wMobile").value,
         barangay: document.getElementById("wBarangay").value,
@@ -411,14 +435,19 @@
         nfcStatus: "Pending"
       });
       render();
-      closeModal("addWeaverModal");
-      document.getElementById("assocWeaverForm").reset();
+      closeModal("weaverModal");
+      document.getElementById("weaverForm").reset();
     }
 
-    function filterWeavers() {
+    // FILTER FUNCTION
+    function filterTable() {
       const q = document.getElementById("searchInput").value.toLowerCase();
-      document.querySelectorAll("#assocWeaverTableBody tr").forEach(tr => {
-        tr.style.display = tr.innerText.toLowerCase().includes(q) ? "" : "none";
+      const status = document.getElementById("statusFilter").value;
+
+      document.querySelectorAll("#weaverTableBody tr").forEach(tr => {
+        const textMatch = tr.innerText.toLowerCase().includes(q);
+        const statusMatch = status === "ALL" || tr.children[5].innerText.trim() === status;
+        tr.style.display = textMatch && statusMatch ? "" : "none";
       });
     }
 
