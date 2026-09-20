@@ -38,8 +38,8 @@
     }
 
     .brand-logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       flex-shrink: 0;
     }
 
@@ -143,21 +143,23 @@
   <aside class="sidebar d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-brand d-flex align-items-center gap-2">
-        <!-- WEAVER-ID Brand Logo SVG -->
-        <svg class="brand-logo-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100" height="100" rx="22" fill="#0A4D2E"/>
-          <path d="M50 15 L85 50 L50 85 L15 50 Z" stroke="#E8F5E9" stroke-width="4" fill="none" opacity="0.4"/>
-          <path d="M50 25 L75 50 L50 75 L25 50 Z" stroke="#81C784" stroke-width="3" fill="none"/>
-          <path d="M50 35 L65 50 L50 65 L35 50 Z" fill="#A5D6A7"/>
-          <path d="M72 28 A 38 38 0 0 1 72 72" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-          <path d="M78 20 A 48 48 0 0 1 78 80" stroke="#81C784" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.8"/>
-          <circle cx="50" cy="50" r="4" fill="#0A4D2E"/>
+        <!-- FIXED WEAVER-ID LOGO (Enhanced Woven Diamond + NFC Signal) -->
+        <svg class="brand-logo-icon" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="120" height="120" rx="28" fill="#0A4D2E"/>
+          <!-- Woven Geometric Pattern Background -->
+          <path d="M60 18 L102 60 L60 102 L18 60 Z" stroke="#E8F5E9" stroke-width="5" fill="none" opacity="0.3"/>
+          <path d="M60 30 L90 60 L60 90 L30 60 Z" stroke="#81C784" stroke-width="4" fill="none"/>
+          <polygon points="60,42 78,60 60,78 42,60" fill="#A5D6A7"/>
+          <circle cx="60" cy="60" r="5" fill="#0A4D2E"/>
+          <!-- NFC Waves -->
+          <path d="M85 35 A 42 42 0 0 1 85 85" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M93 27 A 54 54 0 0 1 93 93" stroke="#81C784" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.8"/>
         </svg>
 
         <div class="vr mx-1"></div>
         <div>
           <h6 class="fw-bold mb-0 text-success">WEAVER-ID</h6>
-          <small class="text-muted fs-8">System Admin</small>
+          <small class="text-muted fs-8">System Admin Panel</small>
         </div>
       </div>
 
@@ -174,8 +176,8 @@
     <div class="p-3 border-top d-flex align-items-center gap-2">
       <div class="bg-light rounded-circle p-2"><i class="bi bi-shield-lock-fill text-success"></i></div>
       <div class="overflow-hidden me-auto">
-        <div class="fw-bold fs-7 text-truncate">DTI Admin Center</div>
-        <div class="text-muted fs-8 text-truncate">Central Governance</div>
+        <div class="fw-bold fs-7 text-truncate">System Administrator</div>
+        <div class="text-muted fs-8 text-truncate">DTI Governance</div>
       </div>
       <button onclick="handleLogout()" class="btn btn-sm btn-light border-0"><i class="bi bi-box-arrow-right"></i></button>
     </div>
@@ -187,8 +189,8 @@
     <!-- Top Header -->
     <div class="d-flex align-items-center justify-content-between mb-4">
       <div>
-        <h4 class="fw-bold mb-0" id="sectionTitle">Central Admin Control</h4>
-        <small class="text-muted">Global governance for registered weaves, NFC tag pairing, and authenticity tracking.</small>
+        <h4 class="fw-bold mb-0" id="sectionTitle">Admin Control Panel</h4>
+        <small class="text-muted">Manage registered products, NFC tag verification, and global artisan records.</small>
       </div>
       <div class="d-flex gap-2">
         <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#registerProductModal">
@@ -236,7 +238,7 @@
         <!-- Chart -->
         <div class="col-12 col-lg-7">
           <div class="dashboard-card">
-            <h6 class="fw-bold mb-3 fs-7">System-wide Verification Trends</h6>
+            <h6 class="fw-bold mb-3 fs-7">System Scan Activity Trends</h6>
             <div style="height: 220px;">
               <canvas id="adminScanChart"></canvas>
             </div>
@@ -247,21 +249,21 @@
         <div class="col-12 col-lg-5">
           <div class="dashboard-card d-flex flex-column justify-content-between">
             <div>
-              <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-lightning-charge me-1 text-warning"></i> Admin Quick Controls</h6>
+              <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-lightning-charge me-1 text-warning"></i> Quick Operations</h6>
               <div class="d-grid gap-2">
                 <button class="btn btn-outline-success text-start py-2 fs-7" onclick="switchTab('bulk-verify')">
-                  <i class="bi bi-qr-code-scan me-2"></i> Open Bulk Verification Scanner
+                  <i class="bi bi-qr-code-scan me-2"></i> Launch Bulk Verification Scanner
                 </button>
                 <button class="btn btn-outline-primary text-start py-2 fs-7" data-bs-toggle="modal" data-bs-target="#registerProductModal">
                   <i class="bi bi-box-seam me-2"></i> Register New Product & Link NFC
                 </button>
                 <button class="btn btn-outline-secondary text-start py-2 fs-7" onclick="switchTab('artisans')">
-                  <i class="bi bi-people me-2"></i> Manage Master Artisan Directory
+                  <i class="bi bi-people me-2"></i> Open Master Artisan Directory
                 </button>
               </div>
             </div>
             <div class="mt-3 p-2 bg-light rounded border text-center fs-8 text-muted">
-              WEAVER-ID System Status: <span class="badge bg-success">Operational</span>
+              WEAVER-ID Admin Node: <span class="badge bg-success">Online</span>
             </div>
           </div>
         </div>
@@ -269,7 +271,7 @@
 
     </div>
 
-    <!-- 2. BULK VERIFICATION SCANNER (Added from Association Features) -->
+    <!-- 2. BULK VERIFICATION WORKFLOW -->
     <div id="view-bulk-verify" class="tab-view d-none">
       <div class="row g-3">
         <div class="col-12 col-md-5">
@@ -277,21 +279,21 @@
             <div class="scan-pulse bg-success-subtle text-success rounded-circle mx-auto p-4 mb-3 d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
               <i class="bi bi-wifi fs-1"></i>
             </div>
-            <h5 class="fw-bold">Central NFC Reader Active</h5>
-            <p class="text-muted fs-8 mb-3">Scan product tags in batch to verify authenticity, weaver lineage, and origin.</p>
+            <h5 class="fw-bold">NFC Reader Active</h5>
+            <p class="text-muted fs-8 mb-3">Scan product tags in batch to verify authenticity and weaver lineage in real-time.</p>
             
             <div class="input-group mb-3">
               <input type="text" id="simulatedTagInput" class="form-control fs-7" placeholder="e.g. WVID-7721">
-              <button class="btn btn-dti fs-7" onclick="simulateScan()"><i class="bi bi-play-fill me-1"></i> Scan</button>
+              <button class="btn btn-dti fs-7" onclick="simulateScan()"><i class="bi bi-play-fill me-1"></i> Scan Tag</button>
             </div>
-            <small class="text-muted fs-8">Sample Tag IDs: <code>WVID-7721</code>, <code>WVID-8842</code>, <code>WVID-9012</code></small>
+            <small class="text-muted fs-8">Test Tags: <code>WVID-7721</code>, <code>WVID-8842</code>, <code>WVID-9012</code></small>
           </div>
         </div>
 
         <div class="col-12 col-md-7">
           <div class="dashboard-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-bold mb-0">Live Scan Feed</h6>
+              <h6 class="fw-bold mb-0">Live Scan Logs</h6>
               <span class="badge bg-light text-dark border fs-8" id="scanCounterBadge">0 Scanned</span>
             </div>
             <div class="table-responsive" style="max-height: 350px;">
@@ -299,14 +301,14 @@
                 <thead class="table-light">
                   <tr>
                     <th>Tag ID</th>
-                    <th>Product</th>
-                    <th>Association / Artisan</th>
+                    <th>Product Name</th>
+                    <th>Artisan / Owner</th>
                     <th>Result</th>
                   </tr>
                 </thead>
                 <tbody id="scanLogTable">
                   <tr>
-                    <td colspan="4" class="text-center text-muted py-4">No active scans. Enter or tap a tag to begin.</td>
+                    <td colspan="4" class="text-center text-muted py-4">No active scans yet. Tap or enter a tag to begin.</td>
                   </tr>
                 </tbody>
               </table>
@@ -316,11 +318,11 @@
       </div>
     </div>
 
-    <!-- 3. PRODUCT CATALOG (Global + Association Items) -->
+    <!-- 3. PRODUCT CATALOG -->
     <div id="view-catalog" class="tab-view d-none">
       <div class="dashboard-card p-0">
         <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-          <h6 class="fw-bold mb-0">System Product Registry & Tag Links</h6>
+          <h6 class="fw-bold mb-0">Product Registry & Linked NFC Tags</h6>
           <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#registerProductModal"><i class="bi bi-plus-lg me-1"></i> Add Product</button>
         </div>
         <div class="table-responsive">
@@ -329,13 +331,13 @@
               <tr>
                 <th>Product Name</th>
                 <th>Category</th>
-                <th>Association / Weaver</th>
-                <th>Linked Tag</th>
+                <th>Artisan / Weaver</th>
+                <th>Linked NFC Tag</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody id="catalogTable">
-              <!-- JS Populated -->
+              <!-- Rendered by JS -->
             </tbody>
           </table>
         </div>
@@ -345,9 +347,9 @@
     <!-- 4. ARTISANS DIRECTORY -->
     <div id="view-artisans" class="tab-view d-none">
       <div class="dashboard-card">
-        <h6 class="fw-bold mb-3">Master Weaver & Artisan Network</h6>
+        <h6 class="fw-bold mb-3">Master Weavers & Artisans</h6>
         <div class="row g-3" id="artisansGrid">
-          <!-- JS Populated -->
+          <!-- Rendered by JS -->
         </div>
       </div>
     </div>
@@ -355,24 +357,36 @@
     <!-- 5. TAG PAIRING -->
     <div id="view-batch-nfc" class="tab-view d-none">
       <div class="dashboard-card">
-        <h6 class="fw-bold mb-2">Central NFC Tag Inventory</h6>
-        <p class="text-muted fs-8 mb-4">Manage unassigned and provisioned tags across registered weaving hubs.</p>
-        <div class="alert alert-info fs-7 border-0"><i class="bi bi-info-circle me-2"></i> 45 Unassigned NFC tags ready for encoding.</div>
+        <h6 class="fw-bold mb-2">NFC Tag Pairing & Encoding</h6>
+        <p class="text-muted fs-8 mb-4">Pair unassigned NFC hardware tags to woven items before market registration.</p>
+        <div class="alert alert-info fs-7 border-0"><i class="bi bi-info-circle me-2"></i> 45 Unassigned NFC tags ready in central inventory.</div>
       </div>
     </div>
 
-    <!-- 6. AUDIT LOGS -->
+    <!-- 6. AUDIT LOGS (LOCATION COLUMN REMOVED AS REQUESTED) -->
     <div id="view-logs" class="tab-view d-none">
       <div class="dashboard-card">
-        <h6 class="fw-bold mb-3">System-Wide Verification Audit Log</h6>
+        <h6 class="fw-bold mb-3">Verification Audit History</h6>
         <div class="table-responsive">
-          <table class="table table-striped fs-7">
-            <thead>
-              <tr><th>Timestamp</th><th>Tag ID</th><th>Result</th></tr>
+          <table class="table table-striped align-middle fs-7">
+            <thead class="table-light">
+              <tr>
+                <th>Timestamp</th>
+                <th>Tag ID</th>
+                <th>Result</th>
+              </tr>
             </thead>
             <tbody>
-              <tr><td>Just now</td><td><code>WVID-7721</code></td><td><span class="text-success fw-bold">Verified</span></td></tr>
-              <tr><td>15m ago</td><td><code>WVID-8842</code></td><td><span class="text-success fw-bold">Verified</span></td></tr>
+              <tr>
+                <td>System Scan</td>
+                <td><code>WVID-7721</code></td>
+                <td><span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Verified</span></td>
+              </tr>
+              <tr>
+                <td>Bauko Market Scan</td>
+                <td><code>WVID-8842</code></td>
+                <td><span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Verified</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -386,7 +400,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">Admin: Register & Link Weave Product</h5>
+          <h5 class="modal-title fw-bold">Register & Link Weave Product</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -404,11 +418,11 @@
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label fs-7">Master Weaver / Association</label>
-            <input type="text" id="regWeaver" class="form-control fs-7" placeholder="e.g. Virginia Omaweng (Pinagpagan Assoc.)">
+            <label class="form-label fs-7">Master Weaver / Artisan</label>
+            <input type="text" id="regWeaver" class="form-control fs-7" placeholder="e.g. Virginia Omaweng">
           </div>
           <div class="mb-3">
-            <label class="form-label fs-7">NFC Tag ID (Scan or enter ID)</label>
+            <label class="form-label fs-7">NFC Tag ID (Tap reader or type ID)</label>
             <input type="text" id="regNfcTag" class="form-control fs-7" placeholder="e.g. WVID-9901">
           </div>
         </div>
@@ -563,7 +577,7 @@
       renderCatalog();
       renderArtisans();
 
-      // Chart
+      // Chart Initialization
       const ctx = document.getElementById('adminScanChart');
       if (ctx) {
         new Chart(ctx.getContext('2d'), {
@@ -571,7 +585,7 @@
           data: {
             labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             datasets: [{
-              label: 'Global Scans',
+              label: 'System Scans',
               data: [45, 60, 52, 88, 70, 110, 135],
               borderColor: '#0a4d2e',
               backgroundColor: 'rgba(10, 77, 46, 0.1)',
