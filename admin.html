@@ -33,8 +33,14 @@
     }
 
     .sidebar-brand {
-      padding: 1.25rem 1rem;
+      padding: 1rem 1.25rem;
       border-bottom: 1px solid #f1f3f5;
+    }
+
+    .brand-logo-img {
+      height: 36px;
+      width: auto;
+      object-fit: contain;
     }
 
     .sidebar-nav .nav-link {
@@ -186,7 +192,8 @@
   <aside class="sidebar d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-brand d-flex align-items-center gap-2">
-        <i class="bi bi-shield-check text-success fs-3"></i>
+        <img src="logo.png" alt="WEAVER-ID Logo" class="brand-logo-img">
+        <div class="vr mx-1"></div>
         <div>
           <h6 class="fw-bold mb-0 text-success">Weaver-ID</h6>
           <small class="text-muted fs-8">Admin Control Panel</small>
@@ -546,21 +553,21 @@
     ];
 
     const associationsData = [
-      { name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
-      { name: "Sabangan Weavers Association", lead: "Rannie Dao", phone: "9101572596", location: "Poblacion, Sabangan" },
-      { name: "Pinagpagan Womens Workers Association", lead: "Virginia Omaweng", phone: "9978178644", location: "Demang, Sagada" },
-      { name: "Pigacabuba Weaves Association", lead: "Joy Anoyan", phone: "9398711035", location: "Camatagan, Sabangan" },
-      { name: "Sutada Weaver's Association", lead: "Saldy Puyongan", phone: "9151578041", location: "Supang, Sabangan" },
-      { name: "Tangafan Organization Inc", lead: "Paula Cofulan", phone: "N/A", location: "Samoki, Bontoc" },
-      { name: "Pangayapang Handicrafts Association", lead: "Julien Pineda", phone: "9467344884", location: "Poblacion, Bauko" },
-      { name: "Letang Young Mothers", lead: "Felipa Tagaban", phone: "9457956160", location: "Tapapan, Bauko" },
-      { name: "Pamana Organization", lead: "Christopher Pinasen", phone: "9128242841", location: "Masla, Tadian" },
-      { name: "Viewhill Womens Organization", lead: "Ruth Kathleen Codod", phone: "9085604319", location: "Guinzadan Central, Bauko" },
-      { name: "Juliana's Loom Weaving Manufacturing", lead: "Juliana Walisen", phone: "9993761663", location: "Guinzadan Norte, Bauko" },
-      { name: "Paulina's Loom Weaving Manufacturing", lead: "Brendo Cayanga", phone: "9502032739", location: "Ambaguio, Besao" },
-      { name: "Suphina Loom Weaving Manufacturing", lead: "Irene Marconi", phone: "9150668685", location: "Lubon, Tadian" },
-      { name: "Sagada Ethnic Handicrafts Manufacturing", lead: "Regeelyn Bacolong", phone: "N/A", location: "Dagdag, Sagada" },
-      { name: "Sagada Mountainside Handicrafts Manufacturing", lead: "Agnes Cadiogan", phone: "9121527484", location: "Demang, Sagada" }
+      { code: "HUB-SAG-01", name: "Montañosa Weavers Association", lead: "Rose Ann Wangdali", phone: "9502033126", location: "Demang, Sagada" },
+      { code: "HUB-SAB-01", name: "Sabangan Weavers Association", lead: "Rannie Dao", phone: "9101572596", location: "Poblacion, Sabangan" },
+      { code: "HUB-SAG-02", name: "Pinagpagan Womens Workers Association", lead: "Virginia Omaweng", phone: "9978178644", location: "Demang, Sagada" },
+      { code: "HUB-SAB-02", name: "Pigacabuba Weaves Association", lead: "Joy Anoyan", phone: "9398711035", location: "Camatagan, Sabangan" },
+      { code: "HUB-SAB-03", name: "Sutada Weaver's Association", lead: "Saldy Puyongan", phone: "9151578041", location: "Supang, Sabangan" },
+      { code: "HUB-BON-01", name: "Tangafan Organization Inc", lead: "Paula Cofulan", phone: "N/A", location: "Samoki, Bontoc" },
+      { code: "HUB-BAU-01", name: "Pangayapang Handicrafts Association", lead: "Julien Pineda", phone: "9467344884", location: "Poblacion, Bauko" },
+      { code: "HUB-BAU-02", name: "Letang Young Mothers", lead: "Felipa Tagaban", phone: "9457956160", location: "Tapapan, Bauko" },
+      { code: "HUB-TAD-01", name: "Pamana Organization", lead: "Christopher Pinasen", phone: "9128242841", location: "Masla, Tadian" },
+      { code: "HUB-BAU-03", name: "Viewhill Womens Organization", lead: "Ruth Kathleen Codod", phone: "9085604319", location: "Guinzadan Central, Bauko" },
+      { code: "HUB-BAU-04", name: "Juliana's Loom Weaving Manufacturing", lead: "Juliana Walisen", phone: "9993761663", location: "Guinzadan Norte, Bauko" },
+      { code: "HUB-BES-01", name: "Paulina's Loom Weaving Manufacturing", lead: "Brendo Cayanga", phone: "9502032739", location: "Ambaguio, Besao" },
+      { code: "HUB-TAD-02", name: "Suphina Loom Weaving Manufacturing", lead: "Irene Marconi", phone: "9150668685", location: "Lubon, Tadian" },
+      { code: "HUB-SAG-03", name: "Sagada Ethnic Handicrafts Manufacturing", lead: "Regeelyn Bacolong", phone: "N/A", location: "Dagdag, Sagada" },
+      { code: "HUB-SAG-04", name: "Sagada Mountainside Handicrafts Manufacturing", lead: "Agnes Cadiogan", phone: "9121527484", location: "Demang, Sagada" }
     ];
 
     let weaversData = [
@@ -641,8 +648,8 @@
         el.textContent = count;
       });
       tabTitles.weavers = `Registered Weavers (${count})`;
-      const activeTab = document.querySelector('.sidebar-nav .nav-link.active').getAttribute('data-tab');
-      if (activeTab === 'weavers') {
+      const activeNav = document.querySelector('.sidebar-nav .nav-link.active');
+      if (activeNav && activeNav.getAttribute('data-tab') === 'weavers') {
         document.getElementById('sectionTitle').textContent = tabTitles.weavers;
       }
     }
@@ -663,6 +670,38 @@
             <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteWeaver(${w.id})">Remove</button>
           </td>
         </tr>
+      `).join('');
+    }
+
+    function renderAssociations(data) {
+      const container = document.getElementById('associationsContainer');
+      if (data.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted py-4">No matching associations found.</div>`;
+        return;
+      }
+      container.innerHTML = data.map(a => `
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="association-box d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="badge bg-success-subtle text-success border fs-8"><i class="bi bi-building me-1"></i>Verified</span>
+                <small class="text-muted fs-8"><i class="bi bi-geo-alt me-1"></i>${a.location}</small>
+              </div>
+              <h6 class="fw-bold mb-1 text-dark">${a.name}</h6>
+              <div class="mb-2"><code class="fs-8 px-2 py-1 bg-light border rounded text-success">${a.code || 'HUB-ID-N/A'}</code></div>
+            </div>
+            <div class="pt-3 mt-2 border-top">
+              <div class="d-flex align-items-center justify-content-between fs-7 mb-1">
+                <span class="text-muted"><i class="bi bi-person me-1"></i>Lead:</span>
+                <span class="fw-semibold">${a.lead}</span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between fs-7">
+                <span class="text-muted"><i class="bi bi-telephone me-1"></i>Contact:</span>
+                <span class="fw-semibold">${a.phone}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       `).join('');
     }
 
@@ -698,74 +737,22 @@
       document.getElementById('modalProductWeaver').textContent = product.weaver;
       document.getElementById('modalProductNfc').textContent = product.nfc;
 
-      const modalEl = document.getElementById('productDetailModal');
-      const modal = new bootstrap.Modal(modalEl);
+      const modal = new bootstrap.Modal(document.getElementById('productDetailModal'));
       modal.show();
     }
 
-    function renderAssociations(data) {
-      const container = document.getElementById('associationsContainer');
-      if (data.length === 0) {
-        container.innerHTML = `<div class="col-12 text-center text-muted py-4">No matching associations found.</div>`;
-        return;
-      }
-
-      container.innerHTML = data.map(a => `
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="association-box d-flex flex-column justify-content-between">
-            <div>
-              <div class="d-flex align-items-start justify-content-between mb-2">
-                <h6 class="fw-bold mb-0 text-dark fs-7">${a.name}</h6>
-                <span class="badge bg-light text-dark border fs-8">${a.location.split(',').pop().trim()}</span>
-              </div>
-              <div class="text-muted fs-8 mb-3"><i class="bi bi-geo-alt me-1"></i>${a.location}</div>
-            </div>
-            <div class="pt-2 border-top">
-              <div class="d-flex align-items-center justify-content-between fs-8">
-                <span class="text-muted">Lead / Representative:</span>
-                <span class="fw-semibold text-dark">${a.lead}</span>
-              </div>
-              <div class="d-flex align-items-center justify-content-between fs-8 mt-1">
-                <span class="text-muted">Contact:</span>
-                <span class="fw-medium text-secondary">${a.phone !== 'N/A' ? '+63 ' + a.phone : 'N/A'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // --- 3. TAB NAVIGATION ---
-    document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
-        this.classList.add('active');
-
-        const tab = this.getAttribute('data-tab');
-        document.querySelectorAll('.tab-view').forEach(view => view.classList.add('d-none'));
-        
-        const activeView = document.getElementById(`view-${tab}`);
-        if (activeView) activeView.classList.remove('d-none');
-
-        document.getElementById('sectionTitle').textContent = tabTitles[tab] || 'Dashboard';
-      });
-    });
-
-    // --- 4. CRUD OPERATIONS & SEARCH ---
     function saveWeaver() {
-      const bus = document.getElementById('addBusiness').value.trim();
-      const prop = document.getElementById('addProprietor').value.trim();
-      const mun = document.getElementById('addMunicipality').value.trim();
+      const business = document.getElementById('addBusiness').value.trim();
+      const proprietor = document.getElementById('addProprietor').value.trim();
+      const municipality = document.getElementById('addMunicipality').value.trim();
 
-      if (!bus || !prop || !mun) {
-        alert('Please fill out all fields.');
+      if (!business || !proprietor || !municipality) {
+        alert("Please fill in all required fields.");
         return;
       }
 
       const newId = weaversData.length > 0 ? Math.max(...weaversData.map(w => w.id)) + 1 : 1;
-      weaversData.unshift({ id: newId, name: bus.toUpperCase(), proprietor: prop.toUpperCase(), municipality: mun });
+      weaversData.push({ id: newId, name: business.toUpperCase(), proprietor: proprietor.toUpperCase(), municipality });
 
       updateWeaverCounters();
       renderWeavers(weaversData);
@@ -780,91 +767,92 @@
     }
 
     function deleteWeaver(id) {
-      if (confirm('Are you sure you want to remove this record?')) {
+      if (confirm('Are you sure you want to remove this weaver from the registry?')) {
         weaversData = weaversData.filter(w => w.id !== id);
         updateWeaverCounters();
-        filterDirectory();
+        renderWeavers(weaversData);
       }
     }
 
     function filterDirectory() {
       const q = document.getElementById('adminSearchInput').value.toLowerCase().trim();
-
+      
       const filteredWeavers = weaversData.filter(w => 
-        w.name.toLowerCase().includes(q) || 
-        w.proprietor.toLowerCase().includes(q) || 
-        w.municipality.toLowerCase().includes(q)
+        w.name.toLowerCase().includes(q) || w.proprietor.toLowerCase().includes(q) || w.municipality.toLowerCase().includes(q)
       );
-
-      const filteredAssociations = associationsData.filter(a => 
-        a.name.toLowerCase().includes(q) || 
-        a.lead.toLowerCase().includes(q) || 
-        a.location.toLowerCase().includes(q)
-      );
-
-      const filteredProducts = productsData.filter(p => 
-        p.name.toLowerCase().includes(q) || 
-        p.category.toLowerCase().includes(q) || 
-        p.origin.toLowerCase().includes(q) ||
-        p.weaver.toLowerCase().includes(q)
-      );
-
       renderWeavers(filteredWeavers);
-      renderAssociations(filteredAssociations);
-      renderProducts(filteredProducts);
+
+      const filteredAssoc = associationsData.filter(a => 
+        a.name.toLowerCase().includes(q) || a.lead.toLowerCase().includes(q) || a.location.toLowerCase().includes(q) || (a.code && a.code.toLowerCase().includes(q))
+      );
+      renderAssociations(filteredAssoc);
+
+      const filteredProds = productsData.filter(p => 
+        p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.origin.toLowerCase().includes(q)
+      );
+      renderProducts(filteredProds);
     }
 
     function exportData() {
-      alert("Exporting verification report (CSV)...");
+      alert("Exporting audit log and verification trends report (CSV format)...");
     }
 
-     function handleLogout() {
-      if (confirm('Log out from Association Hub?')) {
+    function handleLogout() {
+      if (confirm('Are you sure you want to log out from the Weaver-ID Admin Control Panel?')) {
         window.location.href = 'login.html';
       }
     }
 
-    // --- 5. INITIALIZATION ---
-    window.addEventListener('DOMContentLoaded', () => {
+    // --- 3. EVENT LISTENERS & INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Setup Navigation Tabs
+      document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tabKey = link.getAttribute('data-tab');
+
+          document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+
+          document.querySelectorAll('.tab-view').forEach(v => v.classList.add('d-none'));
+          const targetView = document.getElementById(`view-${tabKey}`);
+          if (targetView) targetView.classList.remove('d-none');
+
+          document.getElementById('sectionTitle').textContent = tabTitles[tabKey] || "Dashboard";
+        });
+      });
+
+      // Render Dynamic Content
       updateWeaverCounters();
       renderWeavers(weaversData);
       renderAssociations(associationsData);
       renderProducts(productsData);
 
-      // Render Verification Trends Chart using Chart.js
-      const ctx = document.getElementById('verificationTrendChart');
-      if (ctx) {
-        new Chart(ctx, {
+      // Initialize Verification Chart
+      const chartCtx = document.getElementById('verificationTrendChart');
+      if (chartCtx) {
+        new Chart(chartCtx.getContext('2d'), {
           type: 'line',
           data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
             datasets: [{
-              label: 'Verifications',
-              data: [65, 90, 120, 185, 230, 281],
+              label: 'Scans',
+              data: [65, 80, 110, 140, 210, 236],
               borderColor: '#0a4d2e',
-              backgroundColor: 'rgba(10, 77, 46, 0.08)',
+              backgroundColor: 'rgba(10, 77, 46, 0.1)',
               fill: true,
-              tension: 0.35,
-              borderWidth: 2,
-              pointRadius: 3,
+              tension: 0.3,
+              pointRadius: 4,
               pointBackgroundColor: '#0a4d2e'
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-              x: {
-                grid: { display: false },
-                ticks: { font: { size: 10 } }
-              },
-              y: {
-                grid: { borderDash: [4, 4], color: '#e2e8f0' },
-                ticks: { font: { size: 10 } }
-              }
+              y: { grid: { borderDash: [4, 4] }, ticks: { font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { font: { size: 10 } } }
             }
           }
         });
