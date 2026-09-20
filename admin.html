@@ -3,602 +3,182 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WEAVER-ID | System Admin Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>WEAVER-ID | Masterlist of Registered Weavers</title>
   <style>
-    :root {
-      --sidebar-width: 260px;
-      --dti-green: #0a4d2e;
-      --dti-green-hover: #073822;
-      --bg-canvas: #f4f6f8;
-    }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-canvas);
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
       color: #333;
     }
-
-    /* Sidebar Navigation */
-    .sidebar {
-      width: var(--sidebar-width);
-      position: fixed;
-      top: 0; bottom: 0; left: 0;
-      background-color: #ffffff;
-      border-right: 1px solid #e9ecef;
-      z-index: 1000;
-    }
-
-    .sidebar-brand {
-      padding: 1.25rem;
-      border-bottom: 1px solid #f1f3f5;
-    }
-
-    .brand-logo-icon {
-      width: 42px;
-      height: 42px;
-      flex-shrink: 0;
-    }
-
-    .sidebar-nav .nav-link {
-      color: #495057;
-      padding: 0.75rem 1.25rem;
-      font-size: 0.875rem;
-      font-weight: 500;
+    .header-container {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
-      cursor: pointer;
+      justify-content: space-between;
+      background: #ffffff;
+      padding: 15px 30px;
       border-radius: 8px;
-      margin: 0.2rem 0.75rem;
-      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 25px;
     }
-
-    .sidebar-nav .nav-link:hover {
-      color: var(--dti-green);
-      background-color: #f8f9fa;
-    }
-
-    .sidebar-nav .nav-link.active {
-      color: var(--dti-green);
-      background-color: #e8f5e9;
-      font-weight: 600;
-    }
-
-    .main-content {
-      margin-left: var(--sidebar-width);
-      padding: 2rem;
-      max-width: 1240px;
-    }
-
-    /* Cards & Components */
-    .dashboard-card {
-      background-color: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #eaeaea;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      padding: 1.25rem;
-      height: 100%;
-    }
-
-    .metric-card {
-      background-color: #ffffff;
-      border-radius: 16px;
-      padding: 1.25rem;
-      border: 1px solid #eaeaea;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      height: 100%;
-    }
-
-    .metric-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
+    .logo-group {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      margin-bottom: 0.75rem;
+      gap: 15px;
     }
-
-    .icon-assocs { background-color: #e8f5e9; color: #2e7d32; }
-    .icon-products { background-color: #e3f2fd; color: #1565c0; }
-    .icon-nfc { background-color: #fff8e1; color: #f57f17; }
-    .icon-verified { background-color: #f3e5f5; color: #7b1fa2; }
-
-    .btn-dti {
-      background-color: var(--dti-green);
-      color: white;
+    .logo-group img {
+      height: 60px;
+      object-fit: contain;
     }
-    .btn-dti:hover {
-      background-color: var(--dti-green-hover);
-      color: white;
+    .header-title {
+      text-align: right;
     }
-
-    .scan-pulse {
-      animation: pulse-ring 1.8s infinite;
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #1a365d;
     }
-
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.7; }
-      100% { transform: scale(0.95); opacity: 1; }
+    .header-title p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: #64748b;
     }
-
-    .fs-7 { font-size: 0.85rem; }
-    .fs-8 { font-size: 0.75rem; }
-
-    @media (max-width: 991.98px) {
-      .sidebar { position: relative !important; width: 100% !important; height: auto !important; border-right: none; }
-      .main-content { margin-left: 0 !important; padding: 1rem !important; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th {
+      background-color: #0f172a;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+    tr:hover {
+      background-color: #f1f5f9;
     }
   </style>
 </head>
 <body>
 
-  <!-- Sidebar Navigation -->
-  <aside class="sidebar d-flex flex-column justify-content-between">
-    <div>
-      <div class="sidebar-brand d-flex align-items-center gap-2">
-        <!-- ADDED WEAVER-ID EMBLEM LOGO -->
-        <svg class="brand-logo-icon" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="120" rx="28" fill="#0A4D2E"/>
-          <path d="M60 18 L102 60 L60 102 L18 60 Z" stroke="#E8F5E9" stroke-width="5" fill="none" opacity="0.3"/>
-          <path d="M60 30 L90 60 L60 90 L30 60 Z" stroke="#81C784" stroke-width="4" fill="none"/>
-          <polygon points="60,42 78,60 60,78 42,60" fill="#A5D6A7"/>
-          <circle cx="60" cy="60" r="5" fill="#0A4D2E"/>
-          <path d="M85 35 A 42 42 0 0 1 85 85" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none"/>
-          <path d="M93 27 A 54 54 0 0 1 93 93" stroke="#81C784" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.8"/>
-        </svg>
-
-        <div class="vr mx-1"></div>
-        <div>
-          <h6 class="fw-bold mb-0 text-success">WEAVER-ID</h6>
-          <small class="text-muted fs-8">System Admin Panel</small>
-        </div>
-      </div>
-
-      <nav class="sidebar-nav mt-3">
-        <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a class="nav-link" data-tab="catalog"><i class="bi bi-box-seam"></i> Product Catalog</a>
-        <a class="nav-link" data-tab="bulk-verify"><i class="bi bi-qr-code-scan"></i> Bulk Verification</a>
-        <a class="nav-link" data-tab="artisans"><i class="bi bi-people"></i> Artisans & Weavers</a>
-        <a class="nav-link" data-tab="batch-nfc"><i class="bi bi-wifi"></i> Tag Pairing</a>
-        <a class="nav-link" data-tab="logs"><i class="bi bi-journal-check"></i> Audit Logs</a>
-      </nav>
+  <!-- HEADER WITH DTI AND BAGONG PILIPINAS LOGOS -->
+  <div class="header-container">
+    <div class="logo-group">
+      <!-- DTI Logo -->
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Department_of_Trade_and_Industry_%28DTI%29.svg/1200px-Department_of_Trade_and_Industry_%28DTI%29.svg.png" alt="DTI Philippines Logo">
+      <!-- Bagong Pilipinas Logo -->
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Bagong_Pilipinas_logo.png" alt="Bagong Pilipinas Logo">
     </div>
-
-    <div class="p-3 border-top d-flex align-items-center gap-2">
-      <div class="bg-light rounded-circle p-2"><i class="bi bi-shield-lock-fill text-success"></i></div>
-      <div class="overflow-hidden me-auto">
-        <div class="fw-bold fs-7 text-truncate">System Administrator</div>
-        <div class="text-muted fs-8 text-truncate">DTI Governance</div>
-      </div>
-      <button onclick="handleLogout()" class="btn btn-sm btn-light border-0"><i class="bi bi-box-arrow-right"></i></button>
-    </div>
-  </aside>
-
-  <!-- Main Content Area -->
-  <main class="main-content">
-
-    <!-- Top Header -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-      <div>
-        <h4 class="fw-bold mb-0" id="sectionTitle">Admin Control Panel</h4>
-        <small class="text-muted">Manage registered products, NFC tag verification, and global artisan records.</small>
-      </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#registerProductModal">
-          <i class="bi bi-plus-lg me-1"></i> Register Product
-        </button>
-      </div>
-    </div>
-
-    <!-- 1. DASHBOARD OVERVIEW -->
-    <div id="view-dashboard" class="tab-view">
-      
-      <!-- Metrics Grid -->
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-assocs"><i class="bi bi-building"></i></div>
-            <h3 class="fw-bold mb-0">8</h3>
-            <div class="text-muted fs-8">Active Associations</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-products"><i class="bi bi-box-seam-fill"></i></div>
-            <h3 class="fw-bold mb-0" id="countProducts">142</h3>
-            <div class="text-muted fs-8">Registered Products</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-nfc"><i class="bi bi-wifi"></i></div>
-            <h3 class="fw-bold mb-0">520</h3>
-            <div class="text-muted fs-8">Active NFC Tags</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="metric-card">
-            <div class="metric-icon icon-verified"><i class="bi bi-patch-check-fill"></i></div>
-            <h3 class="fw-bold mb-0">1,280</h3>
-            <div class="text-muted fs-8">Total Scans Logged</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-3">
-        <!-- Chart -->
-        <div class="col-12 col-lg-7">
-          <div class="dashboard-card">
-            <h6 class="fw-bold mb-3 fs-7">System Scan Activity Trends</h6>
-            <div style="height: 220px;">
-              <canvas id="adminScanChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Actions Panel -->
-        <div class="col-12 col-lg-5">
-          <div class="dashboard-card d-flex flex-column justify-content-between">
-            <div>
-              <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-lightning-charge me-1 text-warning"></i> Quick Operations</h6>
-              <div class="d-grid gap-2">
-                <button class="btn btn-outline-success text-start py-2 fs-7" onclick="switchTab('bulk-verify')">
-                  <i class="bi bi-qr-code-scan me-2"></i> Launch Bulk Verification Scanner
-                </button>
-                <button class="btn btn-outline-primary text-start py-2 fs-7" data-bs-toggle="modal" data-bs-target="#registerProductModal">
-                  <i class="bi bi-box-seam me-2"></i> Register New Product & Link NFC
-                </button>
-                <button class="btn btn-outline-secondary text-start py-2 fs-7" onclick="switchTab('artisans')">
-                  <i class="bi bi-people me-2"></i> Open Master Artisan Directory
-                </button>
-              </div>
-            </div>
-            <div class="mt-3 p-2 bg-light rounded border text-center fs-8 text-muted">
-              WEAVER-ID Admin Node: <span class="badge bg-success">Online</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- 2. BULK VERIFICATION WORKFLOW -->
-    <div id="view-bulk-verify" class="tab-view d-none">
-      <div class="row g-3">
-        <div class="col-12 col-md-5">
-          <div class="dashboard-card text-center py-4">
-            <div class="scan-pulse bg-success-subtle text-success rounded-circle mx-auto p-4 mb-3 d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
-              <i class="bi bi-wifi fs-1"></i>
-            </div>
-            <h5 class="fw-bold">NFC Reader Active</h5>
-            <p class="text-muted fs-8 mb-3">Scan product tags in batch to verify authenticity and weaver lineage in real-time.</p>
-            
-            <div class="input-group mb-3">
-              <input type="text" id="simulatedTagInput" class="form-control fs-7" placeholder="e.g. WVID-7721">
-              <button class="btn btn-dti fs-7" onclick="simulateScan()"><i class="bi bi-play-fill me-1"></i> Scan Tag</button>
-            </div>
-            <small class="text-muted fs-8">Test Tags: <code>WVID-7721</code>, <code>WVID-8842</code>, <code>WVID-9012</code></small>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-7">
-          <div class="dashboard-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-bold mb-0">Live Scan Logs</h6>
-              <span class="badge bg-light text-dark border fs-8" id="scanCounterBadge">0 Scanned</span>
-            </div>
-            <div class="table-responsive" style="max-height: 350px;">
-              <table class="table table-hover align-middle fs-7 mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th>Tag ID</th>
-                    <th>Product Name</th>
-                    <th>Artisan / Owner</th>
-                    <th>Result</th>
-                  </tr>
-                </thead>
-                <tbody id="scanLogTable">
-                  <tr>
-                    <td colspan="4" class="text-center text-muted py-4">No active scans yet. Tap or enter a tag to begin.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. PRODUCT CATALOG -->
-    <div id="view-catalog" class="tab-view d-none">
-      <div class="dashboard-card p-0">
-        <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-          <h6 class="fw-bold mb-0">Product Registry & Linked NFC Tags</h6>
-          <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#registerProductModal"><i class="bi bi-plus-lg me-1"></i> Add Product</button>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-hover align-middle fs-7 mb-0 text-nowrap">
-            <thead class="table-light">
-              <tr>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Artisan / Weaver</th>
-                <th>Linked NFC Tag</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="catalogTable">
-              <!-- Rendered by JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. ARTISANS DIRECTORY -->
-    <div id="view-artisans" class="tab-view d-none">
-      <div class="dashboard-card">
-        <h6 class="fw-bold mb-3">Master Weavers & Artisans</h6>
-        <div class="row g-3" id="artisansGrid">
-          <!-- Rendered by JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. TAG PAIRING -->
-    <div id="view-batch-nfc" class="tab-view d-none">
-      <div class="dashboard-card">
-        <h6 class="fw-bold mb-2">NFC Tag Pairing & Encoding</h6>
-        <p class="text-muted fs-8 mb-4">Pair unassigned NFC hardware tags to woven items before market registration.</p>
-        <div class="alert alert-info fs-7 border-0"><i class="bi bi-info-circle me-2"></i> 45 Unassigned NFC tags ready in central inventory.</div>
-      </div>
-    </div>
-
-    <!-- 6. AUDIT LOGS (UPDATED: LOCATION COLUMN REMOVED) -->
-    <div id="view-logs" class="tab-view d-none">
-      <div class="dashboard-card">
-        <h6 class="fw-bold mb-3">Verification Audit History</h6>
-        <div class="table-responsive">
-          <table class="table table-striped align-middle fs-7">
-            <thead class="table-light">
-              <tr>
-                <th>Audit Entry</th>
-                <th>Tag ID</th>
-                <th>Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>System Scan</td>
-                <td><code>WVID-7721</code></td>
-                <td><span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Verified</span></td>
-              </tr>
-              <tr>
-                <td>Bauko Market</td>
-                <td><code>WVID-8842</code></td>
-                <td><span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Verified</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Register Product Modal -->
-  <div class="modal fade" id="registerProductModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Register & Link Weave Product</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label fs-7">Product Name</label>
-            <input type="text" id="regProductName" class="form-control fs-7" placeholder="e.g. Pinagpagan Ceremonial Pattern Belt">
-          </div>
-          <div class="mb-3">
-            <label class="form-label fs-7">Category</label>
-            <select id="regCategory" class="form-select fs-7">
-              <option value="Textile / Blanket">Textile / Blanket</option>
-              <option value="Apparel / Garment">Apparel / Garment</option>
-              <option value="Home Decor">Home Decor</option>
-              <option value="Bag / Accessory">Bag / Accessory</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fs-7">Master Weaver / Artisan</label>
-            <input type="text" id="regWeaver" class="form-control fs-7" placeholder="e.g. Virginia Omaweng">
-          </div>
-          <div class="mb-3">
-            <label class="form-label fs-7">NFC Tag ID (Tap reader or type ID)</label>
-            <input type="text" id="regNfcTag" class="form-control fs-7" placeholder="e.g. WVID-9901">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-dti btn-sm" onclick="saveNewProduct()">Register Item</button>
-        </div>
-      </div>
+    <div class="header-title">
+      <h1>WEAVER-ID SYSTEM</h1>
+      <p>DTI Mountain Province Registered Weaving Industry MSMEs</p>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- WEAVER MASTERLIST TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Business / Association Name</th>
+        <th>Weaver / Client Name</th>
+        <th>Mobile Number</th>
+        <th>Barangay</th>
+        <th>Municipality</th>
+      </tr>
+    </thead>
+    <tbody id="weaverTableBody">
+      <!-- JavaScript will automatically populate rows here -->
+    </tbody>
+  </table>
+
   <script>
-    // --- DATASETS (EXACT ORIGINAL DATA) ---
-    let catalogItems = [
-      { id: 1, name: "Pinagpagan Pattern Blanket", category: "Textile / Blanket", weaver: "Virginia Omaweng", tag: "WVID-7721", status: "Active" },
-      { id: 2, name: "Inabel Traditional Runner", category: "Home Decor", weaver: "Rose Ann Wangdali", tag: "WVID-9012", status: "Active" },
-      { id: 3, name: "Suklang Woven Backpack", category: "Bag / Accessory", weaver: "Juliana Walisen", tag: "WVID-8842", status: "Active" }
+    // FULL MASTERLIST DATA FROM DTI DOCUMENT
+    const weaverMasterlist = [
+      { businessName: "JOCELYN MIRANDA", lastName: "MIRANDA", firstName: "JOCELYN", mobile: "09128367338", barangay: "DAGDAG", municipality: "Sagada" },
+      { businessName: "JOSEPHINE FUCHADCHA", lastName: "FUCHADCHA", firstName: "JOSEPHINE", mobile: "N/A", barangay: "N/A", municipality: "Bontoc (Capital)" },
+      { businessName: "JULIANA'S LOOM WEAVING MANUFACTURING", lastName: "WALISEN", firstName: "JULIANA", mobile: "09993761663", barangay: "GUINZADAN NORTE", municipality: "Bauko" },
+      { businessName: "KAMOWAN SOUVENIRS", lastName: "ANONGOS", firstName: "BRENDA", mobile: "09194127474", barangay: "PATAY", municipality: "Sagada" },
+      { businessName: "KINAYAN HANDLOOM WOVEN PRODUCTS", lastName: "ALIWENGWENG", firstName: "FLORENCE", mobile: "N/A", barangay: "DEMANG", municipality: "Sagada" },
+      { businessName: "MARISA COTENG", lastName: "Coteng", firstName: "Marisa", mobile: "09451644407", barangay: "Laylaya", municipality: "Besao" },
+      { businessName: "LANIE GAONGEN", lastName: "GAONGEN", firstName: "LANIE", mobile: "N/A", barangay: "DEMANG", municipality: "Sagada" },
+      { businessName: "Letang Young Mothers", lastName: "Tagaban", firstName: "Felipa", mobile: "09457956160", barangay: "Tapapan", municipality: "Bauko" },
+      { businessName: "LINA'S RUGS MANUFACTURING", lastName: "UNOS", firstName: "LINA", mobile: "N/A", barangay: "Tamboan", municipality: "Besao" },
+      { businessName: "LINGAYO'S HANDLOOM WOVEN PRODUCTS", lastName: "Wangdali", firstName: "Rose Ann", mobile: "09502033126", barangay: "Demang", municipality: "Sagada" },
+      { businessName: "LOIDA BANIAGA", lastName: "BANIAGA", firstName: "LOIDA", mobile: "N/A", barangay: "DAGDAG", municipality: "Sagada" },
+      { businessName: "MARILYN'S WOVEN PRODUCTS", lastName: "DAO-ASEN", firstName: "MARILYN", mobile: "09466896101", barangay: "GUINZADAN SUR", municipality: "Bauko" },
+      { businessName: "MARINA VARIETY STORE", lastName: "BALANIYAN", firstName: "MARINA", mobile: "09300907000", barangay: "POBLACION", municipality: "Bontoc (Capital)" },
+      { businessName: "MARY'S WOVEN PRODUCTS", lastName: "TUKAKI", firstName: "MARY", mobile: "N/A", barangay: "GUINZADAN NORTE", municipality: "Bauko" },
+      { businessName: "MAY-ENG LOOM WEAVING MANUFACTURING", lastName: "MAY-ENG", firstName: "DAISY", mobile: "09061298652", barangay: "AMBAGUIO", municipality: "Besao" },
+      { businessName: "MIMYAH'S WOVEN PRODUCTS", lastName: "PIAYAS", firstName: "HERMINIA", mobile: "09668971195", barangay: "CAN-EO", municipality: "Bontoc (Capital)" },
+      { businessName: "MODAWAN WOVEN PRODUCTS", lastName: "MODAWAN", firstName: "MARY ANN", mobile: "09484600525", barangay: "GUINZADAN SUR", municipality: "Bauko" },
+      { businessName: "MONTAÑOSA WEAVERS ASSOCIATION", lastName: "Wangdali", firstName: "Rose Ann", mobile: "09502033126", barangay: "Demang", municipality: "Sagada" },
+      { businessName: "N AND C GLASS AND ALUMINUM SUPPLY", lastName: "CALINGLING", firstName: "CATHERINE", mobile: "N/A", barangay: "ABATAN", municipality: "Bauko" },
+      { businessName: "NEWLOOM WOVEN PRODUCTS", lastName: "DULAY", firstName: "ROSE", mobile: "09108700467", barangay: "DAGDAG", municipality: "Sagada" },
+      { businessName: "OCHASAN'S LOOM WEAVING", lastName: "OCHASAN", firstName: "EVELYN", mobile: "09354595908", barangay: "CAN-EO", municipality: "Bontoc (Capital)" },
+      { businessName: "ONGA-ONG'S LOOM WEAVING PRODUCTS", lastName: "ONGA-ONG", firstName: "KIMBERLY", mobile: "09165633839", barangay: "CAN-EO", municipality: "Bontoc (Capital)" },
+      { businessName: "OYAOY'S CLOTHING BOUTIQUE", lastName: "CHUMEL-ANG", firstName: "RODILYN", mobile: "09702091747", barangay: "Samoki", municipality: "Bontoc (Capital)" },
+      { businessName: "PAMANA ORGANIZATION", lastName: "PINASEN", firstName: "CHRISTOPHER", mobile: "09128242841", barangay: "MASLA", municipality: "Tadian" },
+      { businessName: "Pangayapang Handicrafts Association", lastName: "Pineda", firstName: "Julien", mobile: "09467344884", barangay: "Poblacion", municipality: "Bauko" },
+      { businessName: "PAULINA'S LOOM WEAVING MANUFACTURING", lastName: "CAYANGA", firstName: "BRENDO", mobile: "09502032739", barangay: "AMBAGUIO", municipality: "Besao" },
+      { businessName: "PIGACABUBA WEAVES ASSOCIATION", lastName: "ANOYAN", firstName: "JOY", mobile: "09398711035", barangay: "CAMATAGAN", municipality: "Sabangan" },
+      { businessName: "Pinagpagan Womens Workers Association", lastName: "Omaweng", firstName: "Virginia", mobile: "09978178644", barangay: "Demang", municipality: "Sagada" },
+      { businessName: "PRAY'S KEENLYCRAFT SEWING SERVICE", lastName: "BAN-ANG", firstName: "PRAY KEEN", mobile: "09467509774", barangay: "AMBASING", municipality: "Sagada" },
+      { businessName: "REGINA BALAGTAS", lastName: "BALAGTAS", firstName: "REGINA", mobile: "09812499300", barangay: "KIN-IWAY", municipality: "Besao" },
+      { businessName: "RIVER GREEN VARIETY SHOP", lastName: "TAULI", firstName: "ALICE", mobile: "09123798171", barangay: "POBLACION", municipality: "Bontoc (Capital)" },
+      { businessName: "Rose Ann's Loom Art Gallery", lastName: "WANGDALI", firstName: "ROSE ANN", mobile: "09636113510", barangay: "DEMANG", municipality: "Sagada" },
+      { businessName: "SABANGAN WEAVERS ASSOCIATION", lastName: "DAO", firstName: "RANNIE", mobile: "09101572596", barangay: "POBLACION", municipality: "Sabangan" },
+      { businessName: "SAGADA COLLECTIONS SOUVENIR SHOP", lastName: "BAGYAN", firstName: "LUCIANO", mobile: "09517475183", barangay: "PATAY", municipality: "Sagada" },
+      { businessName: "SAGADA ETHNIC HANDICRAFTS MANUFACTURING", lastName: "BACOLONG", firstName: "REGEELYN", mobile: "N/A", barangay: "DAGDAG", municipality: "Sagada" },
+      { businessName: "SAGADA HAND LOOM WOVEN PRODUCT", lastName: "CACAY", firstName: "ESTHER", mobile: "N/A", barangay: "DAGDAG", municipality: "Sagada" },
+      { businessName: "SAGADA HANGINGVIEW SOUVENIR", lastName: "AGPAD", firstName: "JESSICA", mobile: "09608972889", barangay: "DEMANG", municipality: "Sagada" },
+      { businessName: "SAGADA KOOL'TOUR ARTS AND CRAFTS MANUFACTURING", lastName: "KOLLIN", firstName: "METHUSELAH", mobile: "09079768758", barangay: "AMBASING", municipality: "Sagada" },
+      { businessName: "SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING", lastName: "CADIOGAN", firstName: "AGNES", mobile: "09121527484", barangay: "DEMANG", municipality: "Sagada" },
+      { businessName: "SAGADA MOUNTAINSIDE HANDICRAFTS MANUFACTURING", lastName: "N/A", firstName: "REBECCA", mobile: "N/A", barangay: "DEMANG", municipality: "Sagada" },
+      { businessName: "SAGADA NORTH WEAVING", lastName: "BOLINGET", firstName: "BANGIYAD", mobile: "09061495265", barangay: "AGUID", municipality: "Sagada" },
+      { businessName: "SAGADA SUNRISE HANDICRAFTS AND SOUVENIRS", lastName: "MASLIYAN", firstName: "PATRICIO", mobile: "N/A", barangay: "Ambasing", municipality: "Sagada" },
+      { businessName: "SAGADA WEAVING AND SOUVENIR SHOP", lastName: "ARANDUQUE", firstName: "EZRA KIETHLEY", mobile: "N/A", barangay: "PATAY", municipality: "Sagada" },
+      { businessName: "SAGADA WEAVING AND SOUVENIR SHOP", lastName: "N/A", firstName: "FELIXA GEORGIA", mobile: "N/A", barangay: "PATAY", municipality: "Bontoc (Capital)" },
+      { businessName: "SEIGRID ANN POTTERY", lastName: "BANGYAY", firstName: "SEIGRID ANN", mobile: "09165426447", barangay: "DAGDAG", municipality: "Sagada" },
+      { businessName: "Solenn Stitches", lastName: "Aluyen", firstName: "Rufina", mobile: "09308144979", barangay: "Demang", municipality: "Sagada" },
+      { businessName: "SOMETHING SAGADA SOUVENIRS KLEARING APPAREL", lastName: "LIKIGAN", firstName: "MARCONI", mobile: "09562543413", barangay: "PATAY", municipality: "Sagada" },
+      { businessName: "SUPHINA LOOM WEAVING MANUFACTURING", lastName: "FLORENCE", firstName: "IRENE", mobile: "09150668685", barangay: "LUBON", municipality: "Tadian" },
+      { businessName: "SUTADA WEAVER'S ASSOCIATION", lastName: "PUYONGAN", firstName: "SALDY", mobile: "09151578041", barangay: "SUPANG", municipality: "Sabangan" },
+      { businessName: "SYDAL'G HANDLOOM WOVEN PRODUCTS", lastName: "WADINGAN", firstName: "GLADYS", mobile: "09957141183", barangay: "CAN-EO", municipality: "Bontoc (Capital)" },
+      { businessName: "TANGAFAN ORGANIZATION INC", lastName: "COFULAN", firstName: "PAULA", mobile: "N/A", barangay: "SAMOKI", municipality: "Bontoc (Capital)" },
+      { businessName: "TAWID CLOTHING SHOP", lastName: "CHANGAT", firstName: "ELOIZA JEAN", mobile: "09193106595", barangay: "POBLACION", municipality: "Bontoc (Capital)" },
+      { businessName: "TAYNODAN HANDLOOM WOVEN PRODUCTS", lastName: "AMOGAWEN", firstName: "PHOEBE", mobile: "N/A", barangay: "PATAY", municipality: "Sagada" },
+      { businessName: "TIRIZA'S HANDICRAFTS TRADING", lastName: "ABAD", firstName: "MARIA TERESA", mobile: "09391814622", barangay: "PATAY", municipality: "Sagada" },
+      { businessName: "Viewhill Womens Organization", lastName: "Codod", firstName: "Ruth Kathleen", mobile: "09085604319", barangay: "Guinzadan Central", municipality: "Bauko" },
+      { businessName: "YHUAN YHATZ BAGS AND ACCESSORIES SHOP", lastName: "KIWANG", firstName: "CAREN", mobile: "09108279230", barangay: "Samoki", municipality: "Bontoc (Capital)" },
+      { businessName: "ZEPHYRA'S CLOSET ONLINE SHOP", lastName: "SORIA", firstName: "KRYS IVONNE JOY", mobile: "09151527501", barangay: "POBLACION", municipality: "Bontoc (Capital)" },
+      { businessName: "ZK CLOTHING BOUTIQUE", lastName: "JULIANO", firstName: "MICHAEL IVAN", mobile: "09069220433", barangay: "Poblacion", municipality: "Paracelis" }
     ];
 
-    const artisans = [
-      { name: "Virginia Omaweng", role: "Master Weaver", location: "Demang, Sagada", items: 14 },
-      { name: "Rose Ann Wangdali", role: "Senior Artisan", location: "Demang, Sagada", items: 9 },
-      { name: "Joy Anoyan", role: "Loom Weaver", location: "Camatagan, Sabangan", items: 11 },
-      { name: "Saldy Puyongan", role: "Craftsman", location: "Supang, Sabangan", items: 8 }
-    ];
-
-    let sessionScans = 0;
-
-    // --- RENDER FUNCTIONS ---
-    function renderCatalog() {
-      const tbody = document.getElementById('catalogTable');
-      tbody.innerHTML = catalogItems.map(item => `
+    // FUNCTION TO RENDER DATA INTO TABLE
+    const tableBody = document.getElementById("weaverTableBody");
+    weaverMasterlist.forEach((item, index) => {
+      const fullName = item.lastName && item.lastName !== "N/A" ? `${item.firstName} ${item.lastName}` : item.firstName;
+      const row = `
         <tr>
-          <td class="fw-semibold">${item.name}</td>
-          <td>${item.category}</td>
-          <td>${item.weaver}</td>
-          <td><code>${item.tag}</code></td>
-          <td><span class="badge bg-success-subtle text-success border">Active</span></td>
+          <td>${index + 1}</td>
+          <td><strong>${item.businessName}</strong></td>
+          <td>${fullName}</td>
+          <td>${item.mobile}</td>
+          <td>${item.barangay}</td>
+          <td>${item.municipality}</td>
         </tr>
-      `).join('');
-    }
-
-    function renderArtisans() {
-      const grid = document.getElementById('artisansGrid');
-      grid.innerHTML = artisans.map(a => `
-        <div class="col-12 col-md-6">
-          <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
-            <div>
-              <div class="fw-bold fs-7">${a.name}</div>
-              <small class="text-muted d-block fs-8">${a.role} • ${a.location}</small>
-            </div>
-            <span class="badge bg-white text-dark border fs-8">${a.items} Items</span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // --- BULK VERIFICATION WORKFLOW ---
-    function simulateScan() {
-      const tagInput = document.getElementById('simulatedTagInput');
-      const tagId = tagInput.value.trim().toUpperCase();
-
-      if (!tagId) {
-        alert('Please enter or scan a Tag ID.');
-        return;
-      }
-
-      const match = catalogItems.find(i => i.tag === tagId);
-      const tbody = document.getElementById('scanLogTable');
-
-      if (sessionScans === 0) tbody.innerHTML = '';
-
-      sessionScans++;
-      document.getElementById('scanCounterBadge').textContent = `${sessionScans} Scanned`;
-
-      if (match) {
-        tbody.insertAdjacentHTML('afterbegin', `
-          <tr class="table-success-subtle">
-            <td><code>${match.tag}</code></td>
-            <td class="fw-semibold">${match.name}</td>
-            <td>${match.weaver}</td>
-            <td><span class="badge bg-success"><i class="bi bi-patch-check me-1"></i>Authentic</span></td>
-          </tr>
-        `);
-      } else {
-        tbody.insertAdjacentHTML('afterbegin', `
-          <tr class="table-warning-subtle">
-            <td><code>${tagId}</code></td>
-            <td class="text-muted">Unregistered Tag</td>
-            <td class="text-muted">N/A</td>
-            <td><span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Unverified</span></td>
-          </tr>
-        `);
-      }
-
-      tagInput.value = '';
-    }
-
-    // --- REGISTER NEW PRODUCT ---
-    function saveNewProduct() {
-      const name = document.getElementById('regProductName').value.trim();
-      const category = document.getElementById('regCategory').value;
-      const weaver = document.getElementById('regWeaver').value.trim();
-      const tag = document.getElementById('regNfcTag').value.trim().toUpperCase();
-
-      if (!name || !weaver || !tag) {
-        alert('Please complete all required fields.');
-        return;
-      }
-
-      catalogItems.push({ id: catalogItems.length + 1, name, category, weaver, tag, status: 'Active' });
-      renderCatalog();
-
-      document.getElementById('countProducts').textContent = catalogItems.length;
-
-      document.getElementById('regProductName').value = '';
-      document.getElementById('regWeaver').value = '';
-      document.getElementById('regNfcTag').value = '';
-
-      const modalEl = document.getElementById('registerProductModal');
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
-    }
-
-    // --- NAVIGATION LOGIC ---
-    function switchTab(tabKey) {
-      document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
-      const activeLink = document.querySelector(`.sidebar-nav .nav-link[data-tab="${tabKey}"]`);
-      if (activeLink) activeLink.classList.add('active');
-
-      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('d-none'));
-      const target = document.getElementById(`view-${tabKey}`);
-      if (target) target.classList.remove('d-none');
-    }
-
-    function handleLogout() {
-      if (confirm('Log out from Admin Dashboard?')) {
-        window.location.href = 'login.html';
-      }
-    }
-
-    // --- INITIALIZATION ---
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          switchTab(link.getAttribute('data-tab'));
-        });
-      });
-
-      renderCatalog();
-      renderArtisans();
-
-      // Chart Initialization
-      const ctx = document.getElementById('adminScanChart');
-      if (ctx) {
-        new Chart(ctx.getContext('2d'), {
-          type: 'line',
-          data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [{
-              label: 'System Scans',
-              data: [45, 60, 52, 88, 70, 110, 135],
-              borderColor: '#0a4d2e',
-              backgroundColor: 'rgba(10, 77, 46, 0.1)',
-              fill: true,
-              tension: 0.3
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } }
-          }
-        });
-      }
+      `;
+      tableBody.innerHTML += row;
     });
   </script>
 </body>
