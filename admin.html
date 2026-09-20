@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WEAVER-ID | Central Admin Portal</title>
+  <title>WEAVER-ID | Association Dashboard</title>
   <style>
     :root {
       --primary-color: #0d5c3a;
@@ -130,15 +130,6 @@
       font-size: 0.9rem;
     }
 
-    .filter-group select {
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      outline: none;
-      font-size: 0.9rem;
-      background: #fff;
-    }
-
     .btn-group {
       display: flex;
       gap: 10px;
@@ -191,7 +182,7 @@
     }
 
     th, td {
-      padding: 10px 14px;
+      padding: 12px 15px;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
     }
@@ -293,73 +284,41 @@
     <div class="logo-group">
       <img src="weaver-id-logo.png" alt="WEAVER-ID Logo">
       <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Department_of_Trade_and_Industry_%28DTI%29.svg/1200px-Department_of_Trade_and_Industry_%28DTI%29.svg.png" alt="DTI Logo">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Bagong_Pilipinas_logo.png" alt="Bagong Pilipinas Logo">
     </div>
     <div class="header-title">
-      <h1>WEAVER-ID SYSTEM</h1>
-      <p>DTI Mountain Province Central Admin Portal</p>
+      <h1 id="assocNameHeader">MONTAÑOSA WEAVERS ASSOCIATION</h1>
+      <p>Association Management Dashboard | Sagada, Mountain Province</p>
     </div>
   </div>
 
-  <!-- STATS METRICS -->
+  <!-- METRICS GRID -->
   <div class="stats-grid">
     <div class="stat-card">
-      <h3>Registered MSMEs & Associations</h3>
-      <div class="number" id="statAssocCount">0</div>
+      <h3>Affiliated Weavers</h3>
+      <div class="number" id="statMemberCount">0</div>
     </div>
     <div class="stat-card accent">
-      <h3>Registered Individual Weavers</h3>
-      <div class="number" id="statWeaverCount">0</div>
+      <h3>Active NFC Cards</h3>
+      <div class="number" id="statActiveNfc">0</div>
     </div>
     <div class="stat-card dark">
-      <h3>Municipalities Covered</h3>
-      <div class="number" id="statMunicipalityCount">6</div>
-    </div>
-    <div class="stat-card">
-      <h3>Active NFC Cards</h3>
-      <div class="number" id="statNfcCount">0</div>
+      <h3>Pending NFC Requests</h3>
+      <div class="number" id="statPendingNfc">0</div>
     </div>
   </div>
 
-  <!-- ACTIONS & FILTERS -->
+  <!-- CONTROLS BAR -->
   <div class="action-bar">
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search full name, MSME, or municipality..." onkeyup="filterTables()">
-    </div>
-    <div class="filter-group">
-      <select id="muniFilter" onchange="filterTables()">
-        <option value="ALL">All Municipalities</option>
-        <option value="Sagada">Sagada</option>
-        <option value="Bontoc (Capital)">Bontoc (Capital)</option>
-        <option value="Bauko">Bauko</option>
-        <option value="Besao">Besao</option>
-        <option value="Sabangan">Sabangan</option>
-        <option value="Tadian">Tadian</option>
-        <option value="Paracelis">Paracelis</option>
-      </select>
+      <input type="text" id="searchInput" placeholder="Search member weaver by name or barangay..." onkeyup="filterWeavers()">
     </div>
     <div class="btn-group">
-      <button class="btn btn-primary" onclick="openModal('assocModal')">+ Add MSME / Assoc</button>
-      <button class="btn btn-accent" onclick="openModal('weaverModal')">+ Add Weaver</button>
+      <button class="btn btn-accent" onclick="openModal('addWeaverModal')">+ Register Member Weaver</button>
     </div>
   </div>
 
-  <!-- TABLE 1: MSMEs & ASSOCIATIONS -->
-  <div class="section-title">Registered MSMEs & Associations Masterlist</div>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Full Business / Association Name</th>
-        <th>Municipality</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="associationTableBody"></tbody>
-  </table>
-
-  <!-- TABLE 2: INDIVIDUAL WEAVERS -->
-  <div class="section-title">Individual Weavers Masterlist (58 Total)</div>
+  <!-- TABLE: ASSOCIATION WEAVERS -->
+  <div class="section-title">Association Member Weavers Directory</div>
   <table>
     <thead>
       <tr>
@@ -371,46 +330,17 @@
         <th>NFC Tag Status</th>
       </tr>
     </thead>
-    <tbody id="weaverTableBody"></tbody>
+    <tbody id="assocWeaverTableBody"></tbody>
   </table>
 
-  <!-- MODAL: REGISTER MSME -->
-  <div class="modal-overlay" id="assocModal">
+  <!-- MODAL: REGISTER MEMBER WEAVER -->
+  <div class="modal-overlay" id="addWeaverModal">
     <div class="modal-card">
-      <h3>Register MSME / Association</h3>
-      <form id="assocForm" onsubmit="addAssociation(event)">
-        <div class="form-group">
-          <label>Full Business / Association Name</label>
-          <input type="text" id="aName" placeholder="e.g., SAGADA WEAVING AND SOUVENIR SHOP" required>
-        </div>
-        <div class="form-group">
-          <label>Municipality</label>
-          <select id="aMunicipality" required>
-            <option value="Sagada">Sagada</option>
-            <option value="Bontoc (Capital)">Bontoc (Capital)</option>
-            <option value="Bauko">Bauko</option>
-            <option value="Besao">Besao</option>
-            <option value="Sabangan">Sabangan</option>
-            <option value="Tadian">Tadian</option>
-            <option value="Paracelis">Paracelis</option>
-          </select>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('assocModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Business</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: REGISTER WEAVER -->
-  <div class="modal-overlay" id="weaverModal">
-    <div class="modal-card">
-      <h3>Register Individual Weaver</h3>
-      <form id="weaverForm" onsubmit="addWeaver(event)">
+      <h3>Register New Association Member</h3>
+      <form id="assocWeaverForm" onsubmit="addWeaver(event)">
         <div class="form-group">
           <label>Full Name</label>
-          <input type="text" id="wName" placeholder="e.g., Florence Aliwengweng" required>
+          <input type="text" id="wName" placeholder="e.g., Virginia Omaweng" required>
         </div>
         <div class="form-group">
           <label>Mobile Number</label>
@@ -422,18 +352,10 @@
         </div>
         <div class="form-group">
           <label>Municipality</label>
-          <select id="wMunicipality" required>
-            <option value="Sagada">Sagada</option>
-            <option value="Bontoc (Capital)">Bontoc (Capital)</option>
-            <option value="Bauko">Bauko</option>
-            <option value="Besao">Besao</option>
-            <option value="Sabangan">Sabangan</option>
-            <option value="Tadian">Tadian</option>
-            <option value="Paracelis">Paracelis</option>
-          </select>
+          <input type="text" id="wMunicipality" value="Sagada" readonly style="background: #f1f5f9;">
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('weaverModal')">Cancel</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addWeaverModal')">Cancel</button>
           <button type="submit" class="btn btn-accent">Save Weaver</button>
         </div>
       </form>
@@ -441,104 +363,25 @@
   </div>
 
   <script>
-    // MSMEs AND ASSOCIATIONS MASTERLIST
-    let associationList = [
-      { name: "JOCELYN MIRANDA WEAVING ENTERPRISE", municipality: "Sagada", status: "Verified" },
-      { name: "JOSEPHINE FUCHADCHA WEAVING SHOP", municipality: "Bontoc (Capital)", status: "Verified" },
-      { name: "JULIANA'S LOOM WEAVING MANUFACTURING", municipality: "Bauko", status: "Verified" },
-      { name: "KAMOWAN SOUVENIRS & HANDICRAFTS", municipality: "Sagada", status: "Verified" },
-      { name: "KINAYAN HANDLOOM WOVEN PRODUCTS", municipality: "Sagada", status: "Verified" },
-      { name: "MARISA COTENG WEAVING CENTER", municipality: "Besao", status: "Verified" },
-      { name: "MONTAÑOSA WEAVERS ASSOCIATION", municipality: "Sagada", status: "Verified" },
-      { name: "PIGACABUBA WEAVES ASSOCIATION", municipality: "Sabangan", status: "Verified" },
-      { name: "SABANGAN WEAVERS ASSOCIATION", municipality: "Sabangan", status: "Verified" },
-      { name: "SAGADA WEAVING AND SOUVENIR SHOP", municipality: "Sagada", status: "Verified" },
-      { name: "SUPHINA LOOM WEAVING MANUFACTURING", municipality: "Tadian", status: "Verified" },
-      { name: "TANGAFAN ORGANIZATION INCORPORATED", municipality: "Bontoc (Capital)", status: "Verified" }
-    ];
-
-    // COMPLETE 58 INDIVIDUAL WEAVERS MASTERLIST
-    let weaverList = [
+    // ASSOCIATION SPECIFIC WEAVER DATA
+    let memberWeavers = [
       { name: "Virginia Omaweng", mobile: "09978178644", barangay: "Demang", municipality: "Sagada", nfcStatus: "Issued" },
       { name: "Rose Ann Wangdali", mobile: "09502033126", barangay: "Demang", municipality: "Sagada", nfcStatus: "Issued" },
       { name: "Florence Aliwengweng", mobile: "09171234567", barangay: "Demang", municipality: "Sagada", nfcStatus: "Pending" },
       { name: "Agnes Cadiogan", mobile: "09121527484", barangay: "Demang", municipality: "Sagada", nfcStatus: "Issued" },
       { name: "Rufina Aluyen", mobile: "09308144979", barangay: "Demang", municipality: "Sagada", nfcStatus: "Issued" },
-      { name: "Juliana Walisen", mobile: "09993761663", barangay: "Guinzadan Norte", municipality: "Bauko", nfcStatus: "Issued" },
-      { name: "Joy Anoyan", mobile: "09398711035", barangay: "Camatagan", municipality: "Sabangan", nfcStatus: "Issued" },
-      { name: "Saldy Puyongan", mobile: "09151578041", barangay: "Supang", municipality: "Sabangan", nfcStatus: "Pending" },
-      { name: "Herminia Piayas", mobile: "09668971195", barangay: "Can-eo", municipality: "Bontoc (Capital)", nfcStatus: "Issued" },
-      { name: "Irene Florence Likigan", mobile: "09150668685", barangay: "Lubon", municipality: "Tadian", nfcStatus: "Issued" },
-      { name: "Michael Ivan Juliano", mobile: "09069220433", barangay: "Poblacion", municipality: "Paracelis", nfcStatus: "Pending" },
       { name: "Mercy Dalis", mobile: "09182345671", barangay: "Dagdag", municipality: "Sagada", nfcStatus: "Issued" },
       { name: "Evelyn Kiat-ong", mobile: "09293456782", barangay: "Dagdag", municipality: "Sagada", nfcStatus: "Issued" },
-      { name: "Grace Peg-ang", mobile: "09384567893", barangay: "Poblacion", municipality: "Sagada", nfcStatus: "Pending" },
-      { name: "Beatrice Cudiamat", mobile: "09475678904", barangay: "Demang", municipality: "Sagada", nfcStatus: "Issued" },
-      { name: "Clara Bandao", mobile: "09566789015", barangay: "Ambasing", municipality: "Sagada", nfcStatus: "Issued" },
-      { name: "Delia Sumeg-ang", mobile: "09657890126", barangay: "Ankileng", municipality: "Sagada", nfcStatus: "Pending" },
-      { name: "Edna Fana-ang", mobile: "09748901237", barangay: "Bangaan", municipality: "Sagada", nfcStatus: "Issued" },
-      { name: "Felisa Baldo", mobile: "09839012348", barangay: "Fidelisan", municipality: "Sagada", nfcStatus: "Issued" },
-      { name: "Gloria Dao-as", mobile: "09920123459", barangay: "Tanulong", municipality: "Sagada", nfcStatus: "Issued" },
-      { name: "Helen Bulao", mobile: "09123456780", barangay: "Samoki", municipality: "Bontoc (Capital)", nfcStatus: "Issued" },
-      { name: "Ines Fuchadcha", mobile: "09214567891", barangay: "Samoki", municipality: "Bontoc (Capital)", nfcStatus: "Issued" },
-      { name: "Janet Chakas", mobile: "09305678902", barangay: "Bontoc Ili", municipality: "Bontoc (Capital)", nfcStatus: "Pending" },
-      { name: "Karen Tangafan", mobile: "09496789013", barangay: "Poblacion", municipality: "Bontoc (Capital)", nfcStatus: "Issued" },
-      { name: "Lorna Khayad", mobile: "09587890124", barangay: "Samoki", municipality: "Bontoc (Capital)", nfcStatus: "Issued" },
-      { name: "Maria Claver", mobile: "09678901235", barangay: "Guina-ang", municipality: "Bontoc (Capital)", nfcStatus: "Pending" },
-      { name: "Nora Lingbanan", mobile: "09769012346", barangay: "Mainit", municipality: "Bontoc (Capital)", nfcStatus: "Issued" },
-      { name: "Olivia Pekas", mobile: "09850123457", barangay: "Tocucan", municipality: "Bontoc (Capital)", nfcStatus: "Issued" },
-      { name: "Patricia Bacwaden", mobile: "09941234568", barangay: "Guinzadan Sur", municipality: "Bauko", nfcStatus: "Issued" },
-      { name: "Rosalind Coteng", mobile: "09132345679", barangay: "Bagnen Proper", municipality: "Bauko", nfcStatus: "Issued" },
-      { name: "Stella May-os", mobile: "09223456780", barangay: "Bagnen Oriente", municipality: "Bauko", nfcStatus: "Pending" },
-      { name: "Teresa Daping", mobile: "09314567891", barangay: "Monamon Norte", municipality: "Bauko", nfcStatus: "Issued" },
-      { name: "Ursula Bay-os", mobile: "09405678902", barangay: "Monamon Sur", municipality: "Bauko", nfcStatus: "Issued" },
-      { name: "Victoria Wallang", mobile: "09596789013", barangay: "Sayo", municipality: "Bauko", nfcStatus: "Pending" },
-      { name: "Wilma Domoguen", mobile: "09687890124", barangay: "Otucan Norte", municipality: "Bauko", nfcStatus: "Issued" },
-      { name: "Yolanda Mangangey", mobile: "09779012345", barangay: "Otucan Sur", municipality: "Bauko", nfcStatus: "Issued" },
-      { name: "Zenaida Amistad", mobile: "09860123456", barangay: "Kiniway", municipality: "Besao", nfcStatus: "Issued" },
-      { name: "Alice Bosaing", mobile: "09951234567", barangay: "Besao Proper", municipality: "Besao", nfcStatus: "Pending" },
-      { name: "Bernadette Calde", mobile: "09142345678", barangay: "Laylaya", municipality: "Besao", nfcStatus: "Issued" },
-      { name: "Catherine Dumanas", mobile: "09233456789", barangay: "Agawa", municipality: "Besao", nfcStatus: "Issued" },
-      { name: "Doris Gano", mobile: "09324567890", barangay: "Gueday", municipality: "Besao", nfcStatus: "Issued" },
-      { name: "Esther Kiatong", mobile: "09415678901", barangay: "Catablao", municipality: "Besao", nfcStatus: "Pending" },
-      { name: "Frances Laoyan", mobile: "09506789012", barangay: "Bao-ang", municipality: "Sabangan", nfcStatus: "Issued" },
-      { name: "Gemma Mapangdol", mobile: "09697890123", barangay: "Tambingan", municipality: "Sabangan", nfcStatus: "Issued" },
-      { name: "Harriet Ngalob", mobile: "09789012344", barangay: "Data", municipality: "Sabangan", nfcStatus: "Pending" },
-      { name: "Irene Olingan", mobile: "09870123455", barangay: "Lagangan", municipality: "Sabangan", nfcStatus: "Issued" },
-      { name: "Judith Pading", mobile: "09961234566", barangay: "Napua", municipality: "Sabangan", nfcStatus: "Issued" },
-      { name: "Karen Sagandoy", mobile: "09152345677", barangay: "Pingad", municipality: "Sabangan", nfcStatus: "Issued" },
-      { name: "Laura Taguiba", mobile: "09243456788", barangay: "Poblacion", municipality: "Tadian", nfcStatus: "Pending" },
-      { name: "Monica Umayam", mobile: "09334567899", barangay: "Balaoa", municipality: "Tadian", nfcStatus: "Issued" },
-      { name: "Nelia Valera", mobile: "09425678900", barangay: "Banaao", municipality: "Tadian", nfcStatus: "Issued" },
-      { name: "Ophelia Wacnang", mobile: "09516789011", barangay: "Dacudac", municipality: "Tadian", nfcStatus: "Issued" },
-      { name: "Priscilla Yawan", mobile: "09607890122", barangay: "Kayan East", municipality: "Tadian", nfcStatus: "Pending" },
-      { name: "Queenie Zambo", mobile: "09798901233", barangay: "Kayan West", municipality: "Tadian", nfcStatus: "Issued" },
-      { name: "Rita Aben", mobile: "09889012344", barangay: "Mabaggao", municipality: "Tadian", nfcStatus: "Issued" },
-      { name: "Susan Banggollay", mobile: "09970123455", barangay: "Bantey", municipality: "Tadian", nfcStatus: "Issued" },
-      { name: "Teresita Chaluis", mobile: "09161234566", barangay: "Sumadel", municipality: "Tadian", nfcStatus: "Pending" },
-      { name: "Ursula Dangiwan", mobile: "09252345677", barangay: "Tadian Proper", municipality: "Tadian", nfcStatus: "Issued" }
+      { name: "Grace Peg-ang", mobile: "09384567893", barangay: "Poblacion", municipality: "Sagada", nfcStatus: "Pending" }
     ];
 
-    // RENDER METRICS AND TABLES
     function render() {
-      const assocBody = document.getElementById("associationTableBody");
-      assocBody.innerHTML = "";
-      associationList.forEach((item, index) => {
-        assocBody.innerHTML += `
-          <tr>
-            <td>${index + 1}</td>
-            <td><strong>${item.name}</strong></td>
-            <td>${item.municipality}</td>
-            <td><span class="badge badge-success">${item.status}</span></td>
-          </tr>
-        `;
-      });
+      const tableBody = document.getElementById("assocWeaverTableBody");
+      tableBody.innerHTML = "";
 
-      const weaverBody = document.getElementById("weaverTableBody");
-      weaverBody.innerHTML = "";
-      weaverList.forEach((item, index) => {
+      memberWeavers.forEach((item, index) => {
         const badgeClass = item.nfcStatus === "Issued" ? "badge-success" : "badge-warning";
-        weaverBody.innerHTML += `
+        tableBody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
             <td><strong>${item.name}</strong></td>
@@ -550,30 +393,17 @@
         `;
       });
 
-      document.getElementById("statAssocCount").innerText = associationList.length;
-      document.getElementById("statWeaverCount").innerText = weaverList.length;
-      document.getElementById("statNfcCount").innerText = weaverList.filter(w => w.nfcStatus === "Issued").length;
+      document.getElementById("statMemberCount").innerText = memberWeavers.length;
+      document.getElementById("statActiveNfc").innerText = memberWeavers.filter(w => w.nfcStatus === "Issued").length;
+      document.getElementById("statPendingNfc").innerText = memberWeavers.filter(w => w.nfcStatus === "Pending").length;
     }
 
-    // MODALS
     function openModal(id) { document.getElementById(id).style.display = "flex"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
 
-    function addAssociation(e) {
-      e.preventDefault();
-      associationList.push({
-        name: document.getElementById("aName").value.toUpperCase(),
-        municipality: document.getElementById("aMunicipality").value,
-        status: "Verified"
-      });
-      render();
-      closeModal("assocModal");
-      document.getElementById("assocForm").reset();
-    }
-
     function addWeaver(e) {
       e.preventDefault();
-      weaverList.push({
+      memberWeavers.push({
         name: document.getElementById("wName").value,
         mobile: document.getElementById("wMobile").value,
         barangay: document.getElementById("wBarangay").value,
@@ -581,25 +411,14 @@
         nfcStatus: "Pending"
       });
       render();
-      closeModal("weaverModal");
-      document.getElementById("weaverForm").reset();
+      closeModal("addWeaverModal");
+      document.getElementById("assocWeaverForm").reset();
     }
 
-    // FILTERING
-    function filterTables() {
+    function filterWeavers() {
       const q = document.getElementById("searchInput").value.toLowerCase();
-      const muni = document.getElementById("muniFilter").value;
-
-      document.querySelectorAll("#associationTableBody tr").forEach(tr => {
-        const textMatch = tr.innerText.toLowerCase().includes(q);
-        const muniMatch = muni === "ALL" || tr.children[2].innerText === muni;
-        tr.style.display = textMatch && muniMatch ? "" : "none";
-      });
-
-      document.querySelectorAll("#weaverTableBody tr").forEach(tr => {
-        const textMatch = tr.innerText.toLowerCase().includes(q);
-        const muniMatch = muni === "ALL" || tr.children[4].innerText === muni;
-        tr.style.display = textMatch && muniMatch ? "" : "none";
+      document.querySelectorAll("#assocWeaverTableBody tr").forEach(tr => {
+        tr.style.display = tr.innerText.toLowerCase().includes(q) ? "" : "none";
       });
     }
 
