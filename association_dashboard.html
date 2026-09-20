@@ -3,38 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WEAVER-ID | Tag Inventory & Batch Verification</title>
+  <title>Weaver-ID | Association Hub Dashboard</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
+    :root {
+      --sidebar-width: 250px;
+      --dti-green: #0a4d2e;
+      --dti-green-hover: #073822;
+      --bg-canvas: #f4f6f8;
+    }
+
     body {
-      background-color: #f8f9fa;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      min-height: 100vh;
+      color: #333333;
     }
 
-    /* Top Navbar with Compact Logo */
-    .header-navbar {
+    .sidebar {
+      width: var(--sidebar-width);
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
       background-color: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0.6rem 2rem;
+      border-right: 1px solid #e9ecef;
+      z-index: 1000;
     }
 
+    .sidebar-brand {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #f1f3f5;
+    }
+
+    /* Logo Scaling */
     .brand-logo-img {
-      height: 36px; /* Scaled down logo */
+      height: 36px;
       width: auto;
       object-fit: contain;
     }
 
-    .nav-divider {
-      height: 24px;
-      width: 1px;
-      background-color: #e5e7eb;
-      margin: 0 1rem;
+    .sidebar-nav .nav-link {
+      color: #495057;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 0.2rem 0.75rem;
+      transition: all 0.2s ease;
     }
 
-    /* Status Badges */
+    .sidebar-nav .nav-link:hover {
+      color: var(--dti-green);
+      background-color: #f8f9fa;
+    }
+
+    .sidebar-nav .nav-link.active {
+      color: var(--dti-green);
+      background-color: #e8f5e9;
+      font-weight: 600;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+      max-width: 1200px;
+    }
+
+    .dashboard-card {
+      background-color: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #eaeaea;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      padding: 1.25rem;
+      height: 100%;
+    }
+
+    .metric-card {
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 1.25rem;
+      border: 1px solid #eaeaea;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      height: 100%;
+    }
+
+    .metric-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .icon-items { background-color: #e8f5e9; color: #2e7d32; }
+    .icon-tags { background-color: #fff8e1; color: #f57f17; }
+    .icon-scans { background-color: #e3f2fd; color: #1565c0; }
+    .icon-members { background-color: #f3e5f5; color: #7b1fa2; }
+
+    .btn-dti {
+      background-color: var(--dti-green);
+      color: white;
+    }
+
+    .btn-dti:hover {
+      background-color: var(--dti-green-hover);
+      color: white;
+    }
+
+    .fs-7 { font-size: 0.85rem; }
+    .fs-8 { font-size: 0.75rem; }
+
+    /* Custom Status Badges for Batch & Tag Inventory */
     .status-badge {
       font-weight: 600;
       font-size: 0.75rem;
@@ -62,170 +153,416 @@
       color: #6b7280;
       border: 1px solid #e5e7eb;
     }
+
+    @media (max-width: 991.98px) {
+      .sidebar {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding: 1rem !important;
+      }
+    }
   </style>
 </head>
-<body class="bg-light">
+<body>
 
-  <!-- Header Navbar -->
-  <header class="header-navbar d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center">
-      <!-- Compact WEAVER-ID Logo -->
-      <img src="logo.png" alt="WEAVER-ID Logo" class="brand-logo-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/120x36?text=WEAVER-ID';">
-      <div class="nav-divider"></div>
-      <h5 class="fw-bold mb-0 text-dark">System Management</h5>
-    </div>
+  <!-- Sidebar -->
+  <aside class="sidebar d-flex flex-column justify-content-between">
     <div>
-      <span class="badge bg-light text-secondary border fw-semibold px-2 py-1">Version 1.0</span>
-    </div>
-  </header>
+      <div class="sidebar-brand d-flex align-items-center gap-2">
+        <img src="logo.png" alt="WEAVER-ID Logo" class="brand-logo-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/120x36?text=WEAVER-ID';">
+        <div class="vr mx-1"></div>
+        <div>
+          <h6 class="fw-bold mb-0 text-success">Weaver-ID</h6>
+          <small class="text-muted fs-8">Association Hub</small>
+        </div>
+      </div>
 
-  <div class="container py-5">
+      <nav class="sidebar-nav mt-3">
+        <a class="nav-link active" onclick="switchTab('dashboard')"><i class="bi bi-speedometer2"></i> Dashboard Overview</a>
+        <a class="nav-link" onclick="switchTab('catalog')"><i class="bi bi-box-seam"></i> Product Catalog</a>
+        <a class="nav-link" onclick="switchTab('nfc')"><i class="bi bi-wifi"></i> Tag Inventory</a>
+        <a class="nav-link" onclick="switchTab('members')"><i class="bi bi-people"></i> Hub Weavers</a>
+        <a class="nav-link" onclick="switchTab('scans')"><i class="bi bi-qr-code-scan"></i> Verification Logs</a>
+      </nav>
+    </div>
+
+    <div class="p-3 border-top d-flex align-items-center gap-2">
+      <div class="bg-light rounded-circle p-2"><i class="bi bi-house-door-fill text-success"></i></div>
+      <div class="overflow-hidden me-auto">
+        <div class="fw-bold fs-7 text-truncate" id="assocName">Montañosa Weavers</div>
+        <div class="text-muted fs-8 text-truncate">Sagada, Mountain Province</div>
+      </div>
+      <button onclick="handleLogout()" class="btn btn-sm btn-light border-0" title="Logout"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
     
-    <!-- Title & Action Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Top Action Bar -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
       <div>
-        <h2 class="fw-bold mb-1"><i class="bi bi-cpu text-primary me-2"></i>NFC Tag Inventory</h2>
-        <p class="text-muted mb-0">Lifecycle status tracking and anti-clone security registry.</p>
+        <h4 class="fw-bold mb-0" id="pageTitle">Association Dashboard</h4>
+        <small class="text-muted fs-8">Hub ID: <code>HUB-SAG-01</code> | Status: <span class="badge bg-success-subtle text-success border">Verified Hub</span></small>
       </div>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerTagModal">
-        <i class="bi bi-plus-lg me-1"></i> Register New Tag
-      </button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#scannerModal">
+          <i class="bi bi-wifi me-1"></i> Launch Hardware Scanner
+        </button>
+        <button class="btn btn-dti btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
+          <i class="bi bi-plus-lg me-1"></i> Register New Item
+        </button>
+      </div>
     </div>
 
-    <!-- Batch Verification Demo Section -->
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-body p-4">
-        <div class="row align-items-center">
-          <div class="col-lg-8">
-            <span class="badge bg-warning text-dark mb-2"><i class="bi bi-box-seam me-1"></i> Bulk Purchase Verification</span>
-            <h4 class="fw-bold mb-1">Batch #RCPT-2026-0812 (10 Units)</h4>
-            <p class="text-muted small mb-0">
-              Demonstrating single-item tap to authenticate the entire 10-unit batch.
-            </p>
-          </div>
-          <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-            <button class="btn btn-success shadow-sm" onclick="simulateScan()">
-              <i class="bi bi-phone-vibrate me-1"></i> Scan 1 Item (NFC-WVR-8092)
-            </button>
+    <!-- 1. DASHBOARD VIEW -->
+    <div id="view-dashboard" class="tab-view">
+      
+      <!-- Metrics Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="metric-card">
+            <div class="metric-icon icon-items"><i class="bi bi-box-seam-fill"></i></div>
+            <h2 class="fw-bold mb-0" id="totalProductsCount">28</h2>
+            <div class="text-muted fs-8 mt-1">Total Tagged Items</div>
           </div>
         </div>
 
-        <hr class="my-3">
+        <div class="col-6 col-md-3">
+          <div class="metric-card">
+            <div class="metric-icon icon-tags"><i class="bi bi-tags-fill"></i></div>
+            <h2 class="fw-bold mb-0" id="availableTagsCount">42</h2>
+            <div class="text-muted fs-8 mt-1">Available DTI Tags</div>
+          </div>
+        </div>
 
-        <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded" id="verdictBox">
-          <div class="d-flex align-items-center gap-3">
-            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" id="verdictIcon">
-              <i class="bi bi-shield-question"></i>
+        <div class="col-6 col-md-3">
+          <div class="metric-card">
+            <div class="metric-icon icon-scans"><i class="bi bi-shield-check"></i></div>
+            <h2 class="fw-bold mb-0">154</h2>
+            <div class="text-muted fs-8 mt-1">Verifications</div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="metric-card">
+            <div class="metric-icon icon-members"><i class="bi bi-people-fill"></i></div>
+            <h2 class="fw-bold mb-0">14</h2>
+            <div class="text-muted fs-8 mt-1">Active Hub Artisans</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BATCH VERIFICATION DEMO CARD -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-lg-8">
+              <span class="badge bg-warning text-dark mb-2"><i class="bi bi-box-seam me-1"></i> Bulk Verification Workflow</span>
+              <h5 class="fw-bold mb-1">Batch #RCPT-2026-0812 (10 Units)</h5>
+              <p class="text-muted small mb-0">
+                Demonstrates how scanning 1 single tag authenticates all 10 items tied to the transaction receipt in the backend database.
+              </p>
             </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+              <button class="btn btn-success shadow-sm btn-sm fw-semibold" onclick="simulateScan()">
+                <i class="bi bi-phone-vibrate me-1"></i> Simulate Scan (Tag NFC-WVR-8092)
+              </button>
+            </div>
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded" id="verdictBox">
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" id="verdictIcon">
+                <i class="bi bi-shield-question"></i>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-0 fs-7" id="verdictTitle">Batch Status: Pending Verification</h6>
+                <small class="text-muted fs-8" id="verdictSubtitle">Scan any single item from this batch to verify origin.</small>
+              </div>
+            </div>
+            <span class="badge bg-secondary" id="verifiedBadge">0 / 10 Authenticated</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout Row (Side-by-side Chart + Feed) -->
+      <div class="row g-3 mb-4">
+        <!-- Verification Trends Chart -->
+        <div class="col-12 col-lg-5">
+          <div class="dashboard-card d-flex flex-column justify-content-between">
             <div>
-              <h6 class="fw-bold mb-0" id="verdictTitle">Batch Status: Pending Verification</h6>
-              <small class="text-muted" id="verdictSubtitle">Scan any single item in this batch to verify authenticity across all 10 items.</small>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold mb-0 fs-7">Hub Scans Overview</h6>
+                <span class="badge bg-light text-dark border fs-8">This Month</span>
+              </div>
+              <small class="text-muted fs-8 d-block mb-2">Daily Hub Product Authentications</small>
+            </div>
+            <div style="height: 190px;">
+              <canvas id="assocTrendChart"></canvas>
             </div>
           </div>
-          <span class="badge bg-secondary" id="verifiedBadge">0 / 10 Authenticated</span>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="col-12 col-lg-7">
+          <div class="dashboard-card">
+            <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-clock-history me-2"></i>Recent Hub Activity</h6>
+            
+            <div class="d-flex flex-column gap-2" id="activityFeed">
+              <div class="d-flex align-items-center justify-content-between p-1">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="metric-icon bg-success-subtle text-success mb-0" style="width:36px; height:36px; font-size: 0.9rem;"><i class="bi bi-check-lg"></i></div>
+                  <div>
+                    <div class="fw-bold fs-7">Tag Encoded</div>
+                    <div class="text-muted fs-8">NFC: WVID-8890 | Pinagpagan Pattern Blanket</div>
+                  </div>
+                </div>
+                <span class="text-muted fs-8">10m ago</span>
+              </div>
+              <hr class="my-1 text-border">
+
+              <div class="d-flex align-items-center justify-content-between p-1">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="metric-icon bg-info-subtle text-info mb-0" style="width:36px; height:36px; font-size: 0.9rem;"><i class="bi bi-box-seam"></i></div>
+                  <div>
+                    <div class="fw-bold fs-7">Item Registered</div>
+                    <div class="text-muted fs-8">Woven Tote Bag by Rose Ann Wangdali</div>
+                  </div>
+                </div>
+                <span class="text-muted fs-8">1h ago</span>
+              </div>
+              <hr class="my-1 text-border">
+
+              <div class="d-flex align-items-center justify-content-between p-1">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="metric-icon bg-success-subtle text-success mb-0" style="width:36px; height:36px; font-size: 0.9rem;"><i class="bi bi-shield-check"></i></div>
+                  <div>
+                    <div class="fw-bold fs-7">Authenticity Verified</div>
+                    <div class="text-muted fs-8">Tag: WVID-7712 | Inabel Table Runner</div>
+                  </div>
+                </div>
+                <span class="text-muted fs-8">3h ago</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
 
-    <!-- Inventory Table Card -->
-    <div class="card shadow-sm border-0">
-      <div class="card-body p-0">
+    <!-- 2. PRODUCT CATALOG VIEW -->
+    <div id="view-catalog" class="tab-view d-none">
+      <div class="dashboard-card p-0">
+        <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
+          <h6 class="fw-bold mb-0">Hub Cataloged Woven Items</h6>
+          <input type="text" id="catalogSearch" class="form-control form-control-sm w-25" placeholder="Search item or weaver..." onkeyup="filterCatalog()">
+        </div>
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
+          <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
             <thead class="table-light">
               <tr>
-                <th scope="col" class="ps-4">Tag ID</th>
-                <th scope="col">Product Name</th>
-                <th scope="col">Batch / Receipt ID</th>
-                <th scope="col">Scan Mode</th>
-                <th scope="col">Status</th>
-                <th scope="col">Last Location</th>
-                <th scope="col" class="text-center pe-4">Control</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Artisan Weaver</th>
+                <th>Tag Status</th>
+                <th class="text-end pe-3">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- Row 1: Manufactured -->
-              <tr>
-                <td class="ps-4"><code class="fw-bold text-dark">NFC-WVR-8091</code></td>
-                <td>Traditional Inabel Blanket</td>
-                <td><span class="badge bg-secondary-subtle text-secondary border">Unassigned</span></td>
-                <td><span class="status-badge badge-unscanned">Unscanned</span></td>
-                <td><span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">Manufactured</span></td>
-                <td>Weaving Center (Origin)</td>
-                <td class="text-center pe-4">
-                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openDetailsModal('NFC-WVR-8091', 'Traditional Inabel Blanket', 'Unassigned', 'Manufactured', 'Weaving Center (Origin)', '2026-08-10 09:30 AM')">
-                    Details
-                  </button>
-                </td>
-              </tr>
-
-              <!-- Row 2: Sold & Part of Batch (Target for Scan) -->
-              <tr id="row8092">
-                <td class="ps-4"><code class="fw-bold text-dark">NFC-WVR-8092</code></td>
-                <td>Handwoven Table Runner (1 of 10)</td>
-                <td><code class="text-primary">RCPT-2026-0812</code></td>
-                <td id="scanType8092"><span class="status-badge badge-unscanned">Unscanned</span></td>
-                <td id="status8092"><span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Sold (Pending Scan)</span></td>
-                <td>Point of Sale (Baguio Branch)</td>
-                <td class="text-center pe-4">
-                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openDetailsModal('NFC-WVR-8092', 'Handwoven Table Runner', 'RCPT-2026-0812', 'Sold', 'Point of Sale (Baguio Branch)', '2026-08-12 02:15 PM')">
-                    Details
-                  </button>
-                </td>
-              </tr>
-
-              <!-- Row 3: Part of Same 10-Item Batch -->
-              <tr id="row8093">
-                <td class="ps-4"><code class="fw-bold text-dark">NFC-WVR-8093</code></td>
-                <td>Handwoven Table Runner (2 of 10)</td>
-                <td><code class="text-primary">RCPT-2026-0812</code></td>
-                <td id="scanType8093"><span class="status-badge badge-unscanned">Unscanned</span></td>
-                <td id="status8093"><span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Sold (Pending Scan)</span></td>
-                <td>Bontoc, Mountain Province</td>
-                <td class="text-center pe-4">
-                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openDetailsModal('NFC-WVR-8093', 'Handwoven Table Runner', 'RCPT-2026-0812', 'Sold', 'Bontoc, Mountain Province', '2026-08-15 05:40 PM')">
-                    Details
-                  </button>
-                </td>
-              </tr>
-
-              <!-- Row 4: Flagged State -->
-              <tr class="table-danger-subtle">
-                <td class="ps-4"><code class="fw-bold text-danger">NFC-WVR-8094</code></td>
-                <td>Custom Handwoven Scarf</td>
-                <td><code class="text-primary">RCPT-2026-0819</code></td>
-                <td><span class="status-badge badge-unscanned">Unscanned</span></td>
-                <td><span class="badge bg-danger text-white">Flagged</span></td>
-                <td>Multiple Locations Detected</td>
-                <td class="text-center pe-4">
-                  <button type="button" class="btn btn-sm btn-danger" onclick="openDetailsModal('NFC-WVR-8094', 'Custom Handwoven Scarf', 'RCPT-2026-0819', 'Flagged', 'Conflict: Manila / Cebu', '2026-08-19 11:05 AM')">
-                    Details
-                  </button>
-                </td>
-              </tr>
+            <tbody id="catalogTableBody">
+              <!-- Rendered Dynamically -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
+    <!-- 3. TAG INVENTORY VIEW -->
+    <div id="view-nfc" class="tab-view d-none">
+      <div class="dashboard-card p-0">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0">DTI Issued NFC Tag Registry</h6>
+          <span class="badge bg-success-subtle text-success border">Batch: DTI-CAR-2026</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3">NFC Tag ID</th>
+                <th>Product / Batch Link</th>
+                <th>Physical Scan State</th>
+                <th>Lifecycle Status</th>
+                <th class="text-end pe-3">Control</th>
+              </tr>
+            </thead>
+            <tbody id="nfcTableBody">
+              <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. HUB WEAVERS VIEW -->
+    <div id="view-members" class="tab-view d-none">
+      <div class="dashboard-card p-0">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0">Association Member Artisans</h6>
+          <button class="btn btn-sm btn-dti" data-bs-toggle="modal" data-bs-target="#addWeaverModal">
+            <i class="bi bi-person-plus me-1"></i> Add Weaver
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+            <thead class="table-light">
+              <tr>
+                <th>Artisan Name</th>
+                <th>Proprietor / Lead</th>
+                <th>Municipality</th>
+                <th>Total Items</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="weaversTableBody">
+              <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. VERIFICATION LOGS VIEW -->
+    <div id="view-scans" class="tab-view d-none">
+      <div class="dashboard-card p-0">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0">Live Scan Logs</h6>
+          <button class="btn btn-sm btn-outline-secondary" onclick="exportData()">
+            <i class="bi bi-download me-1"></i> Export CSV
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped fs-7 text-nowrap mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Timestamp</th>
+                <th>NFC ID</th>
+                <th>Product / Receipt</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody">
+              <tr><td>10m ago</td><td><code>WVID-8890</code></td><td>Pinagpagan Pattern Blanket</td><td><span class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Verified</span></td></tr>
+              <tr><td>3h ago</td><td><code>WVID-7712</code></td><td>Inabel Table Runner</td><td><span class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Verified</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Register Product Modal -->
+  <div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold fs-6">Register Woven Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fs-7">Product Title</label>
+            <input type="text" id="inputTitle" class="form-control form-control-sm" placeholder="e.g. Traditional Suklang Backpack">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fs-7">Category</label>
+            <select id="inputCategory" class="form-select form-select-sm">
+              <option value="Blanket / Textile">Blanket / Textile</option>
+              <option value="Home Decor">Home Decor</option>
+              <option value="Bags & Accessories">Bags & Accessories</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fs-7">Artisan Weaver</label>
+            <input type="text" id="inputWeaver" class="form-control form-control-sm" placeholder="e.g. Rose Ann Wangdali">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-dti btn-sm" onclick="submitProduct()">Register Item</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Weaver Modal -->
+  <div class="modal fade" id="addWeaverModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold fs-6">Add New Weaver</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fs-7">Weaving Center / Business Name</label>
+            <input type="text" id="addBusiness" class="form-control form-control-sm" placeholder="e.g. Sagada Weaving Workshop">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fs-7">Proprietor / Weaver Name</label>
+            <input type="text" id="addProprietor" class="form-control form-control-sm" placeholder="e.g. Rose Ann Wangdali">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fs-7">Municipality</label>
+            <input type="text" id="addMunicipality" class="form-control form-control-sm" placeholder="e.g. Sagada">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-dti btn-sm" onclick="saveWeaver()">Save Weaver</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hardware Scanner Modal -->
+  <div class="modal fade" id="scannerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <div class="mb-3">
+          <i class="bi bi-wifi text-success display-4"></i>
+        </div>
+        <h5 class="fw-bold mb-1">NFC Reader Active</h5>
+        <p class="text-muted fs-7 mb-3">Hold a Weaver-ID NFC Tag near the hardware reader to encode or authenticate.</p>
+        <div class="spinner-border text-success mx-auto mb-3" role="status"></div>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close Scanner</button>
+      </div>
+    </div>
   </div>
 
   <!-- Tag Details Modal -->
-  <div class="modal fade" id="tagDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="tagDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="bi bi-tag me-2"></i>Tag Inventory Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title fw-bold fs-6"><i class="bi bi-tag me-2"></i>Tag Detail Inspection</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body fs-7">
           <ul class="list-group list-group-flush">
-            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">NFC Tag ID:</span><strong id="modalTagId">-</strong></li>
-            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Product Name:</span><span id="modalProductName" class="fw-semibold">-</span></li>
-            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Batch / Receipt ID:</span><span id="modalBatchId">-</span></li>
-            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Lifecycle Status:</span><span id="modalStatus">-</span></li>
-            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Last Known Location:</span><span id="modalLocation">-</span></li>
-            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Last Timestamp:</span><span id="modalTimestamp">-</span></li>
+            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Tag ID:</span><strong id="modalTagId">-</strong></li>
+            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Assigned Product:</span><span id="modalProduct" class="fw-semibold">-</span></li>
+            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Batch / Receipt:</span><span id="modalBatch">-</span></li>
+            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Physical Scan:</span><span id="modalScan">-</span></li>
+            <li class="list-group-item d-flex justify-content-between px-0"><span class="text-muted">Status:</span><span id="modalStatus">-</span></li>
           </ul>
         </div>
         <div class="modal-footer">
@@ -235,45 +572,283 @@
     </div>
   </div>
 
-  <!-- Bootstrap 5 JS Bundle -->
+  <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Control & Simulation Script -->
+  
+  <!-- JavaScript Controller -->
   <script>
-    function openDetailsModal(tagId, product, batch, status, location, timestamp) {
+    // Primary Datasets
+    let catalogData = [
+      { id: 'WVID-8890', title: 'Pinagpagan Pattern Blanket', category: 'Blanket / Textile', weaver: 'Rose Ann Wangdali', tagged: true },
+      { id: 'WVID-7712', title: 'Inabel Table Runner', category: 'Home Decor', weaver: 'Virginia Omaweng', tagged: true },
+      { id: 'Pending', title: 'Woven Tote Bag', category: 'Bags & Accessories', weaver: 'Elena Dao', tagged: false }
+    ];
+
+    let nfcData = [
+      { tagId: 'NFC-WVR-8091', item: 'Traditional Inabel Blanket', receipt: 'Unassigned', physical: 'Unscanned', status: 'Manufactured' },
+      { tagId: 'NFC-WVR-8092', item: 'Handwoven Runner (1 of 10)', receipt: 'RCPT-2026-0812', physical: 'Unscanned', status: 'Sold (Pending Scan)' },
+      { tagId: 'NFC-WVR-8093', item: 'Handwoven Runner (2 of 10)', receipt: 'RCPT-2026-0812', physical: 'Unscanned', status: 'Sold (Pending Scan)' },
+      { tagId: 'NFC-WVR-8094', item: 'Custom Handwoven Scarf', receipt: 'RCPT-2026-0819', physical: 'Unscanned', status: 'Flagged' }
+    ];
+
+    let weaversData = [
+      { id: 1, name: "Sagada Weaving", proprietor: "Rose Ann Wangdali", municipality: "Sagada", items: 12 },
+      { id: 2, name: "Gandang Handwoven", proprietor: "Virginia Omaweng", municipality: "Sagada", items: 9 },
+      { id: 3, name: "Besao Loomweaving", proprietor: "Elena Dao", municipality: "Besao", items: 7 }
+    ];
+
+    let chartInstance = null;
+
+    // Render Catalog Table
+    function renderCatalog(data) {
+      const tbody = document.getElementById('catalogTableBody');
+      tbody.innerHTML = data.map(item => `
+        <tr>
+          <td class="fw-semibold">${item.title}</td>
+          <td>${item.category}</td>
+          <td>${item.weaver}</td>
+          <td>
+            ${item.tagged 
+              ? `<span class="badge bg-success-subtle text-success border">Linked: <code>${item.id}</code></span>` 
+              : `<span class="badge bg-warning-subtle text-warning border">Untagged</span>`}
+          </td>
+          <td class="text-end pe-3">
+            ${item.tagged 
+              ? `<button class="btn btn-sm btn-outline-danger py-0" onclick="unlinkTag('${item.id}')">Unlink</button>` 
+              : `<button class="btn btn-sm btn-outline-success py-0" onclick="quickAssignTag('${item.title}')">Assign Tag</button>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Render NFC Tag Inventory Table
+    function renderNFC(data) {
+      const tbody = document.getElementById('nfcTableBody');
+      tbody.innerHTML = data.map(tag => {
+        let physicalBadge = `<span class="status-badge badge-unscanned"><i class="bi bi-dash-circle"></i> ${tag.physical}</span>`;
+        if (tag.physical === 'Direct Scan') {
+          physicalBadge = `<span class="status-badge badge-direct-scan"><i class="bi bi-phone"></i> Direct Scan</span>`;
+        }
+
+        let statusBadge = `<span class="badge bg-secondary">${tag.status}</span>`;
+        if (tag.status === 'Manufactured') statusBadge = `<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">Manufactured</span>`;
+        else if (tag.status === 'Verified Genuine') statusBadge = `<span class="badge bg-success border border-success">Verified Genuine</span>`;
+        else if (tag.status === 'Batch Authenticated') statusBadge = `<span class="status-badge badge-batch-verified"><i class="bi bi-shield-check"></i> Batch Authenticated</span>`;
+        else if (tag.status === 'Flagged') statusBadge = `<span class="badge bg-danger text-white">Flagged Alert</span>`;
+
+        return `
+          <tr>
+            <td class="ps-3"><code class="fw-bold text-dark">${tag.tagId}</code></td>
+            <td>${tag.item} <br><small class="text-muted"><code>${tag.receipt}</code></small></td>
+            <td>${physicalBadge}</td>
+            <td>${statusBadge}</td>
+            <td class="text-end pe-3">
+              <button class="btn btn-sm btn-light border py-0" onclick="openDetailsModal('${tag.tagId}', '${tag.item}', '${tag.receipt}', '${tag.physical}', '${tag.status}')">Details</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Weavers Table
+    function renderWeavers(data) {
+      const tbody = document.getElementById('weaversTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = data.map(w => `
+        <tr>
+          <td class="fw-semibold">${w.name}</td>
+          <td>${w.proprietor}</td>
+          <td>${w.municipality}</td>
+          <td>${w.items || 0} Items</td>
+          <td><span class="badge bg-success">Active</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // Tab Navigation
+    function switchTab(tabKey) {
+      document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+        if(link.getAttribute('onclick').includes(tabKey)) link.classList.add('active');
+        else link.classList.remove('active');
+      });
+
+      const titles = {
+        dashboard: "Association Dashboard",
+        catalog: "Hub Product Catalog",
+        nfc: "NFC Tag Inventory",
+        members: "Hub Weavers Registry",
+        scans: "Hub Verification Logs"
+      };
+
+      document.getElementById('pageTitle').textContent = titles[tabKey] || "Association Dashboard";
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('d-none'));
+      document.getElementById(`view-${tabKey}`).classList.remove('d-none');
+    }
+
+    // Batch Scan Simulation Trigger
+    function simulateScan() {
+      // 1. Update tag states in nfcData array
+      nfcData.forEach(tag => {
+        if (tag.tagId === 'NFC-WVR-8092') {
+          tag.physical = 'Direct Scan';
+          tag.status = 'Verified Genuine';
+        } else if (tag.receipt === 'RCPT-2026-0812') {
+          tag.physical = 'Unscanned';
+          tag.status = 'Batch Authenticated';
+        }
+      });
+
+      // 2. Re-render inventory view
+      renderNFC(nfcData);
+
+      // 3. Update top banner UI
+      const verdictIcon = document.getElementById('verdictIcon');
+      verdictIcon.className = "bg-success text-white rounded-circle d-flex align-items-center justify-content-center";
+      verdictIcon.innerHTML = `<i class="bi bi-check-lg"></i>`;
+
+      document.getElementById('verdictTitle').textContent = "Batch Authenticity Confirmed (100% Genuine)";
+      document.getElementById('verdictSubtitle').textContent = "Scanning Tag [NFC-WVR-8092] cryptographically verified receipt RCPT-2026-0812 for all 10 items.";
+      
+      const badge = document.getElementById('verifiedBadge');
+      badge.className = "badge bg-success fs-7";
+      badge.textContent = "10 / 10 Authenticated";
+
+      // 4. Prepend log entry
+      const logTable = document.getElementById('logsTableBody');
+      if(logTable) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>Just Now</td><td><code>NFC-WVR-8092</code></td><td>RCPT-2026-0812 (10 Item Batch)</td><td><span class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Batch Verified</span></td>`;
+        logTable.prepend(tr);
+      }
+    }
+
+    // Modal Inspection
+    function openDetailsModal(tagId, item, receipt, physical, status) {
       document.getElementById('modalTagId').textContent = tagId;
-      document.getElementById('modalProductName').textContent = product;
-      document.getElementById('modalBatchId').textContent = batch;
+      document.getElementById('modalProduct').textContent = item;
+      document.getElementById('modalBatch').textContent = receipt;
+      document.getElementById('modalScan').textContent = physical;
       document.getElementById('modalStatus').textContent = status;
-      document.getElementById('modalLocation').textContent = location;
-      document.getElementById('modalTimestamp').textContent = timestamp;
 
       const modal = new bootstrap.Modal(document.getElementById('tagDetailsModal'));
       modal.show();
     }
 
-    // Function to simulate scanning 1 item and updating the entire 10-unit batch in database
-    function simulateScan() {
-      // Update Scanned Item (NFC-WVR-8092)
-      document.getElementById('scanType8092').innerHTML = `<span class="status-badge badge-direct-scan"><i class="bi bi-phone"></i> Direct Scan</span>`;
-      document.getElementById('status8092').innerHTML = `<span class="badge bg-success border border-success">Verified Genuine</span>`;
-
-      // Update Unscanned Batch Companion Item (NFC-WVR-8093)
-      document.getElementById('scanType8093').innerHTML = `<span class="status-badge badge-unscanned">Not Scanned</span>`;
-      document.getElementById('status8093').innerHTML = `<span class="status-badge badge-batch-verified"><i class="bi bi-shield-check"></i> Batch Authenticated</span>`;
-
-      // Update Top Status Box
-      const verdictIcon = document.getElementById('verdictIcon');
-      verdictIcon.className = "bg-success text-white rounded-circle d-flex align-items-center justify-content-center";
-      verdictIcon.innerHTML = `<i class="bi bi-check-lg fs-5"></i>`;
-
-      document.getElementById('verdictTitle').textContent = "Batch Authenticity Confirmed (100% Genuine)";
-      document.getElementById('verdictSubtitle').textContent = "Single tag scan verified receipt RCPT-2026-0812 across all 10 items in the database.";
-      
-      const badge = document.getElementById('verifiedBadge');
-      badge.className = "badge bg-success fs-6";
-      badge.textContent = "10 / 10 Items Authenticated";
+    // Action Handlers
+    function filterCatalog() {
+      const q = document.getElementById('catalogSearch').value.toLowerCase();
+      const filtered = catalogData.filter(i => 
+        i.title.toLowerCase().includes(q) || i.weaver.toLowerCase().includes(q)
+      );
+      renderCatalog(filtered);
     }
+
+    function submitProduct() {
+      const title = document.getElementById('inputTitle').value;
+      const category = document.getElementById('inputCategory').value;
+      const weaver = document.getElementById('inputWeaver').value;
+
+      if (!title || !weaver) {
+        alert('Please complete required fields.');
+        return;
+      }
+
+      catalogData.unshift({ id: 'Pending', title, category, weaver, tagged: false });
+      renderCatalog(catalogData);
+      
+      document.getElementById('totalProductsCount').textContent = catalogData.length;
+      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+      document.getElementById('inputTitle').value = '';
+      document.getElementById('inputWeaver').value = '';
+    }
+
+    function saveWeaver() {
+      const name = document.getElementById('addBusiness').value.trim();
+      const proprietor = document.getElementById('addProprietor').value.trim();
+      const municipality = document.getElementById('addMunicipality').value.trim();
+
+      if (!name || !proprietor || !municipality) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      weaversData.push({ id: weaversData.length + 1, name, proprietor, municipality, items: 0 });
+      renderWeavers(weaversData);
+
+      document.getElementById('addBusiness').value = '';
+      document.getElementById('addProprietor').value = '';
+      document.getElementById('addMunicipality').value = '';
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addWeaverModal'));
+      if (modal) modal.hide();
+    }
+
+    function quickAssignTag(itemTitle) {
+      const newTagId = 'WVID-' + Math.floor(1000 + Math.random() * 9000);
+      const item = catalogData.find(i => i.title === itemTitle);
+      if(item) {
+        item.tagged = true;
+        item.id = newTagId;
+        renderCatalog(catalogData);
+
+        nfcData.unshift({ tagId: newTagId, item: itemTitle, receipt: 'RCPT-2026-MANUAL', physical: 'Unscanned', status: 'Active' });
+        renderNFC(nfcData);
+      }
+    }
+
+    function unlinkTag(tagId) {
+      if(confirm(`Unlink tag ${tagId}?`)) {
+        const item = catalogData.find(i => i.id === tagId);
+        if(item) {
+          item.tagged = false;
+          item.id = 'Pending';
+          renderCatalog(catalogData);
+        }
+      }
+    }
+
+    function exportData() {
+      alert("Exporting verification logs to CSV format...");
+    }
+
+    function handleLogout() {
+      if (confirm('Log out from Association Hub?')) {
+        window.location.href = 'login.html';
+      }
+    }
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCatalog(catalogData);
+      renderNFC(nfcData);
+      renderWeavers(weaversData);
+
+      const ctx = document.getElementById('assocTrendChart');
+      if (ctx) {
+        chartInstance = new Chart(ctx.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+              data: [12, 19, 15, 25, 22, 30, 31],
+              borderColor: '#0a4d2e',
+              borderWidth: 2,
+              fill: false,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { 
+              x: { grid: { display: false } }, 
+              y: { grid: { borderDash: [4, 4] }, ticks: { font: { size: 10 } }, min: 0, max: 40 } 
+            }
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>
