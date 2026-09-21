@@ -33,6 +33,45 @@
       padding: 2.5rem;
     }
 
+    /* Updated Header Brand Styling */
+    .brand-header-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .brand-logo-img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background-color: #cbd5e1;
+    }
+
+    .brand-text-block {
+      text-align: left;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #005a36;
+      line-height: 1.1;
+      margin: 0;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
     .btn-dti {
       background-color: var(--dti-green);
       color: white;
@@ -56,13 +95,18 @@
 <body>
 
   <div class="login-card">
-    <!-- Header -->
+    <!-- Updated Header with Official Logo -->
     <div class="text-center mb-4">
-      <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success rounded-circle mb-2" style="width: 56px; height: 56px;">
-        <i class="bi bi-shield-lock-fill fs-2"></i>
+      <div class="brand-header-container">
+        <!-- Replace src with the relative path to your official logo file -->
+        <img src="weaver-id-logo.png" alt="Weaver-ID Logo" class="brand-logo-img">
+        <div class="brand-divider"></div>
+        <div class="brand-text-block">
+          <h5 class="brand-title">Weaver-ID</h5>
+          <div class="brand-subtitle">Unified Portal</div>
+        </div>
       </div>
-      <h5 class="fw-bold mb-0 text-success">Weaver-ID Portal</h5>
-      <p class="text-muted fs-7">Select account type to log in</p>
+      <p class="text-muted fs-7 mb-0">Select account type to log in</p>
     </div>
 
     <!-- Demo Credentials Box -->
