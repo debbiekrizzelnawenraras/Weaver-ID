@@ -9,7 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --sidebar-width: 250px;
+      --sidebar-width: 260px;
       --dti-green: #0a4d2e;
       --dti-green-hover: #073822;
       --bg-canvas: #f4f6f8;
@@ -38,7 +38,7 @@
       border: 1px solid #e2e8f0;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       padding: 2.5rem 2rem;
     }
 
@@ -202,7 +202,7 @@
 </head>
 <body>
 
-  <!-- LOGIN VIEW -->
+  <!-- 1. LOGIN VIEW (Synchronized Credentials with Portal) -->
   <div id="view-login">
     <div class="login-card">
       <div class="text-center mb-4">
@@ -210,7 +210,16 @@
           <i class="bi bi-shield-check fs-2"></i>
         </div>
         <h4 class="fw-bold mb-1 text-success">Weaver-ID</h4>
-        <p class="text-muted fs-8">Admin Control Panel Authentication</p>
+        <p class="text-muted fs-8">DTI Regional Admin Control Panel</p>
+      </div>
+
+      <!-- Demo Credentials Hint -->
+      <div class="card bg-light border-0 mb-3 fs-8 text-muted">
+        <div class="card-body py-2 px-3">
+          <div class="fw-bold text-dark mb-1">DTI Admin Credentials:</div>
+          <div><strong>Email:</strong> admin@dti.gov.ph</div>
+          <div><strong>Password:</strong> admin123</div>
+        </div>
       </div>
 
       <form id="loginForm" onsubmit="handleLogin(event)">
@@ -218,7 +227,7 @@
           <label class="form-label fs-7 fw-semibold">Email Address</label>
           <div class="input-group">
             <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted fs-7"></i></span>
-            <input type="email" id="loginEmail" class="form-control border-start-0" placeholder="admin@weaverid.gov.ph" required value="admin@weaverid.gov.ph">
+            <input type="email" id="loginEmail" class="form-control border-start-0" placeholder="admin@dti.gov.ph" required value="admin@dti.gov.ph">
           </div>
         </div>
 
@@ -226,7 +235,7 @@
           <label class="form-label fs-7 fw-semibold">Password</label>
           <div class="input-group">
             <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted fs-7"></i></span>
-            <input type="password" id="loginPassword" class="form-control border-start-0" placeholder="••••••••" required value="password">
+            <input type="password" id="loginPassword" class="form-control border-start-0" placeholder="••••••••" required value="admin123">
           </div>
         </div>
 
@@ -235,28 +244,23 @@
     </div>
   </div>
 
-  <!-- ADMIN APP CONTAINER (HIDDEN UNTIL LOGIN) -->
+  <!-- 2. MAIN ADMIN APP CONTAINER -->
   <div id="app-container" class="d-none">
     
     <!-- Admin Sidebar Navigation -->
     <aside class="sidebar d-flex flex-column justify-content-between">
-  <div>
-    <div class="sidebar-brand d-flex align-items-center gap-3">
-      <!-- Logo sa pinaka-kaliwa -->
-      <img src="logo.png" alt="WEAVER-ID Logo" class="brand-logo-img" style="width: 45px; height: auto; object-fit: contain;">
-      
-      <!-- Vertical Line Divider -->
-      <div class="vr style-divider" style="height: 40px; opacity: 0.25; border-left: 1px solid #6c757d;"></div>
-
-      <!-- Text Group sa kanan -->
       <div>
-        <h6 class="fw-bold mb-0 text-success" style="font-size: 1.1rem; color: #0d5c3a !important;">Weaver-ID</h6>
-        <small class="text-muted" style="font-size: 0.85rem; color: #495057;">Admin Control Panel</small>
-      </div>
-    </div>
- 
+        <div class="sidebar-brand d-flex align-items-center gap-3">
+          <div class="bg-success-subtle text-success p-2 rounded-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="bi bi-shield-check fs-4"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 text-success" style="font-size: 1.1rem; color: #0a4d2e !important;">Weaver-ID</h6>
+            <small class="text-muted" style="font-size: 0.85rem; color: #495057;">DTI Regional Admin</small>
+          </div>
+        </div>
 
-      <nav class="sidebar-nav mt-3">
+        <nav class="sidebar-nav mt-3">
           <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
           <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Registered Weavers</a>
           <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
@@ -264,26 +268,23 @@
           <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
           <a class="nav-link" data-tab="logs"><i class="bi bi-journal-check"></i> Audit Logs</a>
         </nav> 
- 
-  <!-- </aside>      -->
+      </div>
 
-
-      <!-- Admin Profile Footer -->
       <div class="p-3 border-top d-flex align-items-center gap-2">
         <div class="bg-light rounded-circle p-2"><i class="bi bi-person-fill text-secondary"></i></div>
         <div class="overflow-hidden me-auto">
-          <div class="fw-bold fs-7 text-truncate">Provincial Admin</div>
-          <div class="text-muted fs-8 text-truncate" id="loggedUserDisplay">admin@weaverid.gov.ph</div>
+          <div class="fw-bold fs-7 text-truncate">DTI Regional Admin</div>
+          <div class="text-muted fs-8 text-truncate" id="loggedUserDisplay">admin@dti.gov.ph</div>
         </div>
-        <button type="button" onclick="handleLogout()" class="btn btn-sm btn-light border-0" title="Logout"><i class="bi bi-box-arrow-right text-danger"></i></button>
+        <button type="button" onclick="handleLogout()" class="btn btn-sm btn-light border-0" title="Logout">
+          <i class="bi bi-box-arrow-right text-danger fs-6"></i>
+        </button>
       </div>
-     </div>
     </aside>
 
     <!-- Main Content Area -->
     <main class="main-content">
       
-      <!-- Top Action Bar -->
       <div class="d-flex align-items-center justify-content-between mb-4">
         <div class="d-flex align-items-center gap-3">
           <button class="btn btn-light border d-lg-none" type="button"><i class="bi bi-list"></i></button>
@@ -294,21 +295,18 @@
         </button>
       </div>
 
-      <!-- Search Input -->
       <div class="search-box mb-4">
         <i class="bi bi-search text-muted"></i>
         <input type="text" id="adminSearchInput" placeholder="Search MSMEs, weavers, products, associations..." onkeyup="filterDirectory()">
       </div>
 
-      <!-- 1. DASHBOARD VIEW -->
+      <!-- TAB 1: DASHBOARD VIEW -->
       <div id="view-dashboard" class="tab-view">
-        
-        <!-- 4 Metric Cards Grid -->
         <div class="row g-3 mb-4">
           <div class="col-6 col-md-3">
             <div class="metric-card">
               <div class="metric-icon icon-weavers"><i class="bi bi-people-fill"></i></div>
-              <h2 class="fw-bold mb-0 countWeaversDisplay">59</h2>
+              <h2 class="fw-bold mb-0 countWeaversDisplay">0</h2>
               <div class="text-muted fs-8 mt-1">Registered Weavers</div>
             </div>
           </div>
@@ -316,7 +314,7 @@
           <div class="col-6 col-md-3">
             <div class="metric-card">
               <div class="metric-icon icon-products"><i class="bi bi-box-seam-fill"></i></div>
-              <h2 class="fw-bold mb-0">12</h2>
+              <h2 class="fw-bold mb-0">3</h2>
               <div class="text-muted fs-8 mt-1">Cataloged Products</div>
             </div>
           </div>
@@ -338,10 +336,7 @@
           </div>
         </div>
 
-        <!-- SIDE-BY-SIDE ROW -->
         <div class="row g-3 mb-4">
-          
-          <!-- Verification Trends Chart Card -->
           <div class="col-12 col-lg-5">
             <div class="dashboard-card d-flex flex-column justify-content-between">
               <div>
@@ -357,17 +352,13 @@
             </div>
           </div>
 
-          <!-- Recent Scans Card -->
           <div class="col-12 col-lg-7">
             <div class="dashboard-card">
               <h6 class="fw-bold mb-3 fs-7"><i class="bi bi-clock me-2"></i>Recent Scans</h6>
-              
               <div class="d-flex flex-column gap-2">
                 <div class="d-flex align-items-center justify-content-between p-1">
                   <div class="d-flex align-items-center gap-3">
-                    <div class="scan-status-icon bg-success-subtle text-success">
-                      <i class="bi bi-check-lg"></i>
-                    </div>
+                    <div class="scan-status-icon bg-success-subtle text-success"><i class="bi bi-check-lg"></i></div>
                     <div>
                       <div class="fw-bold fs-7">Product Verified</div>
                       <div class="text-muted fs-8">NFC: WVID-8842 | Backpack</div>
@@ -375,14 +366,10 @@
                   </div>
                   <span class="text-muted fs-8">2m ago</span>
                 </div>
-
-                <hr class="my-1 text-border">
-
+                <hr class="my-1">
                 <div class="d-flex align-items-center justify-content-between p-1">
                   <div class="d-flex align-items-center gap-3">
-                    <div class="scan-status-icon bg-warning-subtle text-warning">
-                      <i class="bi bi-exclamation-lg"></i>
-                    </div>
+                    <div class="scan-status-icon bg-warning-subtle text-warning"><i class="bi bi-exclamation-lg"></i></div>
                     <div>
                       <div class="fw-bold fs-7">Unregistered Tag</div>
                       <div class="text-muted fs-8">NFC: Unknown | Bauko Market</div>
@@ -390,14 +377,10 @@
                   </div>
                   <span class="text-muted fs-8">15m ago</span>
                 </div>
-
-                <hr class="my-1 text-border">
-
+                <hr class="my-1">
                 <div class="d-flex align-items-center justify-content-between p-1">
                   <div class="d-flex align-items-center gap-3">
-                    <div class="scan-status-icon bg-success-subtle text-success">
-                      <i class="bi bi-check-lg"></i>
-                    </div>
+                    <div class="scan-status-icon bg-success-subtle text-success"><i class="bi bi-check-lg"></i></div>
                     <div>
                       <div class="fw-bold fs-7">Product Verified</div>
                       <div class="text-muted fs-8">NFC: WVID-7721 | Blanket</div>
@@ -408,12 +391,10 @@
               </div>
             </div>
           </div>
-
         </div>
-
       </div>
 
-      <!-- 2. REGISTERED WEAVERS VIEW -->
+      <!-- TAB 2: REGISTERED WEAVERS VIEW -->
       <div id="view-weavers" class="tab-view d-none">
         <div class="dashboard-card p-0">
           <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
@@ -431,27 +412,22 @@
                   <th class="text-end pe-3">Action</th>
                 </tr>
               </thead>
-              <tbody id="directoryTable">
-                <!-- Populated dynamically by JavaScript -->
-              </tbody>
+              <tbody id="directoryTable"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- 3. ASSOCIATIONS VIEW -->
+      <!-- TAB 3: ASSOCIATIONS VIEW -->
       <div id="view-associations" class="tab-view d-none">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h6 class="fw-bold mb-0">Registered Associations & Cooperatives</h6>
           <span class="badge bg-success-subtle text-success border">Registry Cards View</span>
         </div>
-        
-        <div class="row g-3" id="associationsContainer">
-          <!-- Rendered dynamically as structured boxes -->
-        </div>
+        <div class="row g-3" id="associationsContainer"></div>
       </div>
 
-      <!-- 4. CATALOGED PRODUCTS VIEW -->
+      <!-- TAB 4: CATALOGED PRODUCTS VIEW -->
       <div id="view-products" class="tab-view d-none">
         <div class="dashboard-card">
           <h6 class="fw-bold mb-3">Cataloged Products</h6>
@@ -465,15 +441,13 @@
                   <th class="text-end">Action</th>
                 </tr>
               </thead>
-              <tbody id="productsTable">
-                <!-- Populated dynamically by JavaScript -->
-              </tbody>
+              <tbody id="productsTable"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- 5. NFC TAGS VIEW -->
+      <!-- TAB 5: NFC TAGS VIEW -->
       <div id="view-nfc" class="tab-view d-none">
         <div class="dashboard-card">
           <h6 class="fw-bold mb-3">NFC Tags Issued</h6>
@@ -496,7 +470,7 @@
         </div>
       </div>
 
-      <!-- 6. AUDIT LOGS VIEW -->
+      <!-- TAB 6: AUDIT LOGS VIEW -->
       <div id="view-logs" class="tab-view d-none">
         <div class="dashboard-card">
           <h6 class="fw-bold mb-3">Audit Logs</h6>
@@ -557,7 +531,7 @@
               <div class="bg-light rounded p-4 text-center border d-flex flex-column align-items-center justify-content-center h-100">
                 <i class="bi bi-box-seam text-success" style="font-size: 4rem;"></i>
                 <div class="mt-2 text-muted fs-8" id="modalProductSku">SKU: WVID-PRD-001</div>
-                <span class="badge bg-success-subtle text-success border mt-2" id="modalProductTag">NFC Paired</span>
+                <span class="badge bg-success-subtle text-success border mt-2">NFC Paired</span>
               </div>
             </div>
             <div class="col-md-7">
@@ -607,7 +581,7 @@
   <script>
     let chartInstance = null;
 
-    // --- 1. DATASETS ---
+    // --- DATASETS ---
     const productsData = [
       { id: 1, name: "Pinagpagan Pattern Blanket", category: "Textile / Blanket", origin: "Sagada", material: "Handloom Woven Cotton", nfc: "WVID-7721", weaver: "Pinagpagan Womens Workers Association", desc: "Traditional Sagada woven blanket featuring authentic ceremonial geometric weave patterns passed down through generations." },
       { id: 2, name: "Inabel Table Runner", category: "Home Decor", origin: "Bontoc", material: "Polycotton Thread", nfc: "WVID-9012", weaver: "Bontoc Weaving Center", desc: "Vibrant table runner handcrafted with traditional Cordilleran geometric warp-faced weave." },
@@ -703,25 +677,31 @@
       logs: "Audit Logs"
     };
 
-    // --- 2. AUTHENTICATION HANDLERS ---
-    function handleLogin(event) {
-      event.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      
-      document.getElementById('loggedUserDisplay').textContent = email;
+    // --- 2. AUTHENTICATION & DIRECT DASHBOARD DISPLAY ---
+    function showDashboard(userEmail) {
+      document.getElementById('loggedUserDisplay').textContent = userEmail || 'admin@dti.gov.ph';
       document.getElementById('view-login').classList.add('d-none');
       document.getElementById('app-container').classList.remove('d-none');
-
       initChart();
     }
 
-    function handleLogout() {
-      // Clear local state if needed
-      localStorage.clear();
-      sessionStorage.clear();
+    function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPassword').value;
 
-      // Redirect directly to external logout page
-      window.location.href = 'logout.html';
+      if (email === "admin@dti.gov.ph" && pass === "admin123") {
+        localStorage.setItem("weaver_user", JSON.stringify({ email: email, role: "admin" }));
+        showDashboard(email);
+      } else {
+        alert("Invalid Admin Credentials! Use admin@dti.gov.ph / admin123");
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem("weaver_user");
+      sessionStorage.clear();
+      window.location.href = 'login.html';
     }
 
     // --- 3. RENDER FUNCTIONS ---
@@ -951,12 +931,23 @@
       }
     }
 
-    // --- 6. INITIALIZATION ---
+    // --- 6. INITIALIZATION & STORAGE CHECK ---
     window.addEventListener('DOMContentLoaded', () => {
       updateWeaverCounters();
       renderWeavers(weaversData);
       renderAssociations(associationsData);
       renderProducts(productsData);
+
+      // Automatic bypass if redirected from login page / session present
+      const savedUser = localStorage.getItem("weaver_user");
+      if (savedUser) {
+        try {
+          const userObj = JSON.parse(savedUser);
+          showDashboard(userObj.email);
+        } catch(e) {
+          showDashboard('admin@dti.gov.ph');
+        }
+      }
     });
   </script>
 </body>
