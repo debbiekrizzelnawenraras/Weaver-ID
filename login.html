@@ -158,11 +158,42 @@
   </div>
 
   <script>
-    function handleCombinedLogin(event) {
-      event.preventDefault();
-      const targetDashboard = document.getElementById('role').value;
-      window.location.href = targetDashboard;
+    async function handleCombinedLogin(event) {
+    event.preventDefault();
+    const email =
+        document.getElementById('email').value.trim();
+    const password =
+        document.getElementById('password').value;
+    const role =
+        document.getElementById('role').value;
+    const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            email,
+            password,
+            role
+        })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        alert(data.message || 'Invalid credentials.');
+        return;
     }
+    if (data.role === 'admin') {
+        window.location.href = 'admin.html';
+    } else if (data.role === 'staff') {
+        window.location.href = 'admin.html';
+    } else if (data.role === 'association') {
+        window.location.href = 'association_dashboard.html';
+    } else {
+        alert('Unauthorized account type.');
+    }
+}
   </script>
 
 </body>
