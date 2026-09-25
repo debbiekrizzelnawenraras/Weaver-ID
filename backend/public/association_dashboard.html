@@ -821,7 +821,7 @@
       document.getElementById('inputWeaver').value = '';
     }
 
-    function saveWeaver() {
+    async function saveWeaver() {
       const name = document.getElementById('addBusiness').value.trim();
       const proprietor = document.getElementById('addProprietor').value.trim();
       const municipality = document.getElementById('addMunicipality').value.trim();
@@ -831,15 +831,74 @@
         return;
       }
 
-      weaversData.push({ id: weaversData.length + 1, name, proprietor, municipality, items: 0 });
-      renderWeavers(weaversData);
+      const token = localStorage.getItem('weaver_token');
 
-      document.getElementById('addBusiness').value = '';
-      document.getElementById('addProprietor').value = '';
-      document.getElementById('addMunicipality').value = '';
+      if (!token) {
+        alert('Your session has expired. Please log in again.');
+        window.location.href = 'login.html';
+        return;
+      }
 
-      const modal = bootstrap.Modal.getInstance(document.getElementById('addWeaverModal'));
-      if (modal) modal.hide();
+      try {
+        const response = await fetch('/api/association/weavers', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name,
+            proprietor,
+            municipality
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('weaver_token');
+            localStorage.removeItem('weaver_user');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          if (response.status === 422) {
+            const errors = data.errors
+              ? Object.values(data.errors).flat().join('\n')
+              : 'Please check the information you entered.';
+
+            alert(errors);
+            return;
+          }
+
+          throw new Error(data.message || `Request failed: ${response.status}`);
+        }
+
+        alert(data.message || 'Weaver created successfully.');
+
+        // Reload the Association Hub data from Laravel.
+        await loadAssociationData();
+
+        // Clear the form.
+        document.getElementById('addBusiness').value = '';
+        document.getElementById('addProprietor').value = '';
+        document.getElementById('addMunicipality').value = '';
+
+        // Close the modal.
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById('addWeaverModal')
+        );
+
+        if (modal) {
+          modal.hide();
+        }
+
+      } catch (error) {
+        console.error('Failed to create weaver:', error);
+        alert('Unable to create the weaver. Please try again.');
+      }
     }
 
     function quickAssignTag(itemTitle) {
