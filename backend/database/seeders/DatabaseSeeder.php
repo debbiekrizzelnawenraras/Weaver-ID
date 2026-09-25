@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Association;
+use App\Models\Product;
 use App\Models\User;
+use App\Models\Weaver;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,8 +14,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $association = Association::create([
-            'name' => 'Test Weaving Association',
-            'municipality' => 'Bontoc',
+            'name' => 'Montañosa Weavers',
+            'municipality' => 'Sagada',
             'status' => 'active',
         ]);
 
@@ -39,6 +41,51 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('Association123!'),
             'role' => 'association',
             'association_id' => $association->id,
+            'status' => 'active',
+        ]);
+
+        $weaver1 = Weaver::create([
+            'association_id' => $association->id,
+            'name' => 'Sagada Weaving',
+            'proprietor' => 'Rose Ann Wangdali',
+            'municipality' => 'Sagada',
+            'status' => 'active',
+        ]);
+
+        $weaver2 = Weaver::create([
+            'association_id' => $association->id,
+            'name' => 'Gandang Handwoven',
+            'proprietor' => 'Virginia Omaweng',
+            'municipality' => 'Sagada',
+            'status' => 'active',
+        ]);
+
+        $weaver3 = Weaver::create([
+            'association_id' => $association->id,
+            'name' => 'Besao Loomweaving',
+            'proprietor' => 'Elena Dao',
+            'municipality' => 'Besao',
+            'status' => 'active',
+        ]);
+
+        Product::create([
+            'weaver_id' => $weaver1->id,
+            'title' => 'Pinagpagan Pattern Blanket',
+            'category' => 'Blanket / Textile',
+            'status' => 'active',
+        ]);
+
+        Product::create([
+            'weaver_id' => $weaver2->id,
+            'title' => 'Inabel Table Runner',
+            'category' => 'Home Decor',
+            'status' => 'active',
+        ]);
+
+        Product::create([
+            'weaver_id' => $weaver3->id,
+            'title' => 'Woven Tote Bag',
+            'category' => 'Bags & Accessories',
             'status' => 'active',
         ]);
     }
