@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Weaver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -49,5 +50,35 @@ class AssociationController extends Controller
         return response()->json([
             'products' => $products,
         ]);
+    }
+
+    public function storeWeaver(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'association' || !$user->association_id) {
+            return response()->json([
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'proprietor' => ['required', 'string', 'max:255'],
+            'municipality' => ['required', 'string', 'max:255'],
+        ]);
+
+        $weaver = Weaver::create([
+            'association_id' => $user->association_id,
+            'name' => $validated['name'],
+            'proprietor' => $validated['proprietor'],
+            'municipality' => $validated['municipality'],
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'message' => 'Weaver created successfully.',
+            'weaver' => $weaver,
+        ], 201);
     }
 }

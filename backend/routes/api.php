@@ -13,5 +13,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/association/weavers', [AssociationController::class, 'weavers']);
+    Route::post('/association/weavers', [AssociationController::class, 'storeWeaver']);
     Route::get('/association/products', [AssociationController::class, 'products']);
 });
