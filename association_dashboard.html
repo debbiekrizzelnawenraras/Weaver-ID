@@ -599,6 +599,66 @@
 
     let chartInstance = null;
 
+    // Load Association Hub data from Laravel API
+    async function loadAssociationData() {
+      const token = localStorage.getItem('weaver_token');
+
+      if (!token) {
+        console.error('No authentication token found.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/association/weavers', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('weaver_token');
+            localStorage.removeItem('weaver_user');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        weaversData = data.weavers.map(weaver => ({
+          id: weaver.id,
+          name: weaver.name,
+          proprietor: weaver.proprietor,
+          municipality: weaver.municipality,
+          items: weaver.products ? weaver.products.length : 0
+        }));
+
+        catalogData = data.weavers.flatMap(weaver =>
+          weaver.products.map(product => ({
+            id: product.id,
+            title: product.title,
+            category: product.category,
+            weaver: weaver.proprietor,
+            tagged: false
+          }))
+        );
+
+        renderWeavers(weaversData);
+        renderCatalog(catalogData);
+
+        console.log('Association data loaded from Laravel:', data);
+
+      } catch (error) {
+        console.error('Failed to load Association Hub data:', error);
+      }
+    }
+
     // Render Catalog Table
     function renderCatalog(data) {
       const tbody = document.getElementById('catalogTableBody');

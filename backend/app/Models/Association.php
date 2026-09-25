@@ -20,4 +20,9 @@ class Association extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function weavers(): HasMany
+    {
+        return $this->hasMany(Weaver::class);
+    }
 }
