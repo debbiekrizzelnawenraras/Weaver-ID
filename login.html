@@ -113,8 +113,9 @@
     <div class="card bg-light border-0 mb-3 fs-8 text-muted">
       <div class="card-body py-2 px-3">
         <div class="fw-bold text-dark mb-1">Demo Credentials:</div>
-        <div><strong>Association:</strong> hub@montanosa.org | pass: hub123</div>
-        <div><strong>DTI Admin:</strong> admin@dti.gov.ph | pass: admin123</div>
+        <div><strong>Association:</strong> association@weaver-id.test | pass: Association123!</div>
+        <div><strong>DTI Admin:</strong> admin@weaver-id.test | pass: Admin123!</div>
+        <div><strong>DTI Staff:</strong> staff@weaver-id.test | pass: Staff123!</div>
       </div>
     </div>
 
@@ -127,8 +128,9 @@
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-badge text-muted"></i></span>
           <select id="role" class="form-select border-start-0 ps-0" required>
-            <option value="association_dashboard.html" selected>Association Hub</option>
-            <option value="admin.html">DTI Regional Admin</option>
+            <option value="association" selected>Association Hub</option>
+            <option value="admin">DTI Regional Admin</option>
+            <option value="staff">DTI Staff</option>
           </select>
         </div>
       </div>
@@ -159,41 +161,50 @@
 
   <script>
     async function handleCombinedLogin(event) {
-    event.preventDefault();
-    const email =
-        document.getElementById('email').value.trim();
-    const password =
-        document.getElementById('password').value;
-    const role =
-        document.getElementById('role').value;
-    const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
+          },
+          body: JSON.stringify({
             email,
             password,
             role
-        })
-    });
-    const data = await response.json();
-    if (!response.ok) {
-        alert(data.message || 'Invalid credentials.');
-        return;
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.message || 'Login failed.');
+          return;
+        }
+
+        localStorage.setItem('weaver_token', data.token);
+        localStorage.setItem('weaver_user', JSON.stringify(data.user));
+
+        if (data.user.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else if (data.user.role === 'staff') {
+          window.location.href = 'admin.html';
+        } else if (data.user.role === 'association') {
+          window.location.href = 'association_dashboard.html';
+        } else {
+          alert('Unauthorized account type.');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Unable to connect to the Weaver-ID server.');
+      }
     }
-    if (data.role === 'admin') {
-        window.location.href = 'admin.html';
-    } else if (data.role === 'staff') {
-        window.location.href = 'admin.html';
-    } else if (data.role === 'association') {
-        window.location.href = 'association_dashboard.html';
-    } else {
-        alert('Unauthorized account type.');
-    }
-}
   </script>
 
 </body>
