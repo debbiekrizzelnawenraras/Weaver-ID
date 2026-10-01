@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Models\Weaver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -79,6 +80,45 @@ class AssociationController extends Controller
         return response()->json([
             'message' => 'Weaver created successfully.',
             'weaver' => $weaver,
+        ], 201);
+    }
+    public function storeProduct(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'association' || !$user->association_id) {
+            return response()->json([
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'weaver_id' => ['required', 'integer', 'exists:weavers,id'],
+            'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'max:255'],
+        ]);
+
+        $weaver = Weaver::where('id', $validated['weaver_id'])
+            ->where('association_id', $user->association_id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$weaver) {
+            return response()->json([
+                'message' => 'The selected weaver does not belong to your association or is inactive.',
+            ], 403);
+        }
+
+        $product = Product::create([
+            'weaver_id' => $weaver->id,
+            'title' => $validated['title'],
+            'category' => $validated['category'],
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'message' => 'Product created successfully.',
+            'product' => $product->load('weaver'),
         ], 201);
     }
 }
