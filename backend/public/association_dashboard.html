@@ -424,11 +424,12 @@
           <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
             <thead class="table-light">
               <tr>
-                <th>Artisan Name</th>
-                <th>Proprietor / Lead</th>
+                <th>Weaver</th>
+                <th>Proprietor</th>
                 <th>Municipality</th>
-                <th>Total Items</th>
+                <th>Items</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="weaversTableBody">
@@ -530,6 +531,76 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
           <button type="button" class="btn btn-dti btn-sm" onclick="saveWeaver()">Save Weaver</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Weaver Modal -->
+  <div class="modal fade" id="editWeaverModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold fs-6">Edit Weaver</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="editWeaverId">
+
+          <div class="mb-3">
+            <label class="form-label fs-7">Weaver Name</label>
+            <input
+              type="text"
+              id="editWeaverName"
+              class="form-control form-control-sm"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fs-7">Proprietor</label>
+            <input
+              type="text"
+              id="editWeaverProprietor"
+              class="form-control form-control-sm"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fs-7">Municipality</label>
+            <input
+              type="text"
+              id="editWeaverMunicipality"
+              class="form-control form-control-sm"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fs-7">Status</label>
+            <select id="editWeaverStatus" class="form-select form-select-sm">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            data-bs-dismiss="modal">
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-dti btn-sm"
+            onclick="updateWeaver()">
+            Save Changes
+          </button>
         </div>
       </div>
     </div>
@@ -637,6 +708,7 @@
           name: weaver.name,
           proprietor: weaver.proprietor,
           municipality: weaver.municipality,
+          status: weaver.status,
           items: weaver.products ? weaver.products.length : 0
         }));
 
@@ -730,13 +802,26 @@
     function renderWeavers(data) {
       const tbody = document.getElementById('weaversTableBody');
       if (!tbody) return;
+
       tbody.innerHTML = data.map(w => `
         <tr>
           <td class="fw-semibold">${w.name}</td>
           <td>${w.proprietor}</td>
           <td>${w.municipality}</td>
           <td>${w.items || 0} Items</td>
-          <td><span class="badge bg-success">Active</span></td>
+          <td>
+            <span class="badge ${w.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+              ${w.status === 'active' ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              onclick="openEditWeaverModal(${w.id})">
+              Edit
+            </button>
+          </td>
         </tr>
       `).join('');
     }
@@ -819,66 +904,147 @@
       renderCatalog(filtered);
     }
 
+    function openEditWeaverModal(weaverId) {
+      const weaver = weaversData.find(w => Number(w.id) === Number(weaverId));
+
+      if (!weaver) {
+        alert('Weaver record not found.');
+        return;
+      }
+
+      document.getElementById('editWeaverId').value = weaver.id;
+      document.getElementById('editWeaverName').value = weaver.name;
+      document.getElementById('editWeaverProprietor').value = weaver.proprietor;
+      document.getElementById('editWeaverMunicipality').value = weaver.municipality;
+      document.getElementById('editWeaverStatus').value = weaver.status || 'active';
+
+      const modal = new bootstrap.Modal(
+        document.getElementById('editWeaverModal')
+      );
+
+      modal.show();
+    }
+
+    async function updateWeaver() {
+      const weaverId = document.getElementById('editWeaverId').value;
+      const name = document.getElementById('editWeaverName').value.trim();
+      const proprietor = document.getElementById('editWeaverProprietor').value.trim();
+      const municipality = document.getElementById('editWeaverMunicipality').value.trim();
+      const status = document.getElementById('editWeaverStatus').value;
+
+      if (!name || !proprietor || !municipality) {
+        alert('Please complete all required fields.');
+        return;
+      }
+
+      const token = localStorage.getItem('weaver_token');
+
+      if (!token) {
+        alert('Your session has expired. Please log in again.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/association/weavers/${weaverId}`, {
+          method: 'PUT',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name,
+            proprietor,
+            municipality,
+            status
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to update weaver.');
+        }
+
+        alert('Weaver updated successfully.');
+
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById('editWeaverModal')
+        );
+
+        if (modal) {
+          modal.hide();
+        }
+
+        await loadAssociationData();
+
+      } catch (error) {
+        console.error('Weaver update failed:', error);
+        alert(error.message || 'Failed to update weaver.');
+      }
+    }
+
     async function submitProduct() {
-  const title = document.getElementById('inputTitle').value.trim();
-  const category = document.getElementById('inputCategory').value;
-  const weaverId = document.getElementById('inputWeaver').value;
+      const title = document.getElementById('inputTitle').value.trim();
+      const category = document.getElementById('inputCategory').value;
+      const weaverId = document.getElementById('inputWeaver').value;
 
-  if (!title || !weaverId) {
-    alert('Please complete the required fields.');
-    return;
-  }
+      if (!title || !weaverId) {
+        alert('Please complete the required fields.');
+        return;
+      }
 
-  const token = localStorage.getItem('weaver_token');
+      const token = localStorage.getItem('weaver_token');
 
-  if (!token) {
-    alert('Your session has expired. Please log in again.');
-    window.location.href = 'login.html';
-    return;
-  }
+      if (!token) {
+        alert('Your session has expired. Please log in again.');
+        window.location.href = 'login.html';
+        return;
+      }
 
-  try {
-    const response = await fetch('/api/association/products', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        weaver_id: Number(weaverId),
-        title: title,
-        category: category
-      })
-    });
+      try {
+        const response = await fetch('/api/association/products', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            weaver_id: Number(weaverId),
+            title: title,
+            category: category
+          })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to register product.');
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to register product.');
+        }
+
+        alert('Product registered successfully.');
+
+        document.getElementById('inputTitle').value = '';
+        document.getElementById('inputCategory').selectedIndex = 0;
+        document.getElementById('inputWeaver').value = '';
+
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById('addProductModal')
+        );
+
+        if (modal) {
+          modal.hide();
+        }
+
+        await loadAssociationData();
+
+      } catch (error) {
+        console.error('Product registration failed:', error);
+        alert(error.message || 'Failed to register product.');
+      }
     }
-
-    alert('Product registered successfully.');
-
-    document.getElementById('inputTitle').value = '';
-    document.getElementById('inputCategory').selectedIndex = 0;
-    document.getElementById('inputWeaver').value = '';
-
-    const modal = bootstrap.Modal.getInstance(
-      document.getElementById('addProductModal')
-    );
-
-    if (modal) {
-      modal.hide();
-    }
-
-    await loadAssociationData();
-
-  } catch (error) {
-    console.error('Product registration failed:', error);
-    alert(error.message || 'Failed to register product.');
-  }
-}
 
     async function saveWeaver() {
       const name = document.getElementById('addBusiness').value.trim();

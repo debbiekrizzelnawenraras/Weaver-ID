@@ -82,6 +82,42 @@ class AssociationController extends Controller
             'weaver' => $weaver,
         ], 201);
     }
+    
+    public function updateWeaver(Request $request, Weaver $weaver): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'association' || !$user->association_id) {
+            return response()->json([
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        if ($weaver->association_id !== $user->association_id) {
+            return response()->json([
+                'message' => 'You are not authorized to modify this weaver.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'proprietor' => ['required', 'string', 'max:255'],
+            'municipality' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'in:active,inactive'],
+        ]);
+
+        $weaver->update([
+            'name' => $validated['name'],
+            'proprietor' => $validated['proprietor'],
+            'municipality' => $validated['municipality'],
+            'status' => $validated['status'],
+        ]);
+
+        return response()->json([
+            'message' => 'Weaver updated successfully.',
+            'weaver' => $weaver->fresh(),
+        ]);
+    }
     public function storeProduct(Request $request): JsonResponse
     {
         $user = $request->user();
