@@ -109,7 +109,7 @@
       <p class="text-muted fs-7 mb-0">Select account type to log in</p>
     </div>
 
-    <!-- Demo Credentials Box -->
+    <!-- Demo Credentials Box for prototype purposes only po. Please delete nalang after the demo.-->
     <div class="card bg-light border-0 mb-3 fs-8 text-muted">
       <div class="card-body py-2 px-3">
         <div class="fw-bold text-dark mb-1">Demo Credentials:</div>
@@ -120,8 +120,8 @@
     </div>
 
     <!-- HTML Form -->
-    <form id="combinedLoginForm" onsubmit="handleCombinedLogin(event)">
-      
+    <form id="combinedLoginForm" onsubmit="handleCombinedLogin(event)"> 
+      <!-- check this at the script part. kinukuha niya ang mga information and is directing it to the -->
       <!-- Account Type Selection -->
       <div class="mb-3">
         <label for="role" class="form-label fs-7 fw-semibold">Portal Role</label>
@@ -160,15 +160,21 @@
   </div>
 
   <script>
+    /**
+     * handleCombinedLogin function to manage login for all roles. para hindi na basta entry point ang login.html. so that there is authentication for all roles.
+     * if the user logs in, it will check the role and redirect to the appropriate dashboard. once redirected, the credentials will be sent to POST/api/login for authentication. if the credentials are valid, it will return a token and user information which will be stored in localStorage. if the credentials are invalid, it will alert the user. I-check ni Laravel if the user is authenticated and has the correct role. if not, it will return a 401 unauthorized response. if the user is authenticated and has the correct role, it will return a 200 OK response with the token and user information.
+     */
     async function handleCombinedLogin(event) {
       event.preventDefault();
 
+      // fetching of data (email, password, role)
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const role = document.getElementById('role').value;
 
+      
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/login', { // sends the data to the backend for authentication. this is safer than sending it to the frontend. the backend will handle the authentication and return a token and user information if successful. This is used since the password is sensitive information.
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -183,7 +189,7 @@
 
         const data = await response.json();
 
-        if (!response.ok) {
+        if (!response.ok) { // this will show up if there is an error in the backend. more likely, walang credentials or wrong ang credentials.
           alert(data.message || 'Login failed.');
           return;
         }
