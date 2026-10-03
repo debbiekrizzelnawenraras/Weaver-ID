@@ -13,13 +13,7 @@ class AssociationController extends Controller
     public function weavers(Request $request): JsonResponse
     {
         $user = $request->user();
-
-        if ($user->role !== 'association' || !$user->association_id) {
-            return response()->json([
-                'message' => 'Unauthorized.',
-            ], 403);
-        }
-
+    
         $weavers = $user->association
             ->weavers()
             ->with('products')

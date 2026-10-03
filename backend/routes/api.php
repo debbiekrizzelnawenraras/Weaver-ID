@@ -12,9 +12,12 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    Route::get('/association/weavers', [AssociationController::class, 'weavers']);
-    Route::post('/association/weavers', [AssociationController::class, 'storeWeaver']);
-    Route::put('/association/weavers/{weaver}', [AssociationController::class, 'updateWeaver']);
-    Route::get('/association/products', [AssociationController::class, 'products']);
-    Route::post('/association/products', [AssociationController::class, 'storeProduct']);
+    Route::middleware('role:association')->group(function () {
+        Route::get('/association/weavers', [AssociationController::class, 'weavers']);
+        Route::post('/association/weavers', [AssociationController::class, 'storeWeaver']);
+        Route::put('/association/weavers/{weaver}', [AssociationController::class, 'updateWeaver']);
+
+        Route::get('/association/products', [AssociationController::class, 'products']);
+        Route::post('/association/products', [AssociationController::class, 'storeProduct']);
+    });
 });
