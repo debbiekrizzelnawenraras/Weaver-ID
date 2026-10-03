@@ -13,7 +13,13 @@ class AssociationController extends Controller
     public function weavers(Request $request): JsonResponse
     {
         $user = $request->user();
-    
+
+        if (!$user->association_id) {
+            return response()->json([
+                'message' => 'Association account is not linked to an association.',
+            ], 403);
+        }
+
         $weavers = $user->association
             ->weavers()
             ->with('products')
@@ -29,13 +35,13 @@ class AssociationController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role !== 'association' || !$user->association_id) {
+        if (!$user->association_id) {
             return response()->json([
-                'message' => 'Unauthorized.',
+                'message' => 'Association account is not linked to an association.',
             ], 403);
         }
 
-        $products = \App\Models\Product::whereHas('weaver', function ($query) use ($user) {
+        $products = Product::whereHas('weaver', function ($query) use ($user) {
             $query->where('association_id', $user->association_id);
         })
             ->where('status', 'active')
@@ -51,9 +57,9 @@ class AssociationController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role !== 'association' || !$user->association_id) {
+        if (!$user->association_id) {
             return response()->json([
-                'message' => 'Unauthorized.',
+                'message' => 'Association account is not linked to an association.',
             ], 403);
         }
 
@@ -81,9 +87,9 @@ class AssociationController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role !== 'association' || !$user->association_id) {
+        if (!$user->association_id) {
             return response()->json([
-                'message' => 'Unauthorized.',
+                'message' => 'Association account is not linked to an association.',
             ], 403);
         }
 
@@ -116,9 +122,9 @@ class AssociationController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role !== 'association' || !$user->association_id) {
+        if (!$user->association_id) {
             return response()->json([
-                'message' => 'Unauthorized.',
+                'message' => 'Association account is not linked to an association.',
             ], 403);
         }
 
