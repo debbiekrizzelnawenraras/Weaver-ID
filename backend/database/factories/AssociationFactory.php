@@ -14,7 +14,7 @@ class AssociationFactory extends Factory
     {
         return [
             'name' => fake()->company() . ' Weavers',
-            'municipality' => fake()->randomElement(['Bontoc', 'Sagada', 'Besao', 'Bauko', 'Tadian']),
+            'municipality' => 'Bontoc',
             'status' => 'active',
         ];
     }

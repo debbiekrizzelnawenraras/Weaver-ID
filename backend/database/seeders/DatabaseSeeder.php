@@ -7,12 +7,14 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Weaver;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $password = config('weaver.seed_password') ?: Str::random(16);
+
         $association = Association::create([
             'name' => 'Montañosa Weavers',
             'municipality' => 'Sagada',
@@ -22,7 +24,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'DTI System Administrator',
             'email' => 'admin@weaver-id.test',
-            'password' => Hash::make('Admin123!'),
+            'password' => $password,
             'role' => 'admin',
             'status' => 'active',
         ]);
@@ -30,15 +32,16 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'DTI Staff User',
             'email' => 'staff@weaver-id.test',
-            'password' => Hash::make('Staff123!'),
+            'password' => $password,
             'role' => 'staff',
+            'municipality' => 'Sagada',
             'status' => 'active',
         ]);
 
         User::create([
             'name' => 'Association Hub User',
             'email' => 'association@weaver-id.test',
-            'password' => Hash::make('Association123!'),
+            'password' => $password,
             'role' => 'association',
             'association_id' => $association->id,
             'status' => 'active',
@@ -88,5 +91,7 @@ class DatabaseSeeder extends Seeder
             'category' => 'Bags & Accessories',
             'status' => 'active',
         ]);
+
+        $this->command?->info("Demo accounts (admin@, staff@, association@weaver-id.test) use password: {$password}");
     }
 }

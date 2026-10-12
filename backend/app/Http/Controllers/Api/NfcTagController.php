@@ -10,12 +10,19 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Tag management for admin, staff and association users.
+ *
+ * Every query is limited to what the signed-in user may manage:
+ * admin everything, staff their municipality, association its own products.
+ */
 class NfcTagController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $tags = NfcTag::with('product.weaver.association')
-            ->latest()
+        $tags = NfcTag::manageableBy($request->user())
+            ->with('product.weaver.association')
+            ->latest('id')
             ->get();
 
         return response()->json([
@@ -53,7 +60,15 @@ class NfcTagController extends Controller
             'product_id.exists' => 'The selected product does not exist or is inactive.',
         ]);
 
-        $product = Product::with('weaver')->findOrFail($validated['product_id']);
+        $product = Product::manageableBy($request->user())
+            ->with('weaver')
+            ->find($validated['product_id']);
+
+        if (! $product) {
+            return response()->json([
+                'message' => 'You cannot issue tags for this product.',
+            ], 403);
+        }
 
         if ($product->weaver->status !== 'active') {
             throw ValidationException::withMessages([
@@ -75,8 +90,18 @@ class NfcTagController extends Controller
         ], 201);
     }
 
-    public function revoke(NfcTag $nfcTag): JsonResponse
+    public function revoke(Request $request, NfcTag $nfcTag): JsonResponse
     {
+        $allowed = NfcTag::manageableBy($request->user())
+            ->whereKey($nfcTag->id)
+            ->exists();
+
+        if (! $allowed) {
+            return response()->json([
+                'message' => 'You cannot revoke this tag.',
+            ], 403);
+        }
+
         $nfcTag->update([
             'status' => 'revoked',
         ]);

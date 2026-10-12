@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +19,19 @@ class NfcTag extends Model
         'issued_by',
         'issued_at',
     ];
+
+    /**
+     * Tags on products this user may manage. Tags not linked to any
+     * product are visible to admin only.
+     */
+    public function scopeManageableBy(Builder $query, User $user): Builder
+    {
+        if ($user->role === 'admin') {
+            return $query;
+        }
+
+        return $query->whereHas('product', fn (Builder $q) => $q->manageableBy($user));
+    }
 
     protected function casts(): array
     {

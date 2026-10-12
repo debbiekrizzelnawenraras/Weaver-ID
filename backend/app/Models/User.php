@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'role',
         'association_id',
+        'municipality',
         'status',
     ];
 
