@@ -21,6 +21,13 @@ class RoleMiddleware
             ], 401);
         }
 
+        // A deactivated account loses access immediately, even with a valid token.
+        if ($user->status !== 'active') {
+            return response()->json([
+                'message' => 'This account is inactive.',
+            ], 403);
+        }
+
         if (!in_array($user->role, $roles, true)) {
             return response()->json([
                 'message' => 'Unauthorized.',
