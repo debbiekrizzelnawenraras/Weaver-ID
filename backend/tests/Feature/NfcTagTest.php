@@ -45,13 +45,6 @@ it('lets admin issue a tag', function () {
     ])->assertCreated();
 });
 
-it('blocks association users from tag management', function () {
-    Sanctum::actingAs(User::factory()->association()->create());
-
-    $this->getJson('/api/nfc-tags')->assertForbidden();
-    $this->postJson('/api/nfc-tags', [])->assertForbidden();
-});
-
 it('requires authentication for tag management', function () {
     $this->getJson('/api/nfc-tags')->assertUnauthorized();
     $this->postJson('/api/nfc-tags', [])->assertUnauthorized();

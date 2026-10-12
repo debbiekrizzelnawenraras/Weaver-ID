@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AdminReportController;
+use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AssociationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\NfcTagController;
@@ -29,7 +31,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/association/products', [AssociationController::class, 'storeProduct']);
     });
 
-    Route::middleware('role:staff')->group(function () {
+    // Staff scope: their own municipality. Admin uses the same routes and sees everything.
+    Route::middleware('role:staff,admin')->group(function () {
+        Route::get('/staff/associations', [StaffController::class, 'associations']);
+        Route::post('/staff/associations', [StaffController::class, 'storeAssociation']);
+
         Route::get('/staff/weavers', [StaffController::class, 'weavers']);
         Route::post('/staff/weavers', [StaffController::class, 'storeWeaver']);
         Route::put('/staff/weavers/{weaver}', [StaffController::class, 'updateWeaver']);
@@ -39,10 +45,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/staff/products/{product}', [StaffController::class, 'updateProduct']);
     });
 
-    // NFC tag management is a DTI function: staff and admin only.
-    Route::middleware('role:staff,admin')->group(function () {
+    // Tag linking is shared by admin, staff and association users, each within their own scope.
+    Route::middleware('role:admin,staff,association')->group(function () {
         Route::get('/nfc-tags', [NfcTagController::class, 'index']);
         Route::post('/nfc-tags', [NfcTagController::class, 'store']);
         Route::patch('/nfc-tags/{nfcTag}/revoke', [NfcTagController::class, 'revoke']);
+    });
+
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/summary', [AdminReportController::class, 'summary']);
+        Route::get('/scan-logs', [AdminReportController::class, 'scanLogs']);
+
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users', [AdminUserController::class, 'store']);
+        Route::put('/users/{user}', [AdminUserController::class, 'update']);
     });
 });

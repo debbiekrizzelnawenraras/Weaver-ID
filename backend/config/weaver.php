@@ -18,4 +18,16 @@ return [
 
     'suspicious_window_minutes' => (int) env('WEAVER_SUSPICIOUS_WINDOW', 30),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Seeder password
+    |--------------------------------------------------------------------------
+    |
+    | Password given to the demo accounts by `php artisan db:seed`. When unset,
+    | a random one is generated and printed once. Never commit a real value.
+    |
+    */
+
+    'seed_password' => env('SEED_PASSWORD'),
+
 ];

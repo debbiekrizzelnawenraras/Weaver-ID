@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Weaver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AssociationController extends Controller
 {
@@ -20,10 +21,12 @@ class AssociationController extends Controller
             ], 403);
         }
 
+        $status = $this->statusFilter($request);
+
         $weavers = $user->association
             ->weavers()
             ->with('products')
-            ->where('status', 'active')
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->get();
 
         return response()->json([
@@ -41,10 +44,12 @@ class AssociationController extends Controller
             ], 403);
         }
 
+        $status = $this->statusFilter($request);
+
         $products = Product::whereHas('weaver', function ($query) use ($user) {
             $query->where('association_id', $user->association_id);
         })
-            ->where('status', 'active')
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->with('weaver')
             ->get();
 
@@ -136,13 +141,18 @@ class AssociationController extends Controller
 
         $weaver = Weaver::where('id', $validated['weaver_id'])
             ->where('association_id', $user->association_id)
-            ->where('status', 'active')
             ->first();
 
         if (!$weaver) {
             return response()->json([
-                'message' => 'The selected weaver does not belong to your association or is inactive.',
+                'message' => 'The selected weaver does not belong to your association.',
             ], 403);
+        }
+
+        if ($weaver->status !== 'active') {
+            throw ValidationException::withMessages([
+                'weaver_id' => 'The selected weaver is inactive.',
+            ]);
         }
 
         $product = Product::create([
@@ -156,5 +166,17 @@ class AssociationController extends Controller
             'message' => 'Product created successfully.',
             'product' => $product->load('weaver'),
         ], 201);
+    }
+
+    /**
+     * ?status=active (default) | inactive | all, so deactivated records can be found and reactivated.
+     */
+    private function statusFilter(Request $request): string
+    {
+        $validated = $request->validate([
+            'status' => ['nullable', 'in:active,inactive,all'],
+        ]);
+
+        return $validated['status'] ?? 'active';
     }
 }

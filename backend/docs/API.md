@@ -35,19 +35,50 @@ Response (HTTP 200 for all three outcomes):
 
 Invalid `uid` returns HTTP 422. Every valid scan is written to `scan_logs`, including unregistered ones.
 
-## Staff and admin: tag management
+## Tag linking (admin, staff and association)
 
-Requires `Authorization: Bearer <token>` from `POST /api/login`, with role `staff` or `admin`.
+Requires `Authorization: Bearer <token>` from `POST /api/login`. Each role works inside its own scope:
+
+| Role | Scope |
+|---|---|
+| `admin` | everything |
+| `staff` | associations whose `municipality` equals the staff user's `municipality` (a staff account with no municipality sees nothing) |
+| `association` | its own association's weavers and products |
 
 | Method and path | Purpose |
 |---|---|
-| `GET /api/nfc-tags` | List tags with their product, weaver and association. |
+| `GET /api/nfc-tags` | List tags in scope with their product, weaver and association. |
 | `POST /api/nfc-tags` | Issue a tag: `{ "uid": "...", "product_id": 1 }`. Returns 201. |
-| `PATCH /api/nfc-tags/{id}/revoke` | Revoke a tag. Later scans return `suspicious`. |
+| `PATCH /api/nfc-tags/{id}/revoke` | Revoke a tag in scope. Later scans return `suspicious`. |
 
-Issuing fails with 422 when the UID is already registered, the product is inactive, the product's weaver is inactive, or the product already has an active tag (revoke it first to replace it).
+Issuing fails with 422 when the UID is already registered, the product is inactive, the product's weaver is inactive, or the product already has an active tag (revoke it first to replace it). A product or tag outside the caller's scope returns 403. Every tag stores `issued_by`, which feeds the admin summary below.
 
-## Auth changes in this patch
+## Staff registry (staff and admin)
+
+Staff see and edit only their municipality; admin sees all. Out-of-scope records return 403; an inactive weaver returns 422.
+
+| Method and path | Purpose |
+|---|---|
+| `GET /api/staff/associations` | Associations in scope, with weaver counts. |
+| `POST /api/staff/associations` | Register an association `{ name, municipality }`. Staff may only use their own municipality. |
+| `GET/POST /api/staff/weavers`, `PUT /api/staff/weavers/{id}` | Weavers in scope. |
+| `GET/POST /api/staff/products`, `PUT /api/staff/products/{id}` | Products in scope. A product of an inactive weaver can be edited or deactivated but not reactivated or moved. |
+
+## Association registry
+
+`GET /api/association/weavers` and `GET /api/association/products` accept `?status=active|inactive|all` (default `active`) so deactivated records can be found and reactivated.
+
+## Admin only
+
+| Method and path | Purpose |
+|---|---|
+| `GET /api/admin/summary` | Counts: weavers, products, products with an active tag, tags (active, revoked, issued by each role), scans by result. |
+| `GET /api/admin/scan-logs` | Scan history, 50 per page, newest first. Optional `?result=authenticated\|unregistered\|suspicious`. |
+| `GET /api/admin/users` | All accounts. |
+| `POST /api/admin/users` | Create `{ name, email, password (10+ chars), role, municipality (staff), association_id (association) }`. |
+| `PUT /api/admin/users/{id}` | Edit name, email, status, municipality or association; optional new password. The role cannot change. Deactivating a user or resetting a password signs them out everywhere. An admin cannot deactivate their own account. |
+
+## Auth changes (patch 1)
 
 - `POST /api/login` is limited to 5 attempts per minute per email and IP.
 - `POST /api/logout` deletes the current token.
@@ -58,3 +89,5 @@ Issuing fails with 422 when the UID is already registered, the product is inacti
 
 - Authentication is by UID only. Cheap rewritable tags can copy a UID, so a clone scanned from one phone looks genuine. The suspicious rule is a heuristic, not proof.
 - The `proprietor` name is not returned to the public app by design (personal data).
+- Tag linking is self-service for staff and associations, so a UID's origin is no longer proven by DTI. The controls are the `issued_by` audit trail, revocation, municipality scoping and the admin summary of tags issued per role.
+- Staff scope follows the association's municipality, not the weaver's. A weaver in another town under a Sagada association is managed by Sagada staff.
