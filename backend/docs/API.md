@@ -74,6 +74,7 @@ Staff see and edit only their municipality; admin sees all. Out-of-scope records
 |---|---|
 | `GET /api/admin/summary` | Counts: weavers, products, products with an active tag, tags (active, revoked, issued by each role), scans by result. |
 | `GET /api/admin/scan-logs` | Scan history, 50 per page, newest first. Optional `?result=authenticated\|unregistered\|suspicious`. |
+| `PATCH /api/admin/nfc-tags/{id}/reassign` | Fix a mistake: move a tag to another active product `{ "product_id": 2 }`. 422 if the product is inactive, its weaver is inactive, it already has an active tag, or it is the same product. A revoked tag stays revoked unless `"reactivate": true` is sent. Every change is saved in `nfc_tag_events` with who did it. |
 | `GET /api/admin/users` | All accounts. |
 | `POST /api/admin/users` | Create `{ name, email, password (10+ chars), role, municipality (staff), association_id (association) }`. |
 | `PUT /api/admin/users/{id}` | Edit name, email, status, municipality or association; optional new password. The role cannot change. Deactivating a user or resetting a password signs them out everywhere. An admin cannot deactivate their own account. |

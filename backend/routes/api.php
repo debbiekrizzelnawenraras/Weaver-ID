@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminReportController;
+use App\Http\Controllers\Api\AdminTagController;
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AssociationController;
 use App\Http\Controllers\Api\AuthController;
@@ -55,6 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/summary', [AdminReportController::class, 'summary']);
         Route::get('/scan-logs', [AdminReportController::class, 'scanLogs']);
+
+        Route::patch('/nfc-tags/{nfcTag}/reassign', [AdminTagController::class, 'reassign']);
 
         Route::get('/users', [AdminUserController::class, 'index']);
         Route::post('/users', [AdminUserController::class, 'store']);

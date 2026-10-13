@@ -48,6 +48,11 @@ class NfcTag extends Model
         return strtoupper(preg_replace('/[\s:\-]/', '', $uid));
     }
 
+    public function events(): HasMany
+    {
+        return $this->hasMany(NfcTagEvent::class);
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
