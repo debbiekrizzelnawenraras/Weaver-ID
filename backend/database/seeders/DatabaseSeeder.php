@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Association;
+use App\Models\NfcTag;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Weaver;
@@ -21,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        User::create([
+        $admin = User::create([
             'name' => 'DTI System Administrator',
             'email' => 'admin@weaver-id.test',
             'password' => $password,
@@ -68,14 +69,14 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        Product::create([
+        $product1 = Product::create([
             'weaver_id' => $weaver1->id,
             'title' => 'Pinagpagan Pattern Blanket',
             'category' => 'Blanket / Textile',
             'status' => 'active',
         ]);
 
-        Product::create([
+        $product2 = Product::create([
             'weaver_id' => $weaver2->id,
             'title' => 'Inabel Table Runner',
             'category' => 'Home Decor',
@@ -89,6 +90,25 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
+        // Fixed demo tags so a fresh database can always show all three outcomes.
+        // 04DE0000000003 is deliberately left unregistered.
+        NfcTag::create([
+            'uid' => '04DE0000000001',
+            'product_id' => $product1->id,
+            'status' => 'active',
+            'issued_by' => $admin->id,
+            'issued_at' => now(),
+        ]);
+
+        NfcTag::create([
+            'uid' => '04DE0000000002',
+            'product_id' => $product2->id,
+            'status' => 'revoked',
+            'issued_by' => $admin->id,
+            'issued_at' => now(),
+        ]);
+
         $this->command?->info("Demo accounts (admin@, staff@, association@weaver-id.test) use password: {$password}");
+        $this->command?->info('Demo tags: 04DE0000000001 genuine, 04DE0000000002 revoked, 04DE0000000003 unregistered.');
     }
 }

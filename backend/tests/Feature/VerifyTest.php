@@ -158,3 +158,11 @@ it('never exposes member names in the public response', function () {
 
     expect($body)->not->toContain('Secret Member Name')->not->toContain('Secret Owner');
 });
+
+it('seeds demo tags that show all three outcomes on a fresh database', function () {
+    $this->seed();
+
+    $this->postJson('/api/verify', ['uid' => '04DE0000000001'])->assertJsonPath('result', 'authenticated');
+    $this->postJson('/api/verify', ['uid' => '04DE0000000002'])->assertJsonPath('result', 'suspicious');
+    $this->postJson('/api/verify', ['uid' => '04DE0000000003'])->assertJsonPath('result', 'unregistered');
+});
