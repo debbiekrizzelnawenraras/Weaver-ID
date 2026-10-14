@@ -2,6 +2,5 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// The dashboards are static pages in /public. Send visitors to the login page.
+Route::redirect('/', '/login.html');
