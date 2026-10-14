@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         $password = config('weaver.seed_password') ?: Str::random(16);
 
         $association = Association::create([
-            'name' => 'Montañosa Weavers',
+            'name' => "Rose Ann\u{2019}s Loom Art Gallery",
             'municipality' => 'Sagada',
             'status' => 'active',
         ]);
@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Association Hub User',
+            'name' => "Rose Ann\u{2019}s Loom Art Gallery",
             'email' => 'association@weaver-id.test',
             'password' => $password,
             'role' => 'association',
@@ -49,25 +49,25 @@ class DatabaseSeeder extends Seeder
 
         $weaver1 = Weaver::create([
             'association_id' => $association->id,
-            'name' => 'Sagada Weaving',
-            'proprietor' => 'Rose Ann Wangdali',
+            'name' => 'Sample Member 1 (Weaver)',
+            'proprietor' => 'Placeholder Owner 1',
             'municipality' => 'Sagada',
             'status' => 'active',
         ]);
 
         $weaver2 = Weaver::create([
             'association_id' => $association->id,
-            'name' => 'Gandang Handwoven',
-            'proprietor' => 'Virginia Omaweng',
+            'name' => 'Sample Member 2 (Weaver)',
+            'proprietor' => 'Placeholder Owner 2',
             'municipality' => 'Sagada',
             'status' => 'active',
         ]);
 
         $weaver3 = Weaver::create([
             'association_id' => $association->id,
-            'name' => 'Besao Loomweaving',
-            'proprietor' => 'Elena Dao',
-            'municipality' => 'Besao',
+            'name' => 'Sample Member 3 (Sewer)',
+            'proprietor' => 'Placeholder Owner 3',
+            'municipality' => 'Sagada',
             'status' => 'active',
         ]);
 

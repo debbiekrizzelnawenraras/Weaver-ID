@@ -68,6 +68,10 @@ Staff see and edit only their municipality; admin sees all. Out-of-scope records
 
 `GET /api/association/weavers` and `GET /api/association/products` accept `?status=active|inactive|all` (default `active`) so deactivated records can be found and reactivated.
 
+`PUT /api/association/products/{id}` edits `{ title, category, status }` of one of the association's products (403 for another association's product; 422 when reactivating a product of an inactive weaver).
+
+`GET /api/association/scan-logs` lists scans of the association's own tags, newest first, 50 per page, with optional `?result=`. Scans of unknown tags are not shown.
+
 ## Admin only
 
 | Method and path | Purpose |

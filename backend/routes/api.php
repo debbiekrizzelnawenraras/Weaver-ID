@@ -18,7 +18,7 @@ Route::post('/verify', VerifyController::class)->middleware('throttle:verify');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return $request->user()->load('association');
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -30,6 +30,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/association/products', [AssociationController::class, 'products']);
         Route::post('/association/products', [AssociationController::class, 'storeProduct']);
+        Route::put('/association/products/{product}', [AssociationController::class, 'updateProduct']);
+
+        Route::get('/association/scan-logs', [AssociationController::class, 'scanLogs']);
     });
 
     // Staff scope: their own municipality. Admin uses the same routes and sees everything.

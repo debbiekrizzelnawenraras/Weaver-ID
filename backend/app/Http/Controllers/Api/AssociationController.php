@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ScanLog;
 use App\Models\Weaver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AssociationController extends Controller
@@ -166,6 +169,79 @@ class AssociationController extends Controller
             'message' => 'Product created successfully.',
             'product' => $product->load('weaver'),
         ], 201);
+    }
+
+    /**
+     * Edit a product of this association, including deactivating or reactivating it.
+     * The weaver cannot be changed here; a product of an inactive weaver can be
+     * edited or deactivated but not reactivated.
+     */
+    public function updateProduct(Request $request, Product $product): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->association_id) {
+            return response()->json([
+                'message' => 'Association account is not linked to an association.',
+            ], 403);
+        }
+
+        $product->loadMissing('weaver');
+
+        if ((int) $product->weaver->association_id !== (int) $user->association_id) {
+            return response()->json([
+                'message' => 'You are not authorized to modify this product.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'in:active,inactive'],
+        ]);
+
+        if ($validated['status'] === 'active' && $product->weaver->status !== 'active') {
+            throw ValidationException::withMessages([
+                'status' => 'The weaver of this product is inactive.',
+            ]);
+        }
+
+        $product->update($validated);
+
+        return response()->json([
+            'message' => 'Product updated successfully.',
+            'product' => $product->fresh()->load('weaver'),
+        ]);
+    }
+
+    /**
+     * Scans of this association's own tags, newest first, 50 per page.
+     * Scans of unknown tags are not shown because they belong to nobody.
+     * Optional ?result=authenticated|unregistered|suspicious.
+     */
+    public function scanLogs(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->association_id) {
+            return response()->json([
+                'message' => 'Association account is not linked to an association.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'result' => ['nullable', Rule::enum(ScanResult::class)],
+        ]);
+
+        $logs = ScanLog::whereHas('nfcTag.product.weaver', function ($query) use ($user) {
+            $query->where('association_id', $user->association_id);
+        })
+            ->with('nfcTag.product')
+            ->when($validated['result'] ?? null, fn ($query, $result) => $query->where('result', $result))
+            ->latest('id')
+            ->paginate(50);
+
+        return response()->json($logs);
     }
 
     /**

@@ -185,7 +185,7 @@
     .empty-row { color:#6c757d; text-align:center; padding:1.5rem !important; }
 </style>
 </head>
-<body>
+<body data-roles="admin,staff">
 
   <div id="toastHost"></div>
 
@@ -204,11 +204,11 @@
 
         <nav class="sidebar-nav mt-3" id="sideNav">
           <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-          <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Weavers</a>
+          <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Members</a>
           <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
           <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Products</a>
           <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
-          <a class="nav-link admin-only" data-tab="logs"><i class="bi bi-journal-check"></i> Scan Logs</a>
+          <a class="nav-link logs-ui" data-tab="logs"><i class="bi bi-journal-check"></i> Scan Logs</a>
           <a class="nav-link admin-only" data-tab="users"><i class="bi bi-person-gear"></i> Users</a>
         </nav>
       </div>
@@ -264,12 +264,12 @@
       <div id="view-weavers" class="tab-view d-none">
         <div class="dashboard-card p-0">
           <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-            <h6 class="fw-bold mb-0">Weavers and enterprises</h6>
-            <button class="btn btn-dti btn-sm" data-action="add-weaver"><i class="bi bi-plus-lg"></i> Add weaver</button>
+            <h6 class="fw-bold mb-0">Members</h6>
+            <button class="btn btn-dti btn-sm" data-action="add-weaver"><i class="bi bi-plus-lg"></i> Add member</button>
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-              <thead class="table-light"><tr><th>Enterprise</th><th>Representative</th><th>Municipality</th><th>Association</th><th>Products</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
+              <thead class="table-light"><tr><th>Member</th><th>Owner / contact</th><th>Municipality</th><th>Association</th><th>Products</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
               <tbody id="weaversBody"></tbody>
             </table>
           </div>
@@ -294,7 +294,7 @@
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-              <thead class="table-light"><tr><th>Product</th><th>Category</th><th>Weaver</th><th>Tag</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
+              <thead class="table-light"><tr><th>Product</th><th>Category</th><th>Member</th><th>Tag</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
               <tbody id="productsBody"></tbody>
             </table>
           </div>
@@ -310,7 +310,7 @@
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-              <thead class="table-light"><tr><th>Tag UID</th><th>Product</th><th>Weaver</th><th>Association</th><th>Linked on</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
+              <thead class="table-light"><tr><th>Tag UID</th><th>Product</th><th>Member</th><th>Association</th><th>Linked on</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
               <tbody id="tagsBody"></tbody>
             </table>
           </div>

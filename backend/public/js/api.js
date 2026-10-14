@@ -101,9 +101,14 @@
   // Call at the top of a protected page. Sends the visitor away if the role is wrong.
   function requireRole(roles) {
     var u = user();
-    if (!token() || !u || roles.indexOf(u.role) === -1) {
+    if (!token() || !u) {
       clearSession();
       toLogin();
+      return null;
+    }
+    if (roles.indexOf(u.role) === -1) {
+      // Signed in, but this page belongs to another role: send them to their own page.
+      window.location.href = HOME[u.role] || LOGIN_PAGE;
       return null;
     }
     return u;
