@@ -6,9 +6,19 @@
 (function () {
   'use strict';
 
-  var me = Weaver.requireRole(['admin', 'staff']);
+  var allowed = (document.body.getAttribute('data-roles') || 'admin,staff').split(',');
+  var me = Weaver.requireRole(allowed);
   if (!me) { return; }
   var isAdmin = me.role === 'admin';
+  var isAssoc = me.role === 'association';
+  var hasLogs = isAdmin || isAssoc;
+  var API = {
+    weavers: isAssoc ? '/api/association/weavers?status=all' : '/api/staff/weavers',
+    weaver: isAssoc ? '/api/association/weavers' : '/api/staff/weavers',
+    products: isAssoc ? '/api/association/products?status=all' : '/api/staff/products',
+    product: isAssoc ? '/api/association/products' : '/api/staff/products',
+    logs: isAssoc ? '/api/association/scan-logs' : '/api/admin/scan-logs'
+  };
   var esc = Weaver.esc;
   var READER_URL = window.WEAVER_READER_URL || 'http://127.0.0.1:8777';
 
@@ -16,7 +26,7 @@
   var state = { tab: 'dashboard', filter: '', logPage: 1, logResult: '', staffMunicipality: '' };
 
   var TITLES = {
-    dashboard: 'Dashboard', weavers: 'Weavers', associations: 'Associations', products: 'Products',
+    dashboard: 'Dashboard', weavers: 'Members', associations: 'Associations', products: 'Products',
     nfc: 'NFC Tags', logs: 'Scan Logs', users: 'Users'
   };
 
@@ -64,18 +74,33 @@
   function loadAll() {
     $('loadError').classList.add('d-none');
     var jobs = [
-      Weaver.get('/api/staff/associations').then(function (r) { data.associations = r.associations || []; }),
-      Weaver.get('/api/staff/weavers').then(function (r) { data.weavers = r.weavers || []; }),
-      Weaver.get('/api/staff/products').then(function (r) { data.products = r.products || []; }),
+      Weaver.get(API.weavers).then(function (r) {
+        data.weavers = (r.weavers || []).map(function (w) {
+          if (w.products_count === undefined) { w.products_count = (w.products || []).length; }
+          return w;
+        });
+      }),
+      Weaver.get(API.products).then(function (r) { data.products = r.products || []; }),
       Weaver.get('/api/nfc-tags').then(function (r) { data.tags = r.tags || []; })
     ];
+    if (!isAssoc) {
+      jobs.push(Weaver.get('/api/staff/associations').then(function (r) { data.associations = r.associations || []; }));
+    }
+    if (hasLogs) { jobs.push(loadLogs()); }
     if (isAdmin) {
       jobs.push(Weaver.get('/api/admin/summary').then(function (r) { data.summary = r; }));
       jobs.push(Weaver.get('/api/admin/users').then(function (r) { data.users = r.users || []; }));
-      jobs.push(loadLogs());
     } else {
       jobs.push(Weaver.get('/api/user').then(function (r) {
-        state.staffMunicipality = (r.user || r).municipality || '';
+        var u = r.user || r;
+        if (isAssoc && u.association) {
+          state.association = u.association;
+          state.staffMunicipality = u.association.municipality || '';
+          $('meName').textContent = u.association.name;
+          document.title = 'Weaver-ID | ' + u.association.name;
+        } else {
+          state.staffMunicipality = u.municipality || '';
+        }
       }));
     }
     return Promise.all(jobs).then(renderAll).catch(function (err) {
@@ -87,7 +112,7 @@
 
   function loadLogs() {
     var q = '?page=' + state.logPage + (state.logResult ? '&result=' + encodeURIComponent(state.logResult) : '');
-    return Weaver.get('/api/admin/scan-logs' + q).then(function (r) { data.logs = r; });
+    return Weaver.get(API.logs + q).then(function (r) { data.logs = r; });
   }
 
   // ---------------------------------------------------------------- rendering
@@ -95,10 +120,11 @@
     renderTiles();
     renderDashboardExtras();
     renderWeavers();
-    renderAssociations();
+    if (!isAssoc) { renderAssociations(); }
     renderProducts();
     renderTags();
-    if (isAdmin) { renderLogs(); renderUsers(); }
+    if (hasLogs) { renderLogs(); }
+    if (isAdmin) { renderUsers(); }
   }
 
   function tile(icon, cls, value, label, sub) {
@@ -113,13 +139,20 @@
   function renderTiles() {
     var s = data.summary, html;
     if (isAdmin && s) {
-      html = tile('bi-people-fill', 'icon-weavers', s.weavers.active, 'Active weavers', 'of ' + s.weavers.total + ' registered') +
+      html = tile('bi-people-fill', 'icon-weavers', s.weavers.active, 'Active members', 'of ' + s.weavers.total + ' registered') +
         tile('bi-box-seam-fill', 'icon-products', s.products.total, 'Products', s.products.with_active_tag + ' have an active tag') +
         tile('bi-wifi', 'icon-nfc', s.tags.active, 'Active tags', s.tags.revoked + ' revoked') +
         tile('bi-check-circle-fill', 'icon-verifications', s.scans.total, 'Total scans', s.scans.suspicious + ' suspicious');
+    } else if (isAssoc) {
+      var act = data.tags.filter(function (t) { return t.status === 'active'; }).length;
+      var activeWeavers = data.weavers.filter(function (w) { return w.status === 'active'; }).length;
+      html = tile('bi-people-fill', 'icon-weavers', activeWeavers, 'Active members', 'of ' + data.weavers.length + ' members') +
+        tile('bi-box-seam-fill', 'icon-products', data.products.length, 'Products', data.products.filter(function (p) { return activeTagFor(p.id); }).length + ' have an active tag') +
+        tile('bi-wifi', 'icon-nfc', act, 'Active tags', (data.tags.length - act) + ' revoked') +
+        tile('bi-check-circle-fill', 'icon-verifications', data.logs ? data.logs.total : 0, 'Scans of your tags', '');
     } else {
       var active = data.tags.filter(function (t) { return t.status === 'active'; }).length;
-      html = tile('bi-people-fill', 'icon-weavers', data.weavers.length, 'Weavers', 'in your scope') +
+      html = tile('bi-people-fill', 'icon-weavers', data.weavers.length, 'Members', 'in your scope') +
         tile('bi-box-seam-fill', 'icon-products', data.products.length, 'Products', '') +
         tile('bi-wifi', 'icon-nfc', active, 'Active tags', (data.tags.length - active) + ' revoked') +
         tile('bi-building', 'icon-verifications', data.associations.length, 'Associations', '');
@@ -128,6 +161,7 @@
   }
 
   function renderDashboardExtras() {
+    if (isAssoc) { renderRecentScans(); return; }
     if (!isAdmin || !data.summary) { return; }
     var s = data.summary, total = Math.max(s.scans.total, 1);
     var rows = [['authenticated', '#2e7d32'], ['unregistered', '#78909c'], ['suspicious', '#c62828']];
@@ -142,7 +176,12 @@
       return '<span class="badge bg-light text-dark border">' + esc(role) + ': ' + esc(by[role]) + '</span>';
     }).join('');
 
+    renderRecentScans();
+  }
+
+  function renderRecentScans() {
     var recent = (data.logs && data.logs.data ? data.logs.data : []).slice(0, 8);
+    if (!$('recentScans')) { return; }
     $('recentScans').innerHTML = recent.length ? recent.map(function (l) {
       var product = l.nfc_tag && l.nfc_tag.product ? l.nfc_tag.product.title : 'Unknown tag';
       var cls = l.result === 'authenticated' ? 'success' : (l.result === 'suspicious' ? 'danger' : 'secondary');
@@ -160,12 +199,12 @@
       return matches([w.name, w.proprietor, w.municipality, w.association ? w.association.name : '']);
     }).map(function (w) {
       return '<tr><td class="fw-semibold">' + esc(w.name) + '</td><td>' + esc(w.proprietor) + '</td><td>' + esc(w.municipality) +
-        '</td><td>' + esc(w.association ? w.association.name : '-') + '</td><td>' + esc(w.products_count) +
+        '</td>' + (isAssoc ? '' : '<td>' + esc(w.association ? w.association.name : '-') + '</td>') + '<td>' + esc(w.products_count) +
         '</td><td>' + badge(w.status) + '</td><td class="text-end pe-3">' +
         '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-weaver" data-id="' + esc(w.id) + '">' +
         (w.status === 'active' ? 'Deactivate' : 'Activate') + '</button></td></tr>';
     });
-    $('weaversBody').innerHTML = rows.length ? rows.join('') : empty(7, 'No weavers to show.');
+    $('weaversBody').innerHTML = rows.length ? rows.join('') : empty(isAssoc ? 6 : 7, 'No members to show.');
   }
 
   function renderAssociations() {
@@ -175,7 +214,7 @@
       return '<div class="col-12 col-md-6 col-xl-4"><div class="association-box"><div class="d-flex justify-content-between">' +
         '<h6 class="fw-bold mb-1">' + esc(a.name) + '</h6>' + badge(a.status || 'active') + '</div>' +
         '<div class="text-muted fs-7"><i class="bi bi-geo-alt"></i> ' + esc(a.municipality || '-') + '</div>' +
-        '<div class="text-muted fs-7"><i class="bi bi-people"></i> ' + esc(a.weavers_count) + ' weaver(s)</div></div></div>';
+        '<div class="text-muted fs-7"><i class="bi bi-people"></i> ' + esc(a.weavers_count) + ' member(s)</div></div></div>';
     });
     $('associationsBody').innerHTML = cards.length ? cards.join('') :
       '<div class="col-12"><div class="dashboard-card text-muted text-center">No associations to show.</div></div>';
@@ -353,12 +392,15 @@
 
   var actions = {
     'add-weaver': function () {
-      openForm('Add weaver', 'Save', [
-        { name: 'association_id', label: 'Association', type: 'select', options: assocOptions(), int: true },
-        { name: 'name', label: 'Enterprise name' },
-        { name: 'proprietor', label: 'Representative' },
+      var fields = [
+        { name: 'name', label: 'Member name (weaver, sewer or workshop)' },
+        { name: 'proprietor', label: 'Owner / contact person' },
         { name: 'municipality', label: 'Municipality', value: state.staffMunicipality }
-      ], function (v) { return Weaver.post('/api/staff/weavers', v); });
+      ];
+      if (!isAssoc) {
+        fields.unshift({ name: 'association_id', label: 'Association', type: 'select', options: assocOptions(), int: true });
+      }
+      openForm('Add member', 'Save', fields, function (v) { return Weaver.post(API.weaver, v); });
     },
     'add-association': function () {
       openForm('Add association', 'Save', [
@@ -368,17 +410,19 @@
     },
     'add-product': function () {
       openForm('Add product', 'Save', [
-        { name: 'weaver_id', label: 'Weaver', type: 'select', options: activeWeaverOptions(), int: true },
+        { name: 'weaver_id', label: 'Member', type: 'select', options: activeWeaverOptions(), int: true },
         { name: 'title', label: 'Product name' },
         { name: 'category', label: 'Category', placeholder: 'e.g. Blanket, Table runner' }
-      ], function (v) { return Weaver.post('/api/staff/products', v); });
+      ], function (v) { return Weaver.post(API.product, v); });
     },
     'toggle-product': function (id) {
       var p = byId(data.products, id);
       if (!p) { return; }
       var next = p.status === 'active' ? 'inactive' : 'active';
       confirmThen((next === 'inactive' ? 'Deactivate ' : 'Activate ') + p.title + '?', function () {
-        run(put('/api/staff/products/' + p.id, { weaver_id: p.weaver_id, title: p.title, category: p.category, status: next }));
+        var body = { title: p.title, category: p.category, status: next };
+        if (!isAssoc) { body.weaver_id = p.weaver_id; }
+        run(put(API.product + '/' + p.id, body));
       });
     },
     'issue-tag': function () {
@@ -480,10 +524,9 @@
     var next = w.status === 'active' ? 'inactive' : 'active';
     confirmThen((next === 'inactive' ? 'Deactivate ' : 'Activate ') + w.name + '?' +
       (next === 'inactive' ? ' Its tags will scan as suspicious.' : ''), function () {
-      run(put('/api/staff/weavers/' + w.id, {
-        association_id: w.association_id, name: w.name, proprietor: w.proprietor,
-        municipality: w.municipality, status: next
-      }));
+      var body = { name: w.name, proprietor: w.proprietor, municipality: w.municipality, status: next };
+      if (!isAssoc) { body.association_id = w.association_id; }
+      run(put(API.weaver + '/' + w.id, body));
     });
   };
 
@@ -491,9 +534,12 @@
   function init() {
     $('meName').textContent = me.name;
     $('meSub').textContent = me.email + ' (' + me.role + ')';
-    $('panelName').textContent = isAdmin ? 'Admin Control Panel' : 'Staff Control Panel';
+    $('panelName').textContent = isAdmin ? 'Admin Control Panel' : (isAssoc ? 'Association Portal' : 'Staff Control Panel');
     if (!isAdmin) {
       Array.prototype.forEach.call(document.querySelectorAll('.admin-only'), function (el) { el.remove(); });
+    }
+    if (!hasLogs) {
+      Array.prototype.forEach.call(document.querySelectorAll('.logs-ui'), function (el) { el.remove(); });
     }
 
     $('sideNav').addEventListener('click', function (e) {
@@ -516,7 +562,7 @@
       if (fn) { fn(el.hasAttribute('data-id') ? parseInt(el.getAttribute('data-id'), 10) : undefined); }
     });
 
-    if (isAdmin) {
+    if (hasLogs) {
       $('logFilter').addEventListener('change', function () {
         state.logResult = this.value; state.logPage = 1;
         loadLogs().then(renderLogs);
