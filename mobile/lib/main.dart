@@ -45,25 +45,22 @@ class VerifyResult {
     required this.message,
     this.productTitle,
     this.productCategory,
-    this.weaverName,
-    this.weaverMunicipality,
     this.associationName,
+    this.associationMunicipality,
   });
 
   final Verdict verdict;
   final String message;
   final String? productTitle;
   final String? productCategory;
-  final String? weaverName;
-  final String? weaverMunicipality;
   final String? associationName;
+  final String? associationMunicipality;
 
   factory VerifyResult.error(String message) =>
       VerifyResult(verdict: Verdict.error, message: message);
 
   factory VerifyResult.fromJson(Map<String, dynamic> json) {
     final product = json['product'] as Map<String, dynamic>?;
-    final weaver = json['weaver'] as Map<String, dynamic>?;
     final association = json['association'] as Map<String, dynamic>?;
 
     Verdict verdict;
@@ -86,9 +83,8 @@ class VerifyResult {
       message: (json['message'] ?? '').toString(),
       productTitle: product?['title']?.toString(),
       productCategory: product?['category']?.toString(),
-      weaverName: weaver?['name']?.toString(),
-      weaverMunicipality: weaver?['municipality']?.toString(),
       associationName: association?['name']?.toString(),
+      associationMunicipality: association?['municipality']?.toString(),
     );
   }
 }
@@ -485,9 +481,8 @@ class ResultCard extends StatelessWidget {
               const Divider(height: 24),
               _row('Product', result.productTitle),
               _row('Category', result.productCategory),
-              _row('Weaver', result.weaverName),
-              _row('Municipality', result.weaverMunicipality),
               _row('Association', result.associationName),
+              _row('Municipality', result.associationMunicipality),
             ],
           ],
         ),
