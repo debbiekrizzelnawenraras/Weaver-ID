@@ -307,7 +307,6 @@ class _ScanPageState extends State<ScanPage> {
         ],
       ),
     );
-    controller.dispose();
     if (saved == null || saved.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_serverKey, saved);
