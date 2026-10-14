@@ -50,7 +50,6 @@ class DatabaseSeeder extends Seeder
         $weaver1 = Weaver::create([
             'association_id' => $association->id,
             'name' => 'Sample Member 1 (Weaver)',
-            'proprietor' => 'Placeholder Owner 1',
             'municipality' => 'Sagada',
             'status' => 'active',
         ]);
@@ -58,7 +57,6 @@ class DatabaseSeeder extends Seeder
         $weaver2 = Weaver::create([
             'association_id' => $association->id,
             'name' => 'Sample Member 2 (Weaver)',
-            'proprietor' => 'Placeholder Owner 2',
             'municipality' => 'Sagada',
             'status' => 'active',
         ]);
@@ -66,7 +64,6 @@ class DatabaseSeeder extends Seeder
         $weaver3 = Weaver::create([
             'association_id' => $association->id,
             'name' => 'Sample Member 3 (Sewer)',
-            'proprietor' => 'Placeholder Owner 3',
             'municipality' => 'Sagada',
             'status' => 'active',
         ]);

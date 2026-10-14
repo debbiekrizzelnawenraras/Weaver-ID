@@ -73,7 +73,6 @@ class StaffController extends Controller
         $validated = $request->validate([
             'association_id' => ['required', 'integer', 'exists:associations,id'],
             'name' => ['required', 'string', 'max:255'],
-            'proprietor' => ['required', 'string', 'max:255'],
             'municipality' => ['required', 'string', 'max:255'],
         ]);
 
@@ -86,7 +85,6 @@ class StaffController extends Controller
         $weaver = Weaver::create([
             'association_id' => $association->id,
             'name' => $validated['name'],
-            'proprietor' => $validated['proprietor'],
             'municipality' => $validated['municipality'],
             'status' => 'active',
         ]);
@@ -108,7 +106,6 @@ class StaffController extends Controller
         $validated = $request->validate([
             'association_id' => ['required', 'integer', 'exists:associations,id'],
             'name' => ['required', 'string', 'max:255'],
-            'proprietor' => ['required', 'string', 'max:255'],
             'municipality' => ['required', 'string', 'max:255'],
             'status' => ['required', 'in:active,inactive'],
         ]);
@@ -122,7 +119,6 @@ class StaffController extends Controller
         $weaver->update([
             'association_id' => $association->id,
             'name' => $validated['name'],
-            'proprietor' => $validated['proprietor'],
             'municipality' => $validated['municipality'],
             'status' => $validated['status'],
         ]);

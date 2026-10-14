@@ -15,10 +15,9 @@ it('authenticates an active registered tag and returns the product profile', fun
         ->assertOk()
         ->assertJsonPath('result', 'authenticated')
         ->assertJsonPath('product.title', $product->title)
-        ->assertJsonPath('weaver.name', $product->weaver->name)
-        ->assertJsonPath('weaver.municipality', $product->weaver->municipality)
         ->assertJsonPath('association.name', $product->weaver->association->name)
-        ->assertJsonMissingPath('weaver.proprietor');
+        ->assertJsonPath('association.municipality', $product->weaver->association->municipality)
+        ->assertJsonMissingPath('weaver');
 
     $this->assertDatabaseHas('scan_logs', [
         'uid' => $tag->uid,
@@ -149,4 +148,13 @@ it('rate limits the verify endpoint per IP address', function () {
     }
 
     $this->postJson('/api/verify', ['uid' => '04AABBCCDDEEFF'])->assertStatus(429);
+});
+
+it('never exposes member names in the public response', function () {
+    $tag = NfcTag::factory()->create();
+    $tag->product->weaver->update(['name' => 'Secret Member Name', 'proprietor' => 'Secret Owner']);
+
+    $body = $this->postJson('/api/verify', ['uid' => $tag->uid])->assertOk()->getContent();
+
+    expect($body)->not->toContain('Secret Member Name')->not->toContain('Secret Owner');
 });

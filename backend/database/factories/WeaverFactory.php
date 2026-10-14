@@ -16,7 +16,6 @@ class WeaverFactory extends Factory
         return [
             'association_id' => Association::factory(),
             'name' => fake()->lastName() . ' Weaving',
-            'proprietor' => fake()->name(),
             'municipality' => fake()->randomElement(['Bontoc', 'Sagada', 'Besao', 'Bauko', 'Tadian']),
             'status' => 'active',
         ];

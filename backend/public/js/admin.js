@@ -96,7 +96,7 @@
         if (isAssoc && u.association) {
           state.association = u.association;
           state.staffMunicipality = u.association.municipality || '';
-          $('meName').textContent = u.association.name;
+          setMeName(u.association.name);
           document.title = 'Weaver-ID | ' + u.association.name;
         } else {
           state.staffMunicipality = u.municipality || '';
@@ -196,15 +196,15 @@
 
   function renderWeavers() {
     var rows = data.weavers.filter(function (w) {
-      return matches([w.name, w.proprietor, w.municipality, w.association ? w.association.name : '']);
+      return matches([w.name, w.municipality, w.association ? w.association.name : '']);
     }).map(function (w) {
-      return '<tr><td class="fw-semibold">' + esc(w.name) + '</td><td>' + esc(w.proprietor) + '</td><td>' + esc(w.municipality) +
+      return '<tr><td class="fw-semibold">' + esc(w.name) + '</td><td>' + esc(w.municipality) +
         '</td>' + (isAssoc ? '' : '<td>' + esc(w.association ? w.association.name : '-') + '</td>') + '<td>' + esc(w.products_count) +
         '</td><td>' + badge(w.status) + '</td><td class="text-end pe-3">' +
         '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-weaver" data-id="' + esc(w.id) + '">' +
         (w.status === 'active' ? 'Deactivate' : 'Activate') + '</button></td></tr>';
     });
-    $('weaversBody').innerHTML = rows.length ? rows.join('') : empty(isAssoc ? 6 : 7, 'No members to show.');
+    $('weaversBody').innerHTML = rows.length ? rows.join('') : empty(isAssoc ? 5 : 6, 'No members to show.');
   }
 
   function renderAssociations() {
@@ -394,7 +394,6 @@
     'add-weaver': function () {
       var fields = [
         { name: 'name', label: 'Member name (weaver, sewer or workshop)' },
-        { name: 'proprietor', label: 'Owner / contact person' },
         { name: 'municipality', label: 'Municipality', value: state.staffMunicipality }
       ];
       if (!isAssoc) {
@@ -524,16 +523,23 @@
     var next = w.status === 'active' ? 'inactive' : 'active';
     confirmThen((next === 'inactive' ? 'Deactivate ' : 'Activate ') + w.name + '?' +
       (next === 'inactive' ? ' Its tags will scan as suspicious.' : ''), function () {
-      var body = { name: w.name, proprietor: w.proprietor, municipality: w.municipality, status: next };
+      var body = { name: w.name, municipality: w.municipality, status: next };
       if (!isAssoc) { body.association_id = w.association_id; }
       run(put(API.weaver + '/' + w.id, body));
     });
   };
 
   // -------------------------------------------------------------------- start
+  function setMeName(text) {
+    var el = $('meName');
+    el.textContent = text;
+    el.title = text;
+  }
+
   function init() {
-    $('meName').textContent = me.name;
+    setMeName(me.name);
     $('meSub').textContent = me.email + ' (' + me.role + ')';
+    $('meSub').title = me.email;
     $('panelName').textContent = isAdmin ? 'Admin Control Panel' : (isAssoc ? 'Association Portal' : 'Staff Control Panel');
     if (!isAdmin) {
       Array.prototype.forEach.call(document.querySelectorAll('.admin-only'), function (el) { el.remove(); });
