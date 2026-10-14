@@ -15,7 +15,7 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'in:admin,staff,association'],
+            'role' => ['sometimes', 'in:admin,staff,association'],
         ]);
 
         $user = User::where('email', $credentials['email'])->first();
@@ -35,7 +35,7 @@ class AuthController extends Controller
             ], 403);
         }
 
-        if ($user->role !== $credentials['role']) {
+        if (isset($credentials['role']) && $user->role !== $credentials['role']) {
             return response()->json([
                 'message' => 'The selected role does not match this account.',
             ], 403);

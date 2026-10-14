@@ -37,6 +37,21 @@ it('rejects a role that does not match the account', function () {
         ->assertForbidden();
 });
 
+it('logs in without a role and returns the account role', function () {
+    $user = User::factory()->staff()->create();
+
+    $this->postJson('/api/login', ['email' => $user->email, 'password' => 'password'])
+        ->assertOk()
+        ->assertJsonPath('user.role', 'staff');
+});
+
+it('rejects an unknown role value', function () {
+    $user = User::factory()->staff()->create();
+
+    $this->postJson('/api/login', loginPayload($user, ['role' => 'superuser']))
+        ->assertUnprocessable();
+});
+
 it('rejects an inactive account', function () {
     $user = User::factory()->staff()->inactive()->create();
 
