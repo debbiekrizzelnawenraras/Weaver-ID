@@ -106,35 +106,12 @@
           <div class="brand-subtitle">Unified Portal</div>
         </div>
       </div>
-      <p class="text-muted fs-7 mb-0">Select account type to log in</p>
-    </div>
-
-    <!-- Demo Credentials Box -->
-    <div class="card bg-light border-0 mb-3 fs-8 text-muted">
-      <div class="card-body py-2 px-3">
-        <div class="fw-bold text-dark mb-1">Demo Credentials:</div>
-        <div><strong>Association:</strong> association@weaver-id.test | pass: Association123!</div>
-        <div><strong>DTI Admin:</strong> admin@weaver-id.test | pass: Admin123!</div>
-        <div><strong>DTI Staff:</strong> staff@weaver-id.test | pass: Staff123!</div>
-      </div>
+      <p class="text-muted fs-7 mb-0">Sign in to continue</p>
     </div>
 
     <!-- HTML Form -->
-    <form id="combinedLoginForm" onsubmit="handleCombinedLogin(event)">
-      
-      <!-- Account Type Selection -->
-      <div class="mb-3">
-        <label for="role" class="form-label fs-7 fw-semibold">Portal Role</label>
-        <div class="input-group">
-          <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-badge text-muted"></i></span>
-          <select id="role" class="form-select border-start-0 ps-0" required>
-            <option value="association" selected>Association Hub</option>
-            <option value="admin">DTI Regional Admin</option>
-            <option value="staff">DTI Staff</option>
-          </select>
-        </div>
-      </div>
-
+    <form id="combinedLoginForm" novalidate>
+      <!-- check this at the script part. kinukuha niya ang mga information and is directing it to the -->
       <!-- Email Input -->
       <div class="mb-3">
         <label for="email" class="form-label fs-7 fw-semibold">Email Address</label>
@@ -154,57 +131,49 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="btn btn-dti w-100 py-2 mb-3">Sign In</button>
+      <div id="loginError" class="alert alert-danger py-2 fs-7 d-none" role="alert"></div>
+      <button type="submit" id="loginBtn" class="btn btn-dti w-100 py-2 mb-3">Sign In</button>
 
     </form>
   </div>
 
+  <script src="js/api.js"></script>
   <script>
-    async function handleCombinedLogin(event) {
-      event.preventDefault();
+    (function () {
+      var form = document.getElementById('combinedLoginForm');
+      var btn = document.getElementById('loginBtn');
+      var box = document.getElementById('loginError');
 
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const role = document.getElementById('role').value;
+      function showError(text) { box.textContent = text; box.classList.remove('d-none'); }
 
-      try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            role
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          alert(data.message || 'Login failed.');
-          return;
-        }
-
-        localStorage.setItem('weaver_token', data.token);
-        localStorage.setItem('weaver_user', JSON.stringify(data.user));
-
-        if (data.user.role === 'admin') {
-          window.location.href = 'admin.html';
-        } else if (data.user.role === 'staff') {
-          window.location.href = 'admin.html';
-        } else if (data.user.role === 'association') {
-          window.location.href = 'association_dashboard.html';
-        } else {
-          alert('Unauthorized account type.');
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        alert('Unable to connect to the Weaver-ID server.');
+      // Already signed in? Go straight to the right dashboard.
+      var existing = Weaver.user();
+      if (Weaver.token() && existing && Weaver.homeFor(existing.role)) {
+        window.location.href = Weaver.homeFor(existing.role);
+        return;
       }
-    }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        box.classList.add('d-none');
+        var email = document.getElementById('email').value.trim();
+        var password = document.getElementById('password').value;
+        if (!email || !password) { showError('Enter your email and password.'); return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+        Weaver.login(email, password).then(function (user) {
+          var home = Weaver.homeFor(user.role);
+          if (!home) { showError('This account type has no dashboard.'); return; }
+          window.location.href = home;
+        }).catch(function (err) {
+          showError(Weaver.errorText(err));
+        }).then(function () {
+          btn.disabled = false;
+          btn.textContent = 'Sign In';
+        });
+      });
+    })();
   </script>
 
 </body>
