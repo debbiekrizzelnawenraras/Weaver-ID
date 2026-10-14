@@ -73,14 +73,12 @@ class AssociationController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'proprietor' => ['required', 'string', 'max:255'],
             'municipality' => ['required', 'string', 'max:255'],
         ]);
 
         $weaver = Weaver::create([
             'association_id' => $user->association_id,
             'name' => $validated['name'],
-            'proprietor' => $validated['proprietor'],
             'municipality' => $validated['municipality'],
             'status' => 'active',
         ]);
@@ -109,14 +107,12 @@ class AssociationController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'proprietor' => ['required', 'string', 'max:255'],
             'municipality' => ['required', 'string', 'max:255'],
             'status' => ['required', 'in:active,inactive'],
         ]);
 
         $weaver->update([
             'name' => $validated['name'],
-            'proprietor' => $validated['proprietor'],
             'municipality' => $validated['municipality'],
             'status' => $validated['status'],
         ]);

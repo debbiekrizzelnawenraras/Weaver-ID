@@ -151,7 +151,7 @@ it('stops staff editing a weaver or product outside their municipality', functio
 
     $this->putJson("/api/staff/weavers/{$foreign->weaver_id}", [
         'association_id' => $foreign->weaver->association_id,
-        'name' => 'x', 'proprietor' => 'y', 'municipality' => 'Besao', 'status' => 'active',
+        'name' => 'x', 'municipality' => 'Besao', 'status' => 'active',
     ])->assertForbidden();
 });
 
@@ -161,7 +161,7 @@ it('stops staff adding a weaver to a foreign association', function () {
     Sanctum::actingAs($staff);
 
     $this->postJson('/api/staff/weavers', [
-        'association_id' => $foreign->id, 'name' => 'x', 'proprietor' => 'y', 'municipality' => 'Besao',
+        'association_id' => $foreign->id, 'name' => 'x', 'municipality' => 'Besao',
     ])->assertForbidden();
 });
 

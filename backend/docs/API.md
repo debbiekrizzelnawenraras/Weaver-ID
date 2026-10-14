@@ -22,8 +22,7 @@ Response (HTTP 200 for all three outcomes):
   "result": "authenticated",
   "message": "This product is registered and authenticated by DTI-Mountain Province.",
   "product": { "title": "Inabel Table Runner", "category": "Home Decor" },
-  "weaver": { "name": "Gandang Handwoven", "municipality": "Sagada" },
-  "association": { "name": "Montañosa Weavers" }
+  "association": { "name": "Rose Ann’s Loom Art Gallery", "municipality": "Sagada" }
 }
 ```
 
@@ -93,6 +92,6 @@ Staff see and edit only their municipality; admin sees all. Out-of-scope records
 ## Known limits (say these out loud in the defense)
 
 - Authentication is by UID only. Cheap rewritable tags can copy a UID, so a clone scanned from one phone looks genuine. The suspicious rule is a heuristic, not proof.
-- The `proprietor` name is not returned to the public app by design (personal data).
+- The public response names the association (business) and its municipality only. Member names are never returned to the public (data minimisation, RA 10173). The old `weavers.proprietor` column is kept as an optional, unused column and is no longer collected.
 - Tag linking is self-service for staff and associations, so a UID's origin is no longer proven by DTI. The controls are the `issued_by` audit trail, revocation, municipality scoping and the admin summary of tags issued per role.
 - Staff scope follows the association's municipality, not the weaver's. A weaver in another town under a Sagada association is managed by Sagada staff.

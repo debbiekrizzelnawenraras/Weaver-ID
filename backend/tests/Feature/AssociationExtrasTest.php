@@ -131,3 +131,28 @@ it('returns the association with the signed-in association user', function () {
         ->assertJsonPath('role', 'association')
         ->assertJsonPath('association.name', $user->association->name);
 });
+
+it('lets an association add and edit a member without any second name', function () {
+    $user = User::factory()->association()->create();
+    Sanctum::actingAs($user);
+
+    $id = $this->postJson('/api/association/weavers', ['name' => 'Sample Member', 'municipality' => 'Sagada'])
+        ->assertCreated()
+        ->json('weaver.id');
+
+    $this->assertDatabaseHas('weavers', ['id' => $id, 'proprietor' => null]);
+
+    $this->putJson("/api/association/weavers/{$id}", [
+        'name' => 'Sample Member B', 'municipality' => 'Sagada', 'status' => 'inactive',
+    ])->assertOk()->assertJsonPath('weaver.status', 'inactive');
+});
+
+it('lets staff add a member without any second name', function () {
+    $staff = User::factory()->staff()->create(['municipality' => 'Sagada']);
+    $association = Association::factory()->create(['municipality' => 'Sagada']);
+    Sanctum::actingAs($staff);
+
+    $this->postJson('/api/staff/weavers', [
+        'association_id' => $association->id, 'name' => 'Sample Member', 'municipality' => 'Sagada',
+    ])->assertCreated();
+});
