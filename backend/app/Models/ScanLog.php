@@ -14,6 +14,8 @@ class ScanLog extends Model
         'result',
         'device_id',
         'ip_address',
+        'counter',
+        'flag_reason',
     ];
 
     protected function casts(): array
