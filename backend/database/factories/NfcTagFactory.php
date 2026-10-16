@@ -23,6 +23,18 @@ class NfcTagFactory extends Factory
         ];
     }
 
+    /**
+     * A tag the desk has secured: write password set, read counter on.
+     */
+    public function secured(int $counter = 10): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'counter_enabled' => true,
+            'last_counter' => $counter,
+            'secured_at' => now(),
+        ]);
+    }
+
     public function revoked(): static
     {
         return $this->state(fn (array $attributes) => [

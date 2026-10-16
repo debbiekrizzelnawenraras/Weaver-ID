@@ -54,6 +54,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/nfc-tags', [NfcTagController::class, 'index']);
         Route::post('/nfc-tags', [NfcTagController::class, 'store']);
         Route::patch('/nfc-tags/{nfcTag}/revoke', [NfcTagController::class, 'revoke']);
+        Route::post('/nfc-tags/{nfcTag}/secure-key', [NfcTagController::class, 'secureKey']);
+        Route::post('/nfc-tags/{nfcTag}/secured', [NfcTagController::class, 'secured']);
     });
 
     Route::middleware('role:admin')->prefix('admin')->group(function () {

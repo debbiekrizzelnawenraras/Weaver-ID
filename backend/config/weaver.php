@@ -20,6 +20,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tag write-password key
+    |--------------------------------------------------------------------------
+    |
+    | Secret used to derive each tag's write password from its UID. Keep it
+    | private and back it up: without it, tags that were secured cannot be
+    | rewritten. Generate one with:
+    |     php -r "echo bin2hex(random_bytes(32));"
+    |
+    */
+
+    'tag_key' => env('WEAVER_TAG_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Seeder password
     |--------------------------------------------------------------------------
     |

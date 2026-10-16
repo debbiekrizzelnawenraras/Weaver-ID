@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\NfcTag;
+use App\Models\NfcTagEvent;
 use App\Models\Product;
+use App\Support\TagSecurity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -108,6 +110,70 @@ class NfcTagController extends Controller
 
         return response()->json([
             'message' => 'NFC tag revoked.',
+            'tag' => $nfcTag->fresh()->load('product.weaver.association'),
+        ]);
+    }
+
+    /**
+     * Give the tag desk the write password for one tag it is allowed to manage.
+     * The password is derived from the UID and a server secret, never stored.
+     */
+    public function secureKey(Request $request, NfcTag $nfcTag): JsonResponse
+    {
+        if (! NfcTag::manageableBy($request->user())->whereKey($nfcTag->id)->exists()) {
+            return response()->json(['message' => 'You cannot secure this tag.'], 403);
+        }
+
+        if ($nfcTag->status !== 'active') {
+            return response()->json(['message' => 'Only an active tag can be secured.'], 422);
+        }
+
+        if (! TagSecurity::keyConfigured()) {
+            return response()->json([
+                'message' => 'The server has no tag key. Set WEAVER_TAG_KEY in the .env file first.',
+            ], 503);
+        }
+
+        NfcTagEvent::create([
+            'nfc_tag_id' => $nfcTag->id,
+            'user_id' => $request->user()->id,
+            'action' => 'key_issued',
+        ]);
+
+        return response()->json([
+            'uid' => $nfcTag->uid,
+        ] + TagSecurity::credentials($nfcTag->uid));
+    }
+
+    /**
+     * The tag desk reports that the password and counter were written. The
+     * counter it read becomes the baseline for later scans. Calling this again
+     * (after securing the tag again at the desk) resets the baseline.
+     */
+    public function secured(Request $request, NfcTag $nfcTag): JsonResponse
+    {
+        if (! NfcTag::manageableBy($request->user())->whereKey($nfcTag->id)->exists()) {
+            return response()->json(['message' => 'You cannot secure this tag.'], 403);
+        }
+
+        $validated = $request->validate([
+            'counter' => ['required', 'integer', 'min:0', 'max:'.TagSecurity::MAX_COUNTER],
+        ]);
+
+        $nfcTag->update([
+            'counter_enabled' => true,
+            'last_counter' => $validated['counter'],
+            'secured_at' => now(),
+        ]);
+
+        NfcTagEvent::create([
+            'nfc_tag_id' => $nfcTag->id,
+            'user_id' => $request->user()->id,
+            'action' => 'secured',
+        ]);
+
+        return response()->json([
+            'message' => 'NFC tag secured.',
             'tag' => $nfcTag->fresh()->load('product.weaver.association'),
         ]);
     }

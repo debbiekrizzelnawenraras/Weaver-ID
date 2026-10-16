@@ -47,6 +47,19 @@
     return '<span class="badge bg-' + (map[status] || 'secondary') + '">' + esc(status) + '</span>';
   }
 
+  function securedBadge(t) {
+    if (t.status !== 'active') { return ''; }
+    return t.counter_enabled
+      ? ' <span class="badge bg-info text-dark" title="Write password set and read counter on">secured</span>'
+      : ' <span class="badge bg-warning text-dark" title="This tag has no write password or counter yet">not secured</span>';
+  }
+
+  var REASONS = {
+    tag_revoked: 'tag revoked', product_inactive: 'product inactive', weaver_inactive: 'member inactive',
+    many_devices: 'many devices', counter_rollback: 'possible copy (counter went back)',
+    counter_missing: 'secured tag read without counter'
+  };
+
   function when(value) {
     if (!value) { return '-'; }
     var d = new Date(value);
@@ -242,13 +255,15 @@
       var p = t.product || {}, w = p.weaver || {}, a = w.association || {};
       var actions = '';
       if (t.status === 'active') {
+        actions += '<button class="btn btn-sm btn-outline-primary py-0 me-1" data-action="secure-tag" data-id="' + esc(t.id) + '">' +
+          (t.counter_enabled ? 'Re-secure' : 'Secure') + '</button>';
         actions += '<button class="btn btn-sm btn-outline-danger py-0 me-1" data-action="revoke-tag" data-id="' + esc(t.id) + '">Revoke</button>';
       }
       if (isAdmin) {
         actions += '<button class="btn btn-sm btn-outline-secondary py-0" data-action="reassign-tag" data-id="' + esc(t.id) + '">Reassign</button>';
       }
       return '<tr><td><code>' + esc(t.uid) + '</code></td><td>' + esc(p.title || '-') + '</td><td>' + esc(w.name || '-') +
-        '</td><td>' + esc(a.name || '-') + '</td><td>' + when(t.issued_at || t.created_at) + '</td><td>' + badge(t.status) +
+        '</td><td>' + esc(a.name || '-') + '</td><td>' + when(t.issued_at || t.created_at) + '</td><td>' + badge(t.status) + securedBadge(t) +
         '</td><td class="text-end pe-3">' + actions + '</td></tr>';
     });
     $('tagsBody').innerHTML = rows.length ? rows.join('') : empty(7, 'No tags to show.');
@@ -261,6 +276,7 @@
       return matches([x.uid, x.result, x.nfc_tag && x.nfc_tag.product ? x.nfc_tag.product.title : '']);
     }).map(function (x) {
       return '<tr><td>' + when(x.created_at) + '</td><td><code>' + esc(x.uid) + '</code></td><td>' + badge(x.result) +
+        (x.flag_reason ? ' <span class="text-muted fs-8">' + esc(REASONS[x.flag_reason] || x.flag_reason) + '</span>' : '') +
         '</td><td>' + esc(x.nfc_tag && x.nfc_tag.product ? x.nfc_tag.product.title : '-') + '</td><td>' + esc(x.device_id || x.ip_address || '-') + '</td></tr>';
     });
     $('logsBody').innerHTML = rows.length ? rows.join('') : empty(5, 'No scans match.');
@@ -390,6 +406,30 @@
       .catch(function (err) { toast(Weaver.errorText(err), 'danger'); });
   }
 
+  // Ask the server for the tag's write password, have the reader bridge write it
+  // and turn on the tag counter, then tell the server which counter the tag showed.
+  function secureTag(tag) {
+    return Weaver.post('/api/nfc-tags/' + tag.id + '/secure-key', {}).then(function (key) {
+      return fetch(READER_URL + '/secure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: key.uid, password: key.password, pack: key.pack, timeout: 15 })
+      }).then(function (res) {
+        return res.json().then(function (d) { return { ok: res.ok, d: d }; });
+      }).then(function (r) {
+        if (!r.ok) { throw new Error(r.d.error || 'Reader error.'); }
+        return Weaver.post('/api/nfc-tags/' + tag.id + '/secured', { counter: r.d.counter });
+      });
+    });
+  }
+
+  function secureErrorText(err) {
+    if (err instanceof TypeError) {
+      return 'cannot reach the reader bridge (start python reader_bridge.py).';
+    }
+    return (err && err.message) ? err.message : Weaver.errorText(err);
+  }
+
   var actions = {
     'add-weaver': function () {
       var fields = [
@@ -428,8 +468,29 @@
       openForm('Link a tag to a product', 'Link tag', [
         { name: 'uid', label: 'Tag UID', placeholder: 'e.g. 04E3CA79410289', reader: true },
         { name: 'product_id', label: 'Product', type: 'select', options: activeProductOptions(0), int: true }
-      ], function (v) { return Weaver.post('/api/nfc-tags', v); },
-      'Click "Read from reader" and tap the tag, or type the UID. Spaces and colons are ignored.');
+      ], function (v) {
+        return Weaver.post('/api/nfc-tags', v).then(function (res) {
+          toast('Tag linked. Keep it on the reader while it is being secured...', 'info');
+          return secureTag(res.tag).then(function () {
+            res.message = 'NFC tag issued and secured.';
+            return res;
+          }).catch(function (err) {
+            toast('The tag is linked but NOT secured yet: ' + secureErrorText(err) + ' Use the Secure button on its row.', 'warning');
+            res.message = 'NFC tag issued (not secured yet).';
+            return res;
+          });
+        });
+      },
+      'Place the tag on the reader and click "Read from reader", or type the UID. After linking, keep the tag on the reader: it is secured automatically (write password and read counter).');
+    },
+    'secure-tag': function (id) {
+      var t = byId(data.tags, id);
+      if (!t) { return; }
+      confirmThen('Place tag ' + t.uid + ' on the reader and keep it there, then press OK.' +
+        (t.counter_enabled ? ' This tag is already secured: this resets its saved counter.' : ''), function () {
+        toast('Securing the tag. Keep it on the reader...', 'info');
+        run(secureTag(t).then(function () { return { message: 'NFC tag secured.' }; }));
+      });
     },
     'read-uid': function () {
       var msg = $('readerMsg'), field = $('f_uid');

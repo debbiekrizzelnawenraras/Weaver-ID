@@ -1,7 +1,8 @@
 // Weaver-ID scanner: tap an NFC tag, ask the API if it is genuine.
 //
-// Talks to POST {server}/api/verify with {uid, device_id} and shows one of
-// three verdicts: authenticated, unregistered, suspicious.
+// Talks to POST {server}/api/verify with {uid, device_id, counter} and shows one of
+// three verdicts: authenticated, unregistered, suspicious. The counter is the
+// tag's own read counter (NTAG21x) and is only sent when the tag has one.
 //
 // Real NFC reading works on an Android phone. On Windows/Edge you can still
 // test the screen by typing a UID into the "Test with a UID" box.
@@ -97,7 +98,7 @@ class WeaverApi {
   final String baseUrl;
   final String deviceId;
 
-  Future<VerifyResult> verify(String uid) async {
+  Future<VerifyResult> verify(String uid, {int? counter}) async {
     final base = baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
     try {
       final response = await http
@@ -107,7 +108,11 @@ class WeaverApi {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
             },
-            body: jsonEncode({'uid': uid, 'device_id': deviceId}),
+            body: jsonEncode({
+              'uid': uid,
+              'device_id': deviceId,
+              if (counter != null) 'counter': counter,
+            }),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -188,20 +193,39 @@ class _ScanPageState extends State<ScanPage> {
   static String _normalizeUid(String raw) =>
       raw.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toUpperCase();
 
-  Future<void> _verify(String uid) async {
+  Future<void> _verify(String uid, {int? counter}) async {
     setState(() {
       _busy = true;
       _status = 'Checking $uid ...';
       _result = null;
     });
     final api = WeaverApi(baseUrl: _serverUrl, deviceId: _deviceId);
-    final result = await api.verify(uid);
+    final result = await api.verify(uid, counter: counter);
     if (!mounted) return;
     setState(() {
       _busy = false;
       _status = 'Tag $uid';
       _result = result;
     });
+  }
+
+  /// Reads the tag's own tap counter (NTAG21x). Returns null for tags without
+  /// a counter, so older tags keep working. A secured tag that answers without
+  /// a counter is flagged by the server.
+  Future<int?> _readCounter() async {
+    try {
+      // A memory read makes the tag count this tap, then READ_CNT returns the total.
+      await FlutterNfcKit.transceive('3004');
+      final reply = await FlutterNfcKit.transceive('3902');
+      final hex = reply.toString().replaceAll(RegExp(r'[^0-9a-fA-F]'), '');
+      if (hex.length != 6) return null;
+      final bytes = [
+        for (var i = 0; i < 6; i += 2) int.parse(hex.substring(i, i + 2), radix: 16),
+      ];
+      return bytes[0] | (bytes[1] << 8) | (bytes[2] << 16); // little-endian, 24 bit
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> _scanTag() async {
@@ -237,6 +261,8 @@ class _ScanPageState extends State<ScanPage> {
         iosAlertMessage: 'Hold your phone near the tag',
       );
       final uid = _normalizeUid(tag.id);
+      // Must happen while the tag is still connected.
+      final counter = await _readCounter();
       await FlutterNfcKit.finish();
 
       if (uid.isEmpty) {
@@ -247,7 +273,7 @@ class _ScanPageState extends State<ScanPage> {
         });
         return;
       }
-      await _verify(uid);
+      await _verify(uid, counter: counter);
     } catch (e) {
       try {
         await FlutterNfcKit.finish();
@@ -307,6 +333,7 @@ class _ScanPageState extends State<ScanPage> {
         ],
       ),
     );
+    controller.dispose();
     if (saved == null || saved.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_serverKey, saved);
