@@ -75,6 +75,49 @@ it('flags a secured tag that arrives without a counter', function () {
     expect($tag->fresh()->last_counter)->toBe(10);
 });
 
+it('flags a counter that jumps far above the saved one and does not save it', function () {
+    config(['weaver.counter_window' => 1000]);
+    $tag = NfcTag::factory()->secured(50)->create();
+
+    $this->postJson('/api/verify', ['uid' => $tag->uid, 'counter' => 16000000])
+        ->assertOk()
+        ->assertJsonPath('result', 'suspicious')
+        ->assertJsonMissingPath('product');
+
+    expect($tag->fresh()->last_counter)->toBe(50);
+    $this->assertDatabaseHas('scan_logs', ['nfc_tag_id' => $tag->id, 'flag_reason' => 'counter_jump']);
+
+    // The forged number did not lock the genuine tag out.
+    $this->postJson('/api/verify', ['uid' => $tag->uid, 'counter' => 51])
+        ->assertOk()
+        ->assertJsonPath('result', 'authenticated');
+
+    expect($tag->fresh()->last_counter)->toBe(51);
+});
+
+it('accepts a counter right at the edge of the window', function () {
+    config(['weaver.counter_window' => 1000]);
+    $tag = NfcTag::factory()->secured(50)->create();
+
+    $this->postJson('/api/verify', ['uid' => $tag->uid, 'counter' => 1050])
+        ->assertOk()
+        ->assertJsonPath('result', 'authenticated');
+
+    expect($tag->fresh()->last_counter)->toBe(1050);
+
+    $this->postJson('/api/verify', ['uid' => $tag->uid, 'counter' => 2051])
+        ->assertOk()
+        ->assertJsonPath('result', 'suspicious');
+});
+
+it('computes the counter window', function () {
+    expect(TagSecurity::counterJumpTooBig(null, 5000, 1000))->toBeFalse()
+        ->and(TagSecurity::counterJumpTooBig(50, 1050, 1000))->toBeFalse()
+        ->and(TagSecurity::counterJumpTooBig(50, 1051, 1000))->toBeTrue()
+        ->and(TagSecurity::counterJumpTooBig(50, 50, 1000))->toBeFalse()
+        ->and(TagSecurity::counterJumpTooBig(50, 51, -5))->toBeTrue();
+});
+
 it('records why a revoked tag is suspicious', function () {
     $tag = NfcTag::factory()->revoked()->create();
 

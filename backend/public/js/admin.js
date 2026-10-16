@@ -57,7 +57,8 @@
   var REASONS = {
     tag_revoked: 'tag revoked', product_inactive: 'product inactive', weaver_inactive: 'member inactive',
     many_devices: 'many devices', counter_rollback: 'possible copy (counter went back)',
-    counter_missing: 'secured tag read without counter'
+    counter_missing: 'secured tag read without counter',
+    counter_jump: 'counter jumped too far (not saved)'
   };
 
   function when(value) {
@@ -277,9 +278,10 @@
     }).map(function (x) {
       return '<tr><td>' + when(x.created_at) + '</td><td><code>' + esc(x.uid) + '</code></td><td>' + badge(x.result) +
         (x.flag_reason ? ' <span class="text-muted fs-8">' + esc(REASONS[x.flag_reason] || x.flag_reason) + '</span>' : '') +
-        '</td><td>' + esc(x.nfc_tag && x.nfc_tag.product ? x.nfc_tag.product.title : '-') + '</td><td>' + esc(x.device_id || x.ip_address || '-') + '</td></tr>';
+        '</td><td>' + esc(x.nfc_tag && x.nfc_tag.product ? x.nfc_tag.product.title : '-') + '</td><td>' + esc(x.device_id || x.ip_address || '-') +
+        '</td><td>' + (x.counter === null || x.counter === undefined ? '-' : esc(x.counter)) + '</td></tr>';
     });
-    $('logsBody').innerHTML = rows.length ? rows.join('') : empty(5, 'No scans match.');
+    $('logsBody').innerHTML = rows.length ? rows.join('') : empty(6, 'No scans match.');
     $('logPageInfo').textContent = l ? 'Page ' + l.current_page + ' of ' + l.last_page + ' (' + l.total + ' scans)' : '';
     $('logPrev').disabled = !l || l.current_page <= 1;
     $('logNext').disabled = !l || l.current_page >= l.last_page;

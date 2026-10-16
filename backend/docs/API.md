@@ -9,11 +9,12 @@ All endpoints are under `/api`. Send and accept JSON (`Accept: application/json`
 Request body:
 
 ```json
-{ "uid": "04:A1:B2:C3:D4:E5:F6", "device_id": "optional-install-id" }
+{ "uid": "04:A1:B2:C3:D4:E5:F6", "device_id": "optional-install-id", "counter": 42 }
 ```
 
 - `uid`: hex UID read from the tag. Colons, spaces, dashes and lowercase are accepted. 8 to 20 hex characters.
 - `device_id`: optional stable id for the phone's app install. Used by the suspicious-scan rule. If omitted, the IP address is used.
+- `counter`: optional. The tag's own read counter (0 to 16777215), sent by the app for tags that were secured. A secured tag without a counter, with a counter lower than the saved one, or with one more than `WEAVER_COUNTER_WINDOW` above it is `suspicious`. Flagged counters are not saved. See `docs/TAG-SECURITY.md`.
 
 Response (HTTP 200 for all three outcomes):
 
@@ -30,7 +31,7 @@ Response (HTTP 200 for all three outcomes):
 |---|---|
 | `authenticated` | UID is registered, tag is active, product and weaver are active. Profile fields are included. |
 | `unregistered` | UID is unknown, or the tag is not linked to a product. |
-| `suspicious` | Tag is revoked, the product or weaver is inactive, or too many distinct devices scanned it in the window (see `config/weaver.php`). No profile is returned. |
+| `suspicious` | Tag is revoked, the product or weaver is inactive, too many distinct devices scanned it in the window (see `config/weaver.php`), or a secured tag failed the counter rule. No profile is returned. |
 
 Invalid `uid` returns HTTP 422. Every valid scan is written to `scan_logs`, including unregistered ones.
 
