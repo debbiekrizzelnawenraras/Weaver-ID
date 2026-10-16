@@ -36,6 +36,16 @@ class TagSecurity
         ];
     }
 
+    /**
+     * True when a counter is further above the last saved one than the window
+     * allows. A genuine tag only gets there after that many taps that never
+     * reached the server, so a bigger jump is treated as a forged number.
+     */
+    public static function counterJumpTooBig(?int $last, int $counter, int $window): bool
+    {
+        return $last !== null && $counter > $last + max(0, $window);
+    }
+
     public static function keyConfigured(): bool
     {
         $key = config('weaver.tag_key');

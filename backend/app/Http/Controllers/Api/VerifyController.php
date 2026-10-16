@@ -121,6 +121,9 @@ class VerifyController extends Controller
      * The counter comes from the phone and is not signed, so this is a
      * detection rule, not proof: anyone can post a fake number. A staff member
      * can re-secure the tag at the desk to reset the saved counter.
+     *
+     * A number far above the saved one is flagged and not saved (counter_jump),
+     * so a forged value cannot make every genuine scan look like a rollback.
      */
     private function counterProblem(NfcTag $tag, ?int $counter): ?string
     {
@@ -136,6 +139,10 @@ class VerifyController extends Controller
             return 'counter_rollback';
         }
 
+        if (TagSecurity::counterJumpTooBig($tag->last_counter, $counter, (int) config('weaver.counter_window'))) {
+            return 'counter_jump';
+        }
+
         return null;
     }
 
@@ -148,7 +155,7 @@ class VerifyController extends Controller
             return;
         }
 
-        if (in_array($reason, ['counter_rollback', 'counter_missing'], true)) {
+        if (in_array($reason, ['counter_rollback', 'counter_missing', 'counter_jump'], true)) {
             return;
         }
 

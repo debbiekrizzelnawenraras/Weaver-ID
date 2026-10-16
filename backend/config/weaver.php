@@ -34,6 +34,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Counter window
+    |--------------------------------------------------------------------------
+    |
+    | How far a secured tag's read counter may jump above the last one the
+    | server saw. Taps by phones that never reach the server also count, so
+    | the window must not be too small. A bigger jump is flagged and is not
+    | saved, so a forged number cannot lock a genuine tag out.
+    |
+    */
+
+    'counter_window' => (int) env('WEAVER_COUNTER_WINDOW', 1000),
+
+    /*
+    |--------------------------------------------------------------------------
     | Seeder password
     |--------------------------------------------------------------------------
     |
