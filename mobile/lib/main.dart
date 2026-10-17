@@ -1,8 +1,9 @@
 // Weaver-ID scanner: tap an NFC tag, ask the API if it is genuine.
 //
-// Talks to POST {server}/api/verify with {uid, device_id, counter} and shows one of
+// Talks to POST {server}/api/verify with {uid, device_id, counter, code} and shows one of
 // three verdicts: authenticated, unregistered, suspicious. The counter is the
-// tag's own read counter (NTAG21x) and is only sent when the tag has one.
+// tag's own read counter (NTAG21x) and the code is the tag code the tag desk
+// wrote into the tag's memory; each is only sent when the tag has one.
 //
 // Real NFC reading works on an Android phone. On Windows/Edge you can still
 // test the screen by typing a UID into the "Test with a UID" box.
@@ -18,6 +19,20 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(const WeaverIdApp());
+
+/// The tag code record the tag desk writes into a secured tag (pages 4..10):
+/// an NDEF message with one external-type record "weaver.id:t" whose 8-byte
+/// payload is the code. [hex] is the memory of pages 4..11 (32 bytes) as hex.
+/// Returns the code as 16 upper-case hex characters, or null when the tag holds
+/// no such record. Same layout as build_code_record in tools/reader_bridge.py.
+String? parseTagCode(String hex) {
+  final clean = hex.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toUpperCase();
+  // 03 16 = NDEF TLV of 22 bytes, D4 0B 08 = external record, type length 11,
+  // payload length 8, then the type "weaver.id:t".
+  const head = '0316D40B08' '7765617665722E69643A74';
+  if (clean.length < head.length + 16 || !clean.startsWith(head)) return null;
+  return clean.substring(head.length, head.length + 16);
+}
 
 class WeaverIdApp extends StatelessWidget {
   const WeaverIdApp({super.key});
@@ -98,7 +113,7 @@ class WeaverApi {
   final String baseUrl;
   final String deviceId;
 
-  Future<VerifyResult> verify(String uid, {int? counter}) async {
+  Future<VerifyResult> verify(String uid, {int? counter, String? code}) async {
     final base = baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
     try {
       final response = await http
@@ -112,6 +127,7 @@ class WeaverApi {
               'uid': uid,
               'device_id': deviceId,
               if (counter != null) 'counter': counter,
+              if (code != null) 'code': code,
             }),
           )
           .timeout(const Duration(seconds: 10));
@@ -193,14 +209,14 @@ class _ScanPageState extends State<ScanPage> {
   static String _normalizeUid(String raw) =>
       raw.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toUpperCase();
 
-  Future<void> _verify(String uid, {int? counter}) async {
+  Future<void> _verify(String uid, {int? counter, String? code}) async {
     setState(() {
       _busy = true;
       _status = 'Checking $uid ...';
       _result = null;
     });
     final api = WeaverApi(baseUrl: _serverUrl, deviceId: _deviceId);
-    final result = await api.verify(uid, counter: counter);
+    final result = await api.verify(uid, counter: counter, code: code);
     if (!mounted) return;
     setState(() {
       _busy = false;
@@ -223,6 +239,19 @@ class _ScanPageState extends State<ScanPage> {
         for (var i = 0; i < 6; i += 2) int.parse(hex.substring(i, i + 2), radix: 16),
       ];
       return bytes[0] | (bytes[1] << 8) | (bytes[2] << 16); // little-endian, 24 bit
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Reads the tag code record (pages 4..11). Returns null when the tag has
+  /// none; the server decides whether that is a problem. Reading in the same
+  /// session as the counter does not count a second tap.
+  Future<String?> _readTagCode() async {
+    try {
+      final first = await FlutterNfcKit.transceive('3004');
+      final second = await FlutterNfcKit.transceive('3008');
+      return parseTagCode('$first$second');
     } catch (_) {
       return null;
     }
@@ -263,6 +292,7 @@ class _ScanPageState extends State<ScanPage> {
       final uid = _normalizeUid(tag.id);
       // Must happen while the tag is still connected.
       final counter = await _readCounter();
+      final code = await _readTagCode();
       await FlutterNfcKit.finish();
 
       if (uid.isEmpty) {
@@ -273,7 +303,7 @@ class _ScanPageState extends State<ScanPage> {
         });
         return;
       }
-      await _verify(uid, counter: counter);
+      await _verify(uid, counter: counter, code: code);
     } catch (e) {
       try {
         await FlutterNfcKit.finish();
