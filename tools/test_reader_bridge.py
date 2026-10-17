@@ -105,6 +105,69 @@ class SecureTag(unittest.TestCase):
             rb.secure_ntag215(rb.FakeNtag215(UID), UID, b"\x01\x02", PACK)
 
 
+CODE = bytes.fromhex("0011223344556677")
+
+
+class TagCode(unittest.TestCase):
+    def test_record_round_trip(self):
+        record = rb.build_code_record(CODE)
+        self.assertEqual(len(record), 28)
+        self.assertEqual(record[:5], bytes([0x03, 0x16, 0xD4, 0x0B, 0x08]))
+        self.assertEqual(rb.parse_code_record(record), "0011223344556677")
+
+    def test_parse_ignores_other_memory(self):
+        self.assertIsNone(rb.parse_code_record(bytes(28)))
+        self.assertIsNone(rb.parse_code_record(b"\x03\x10\xd1\x01\x0c\x55" + bytes(22)))
+        self.assertIsNone(rb.parse_code_record(b""))
+
+    def test_code_must_be_eight_bytes(self):
+        with self.assertRaises(ValueError):
+            rb.build_code_record(b"\x01\x02")
+
+    def test_securing_writes_the_code_and_the_phone_can_read_it(self):
+        tag = rb.FakeNtag215(UID)
+        rb.secure_ntag215(tag, UID, PWD, PACK, CODE)
+        tag.new_session()                                                 # phone: no password
+        raw = tag.read16(4) + tag.read16(8)
+        self.assertEqual(rb.parse_code_record(raw), "0011223344556677")
+
+    def test_a_stranger_cannot_change_the_code(self):
+        tag = rb.FakeNtag215(UID)
+        rb.secure_ntag215(tag, UID, PWD, PACK, CODE)
+        tag.new_session()
+        with self.assertRaises(IOError):
+            tag.write(9, b"\xFF\xFF\xFF\xFF")
+
+    def test_page_three_is_never_written(self):
+        tag = rb.FakeNtag215(UID)
+        tag.mem[3][:] = b"\xe1\x10\x3e\x00"
+        rb.secure_ntag215(tag, UID, PWD, PACK, CODE)
+        self.assertEqual(bytes(tag.mem[3]), b"\xe1\x10\x3e\x00")
+
+    def test_securing_again_writes_the_code_on_an_old_secured_tag(self):
+        tag = rb.FakeNtag215(UID)
+        rb.secure_ntag215(tag, UID, PWD, PACK)                            # secured before the code existed
+        tag.new_session()
+        rb.secure_ntag215(tag, UID, PWD, PACK, CODE)
+        tag.new_session()
+        self.assertEqual(rb.parse_code_record(tag.read16(4) + tag.read16(8)), "0011223344556677")
+
+    def test_without_a_code_nothing_is_written(self):
+        tag = rb.FakeNtag215(UID)
+        rb.secure_ntag215(tag, UID, PWD, PACK)
+        tag.new_session()
+        self.assertIsNone(rb.parse_code_record(tag.read16(4) + tag.read16(8)))
+
+    def test_a_tag_that_refuses_the_write_gives_a_readable_error(self):
+        class Refuses(rb.FakeNtag215):
+            def write(self, page, data):
+                if 4 <= page <= 10:
+                    raise IOError("refused")
+                super().write(page, data)
+        with self.assertRaises(rb.SecureError):
+            rb.secure_ntag215(Refuses(UID), UID, PWD, PACK, CODE)
+
+
 class HttpEndpoint(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -133,6 +196,24 @@ class HttpEndpoint(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertTrue(out["ok"])
         self.assertGreaterEqual(out["counter"], 1)
+
+    def test_secure_with_code_reports_it_was_written(self):
+        rb.READER.fake_tag = rb.FakeNtag215(UID)
+        code, out = self.post({"uid": UID, "password": "A1B2C3D4", "pack": "5A5A", "code": "0011223344556677"})
+        self.assertEqual(code, 200)
+        self.assertTrue(out["code_written"])
+        rb.READER.fake_tag.new_session()
+        raw = rb.READER.fake_tag.read16(4) + rb.READER.fake_tag.read16(8)
+        self.assertEqual(rb.parse_code_record(raw), "0011223344556677")
+
+    def test_secure_without_code_says_none_was_written(self):
+        rb.READER.fake_tag = rb.FakeNtag215(UID)
+        code, out = self.post({"uid": UID, "password": "A1B2C3D4", "pack": "5A5A"})
+        self.assertEqual(code, 200)
+        self.assertFalse(out["code_written"])
+
+    def test_bad_code_is_rejected(self):
+        self.assertEqual(self.post({"uid": UID, "password": "A1B2C3D4", "pack": "5A5A", "code": "0011"})[0], 400)
 
     def test_wrong_tag_gives_a_readable_error(self):
         rb.READER.fake_tag = rb.FakeNtag215(UID)
