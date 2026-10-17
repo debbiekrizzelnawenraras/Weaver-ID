@@ -142,6 +142,7 @@ class NfcTagController extends Controller
 
         return response()->json([
             'uid' => $nfcTag->uid,
+            'code' => TagSecurity::code($nfcTag->uid),
         ] + TagSecurity::credentials($nfcTag->uid));
     }
 
@@ -158,10 +159,13 @@ class NfcTagController extends Controller
 
         $validated = $request->validate([
             'counter' => ['required', 'integer', 'min:0', 'max:'.TagSecurity::MAX_COUNTER],
+            // True when the tag desk also wrote the tag code onto the tag.
+            'code_written' => ['sometimes', 'boolean'],
         ]);
 
         $nfcTag->update([
             'counter_enabled' => true,
+            'code_enabled' => $request->boolean('code_written') || $nfcTag->code_enabled,
             'last_counter' => $validated['counter'],
             'secured_at' => now(),
         ]);

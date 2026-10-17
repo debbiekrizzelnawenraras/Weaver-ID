@@ -28,6 +28,8 @@ class VerifyController extends Controller
             'device_id' => ['nullable', 'string', 'max:100'],
             // Read counter of a secured tag. The app sends it when the tag has one.
             'counter' => ['nullable', 'integer', 'min:0', 'max:'.TagSecurity::MAX_COUNTER],
+            // Tag code the app read from the tag's memory (see TagSecurity::code).
+            'code' => ['nullable', 'string', 'max:64'],
         ]);
 
         $counter = isset($validated['counter']) ? (int) $validated['counter'] : null;
@@ -38,7 +40,7 @@ class VerifyController extends Controller
 
         $scanner = $validated['device_id'] ?? $request->ip();
 
-        [$result, $reason] = $this->evaluate($tag, $scanner, $counter);
+        [$result, $reason] = $this->evaluate($tag, $scanner, $counter, $validated['code'] ?? null);
 
         $this->rememberCounter($tag, $counter, $reason);
 
@@ -80,7 +82,7 @@ class VerifyController extends Controller
     /**
      * @return array{0: ScanResult, 1: string|null} the result and, for suspicious scans, the reason (audit only).
      */
-    private function evaluate(?NfcTag $tag, string $scanner, ?int $counter): array
+    private function evaluate(?NfcTag $tag, string $scanner, ?int $counter, ?string $code): array
     {
         if (! $tag || ! $tag->product) {
             return [ScanResult::Unregistered, null];
@@ -100,6 +102,10 @@ class VerifyController extends Controller
             return [ScanResult::Suspicious, 'weaver_inactive'];
         }
 
+        if ($reason = $this->codeProblem($tag, $code)) {
+            return [ScanResult::Suspicious, $reason];
+        }
+
         if ($reason = $this->counterProblem($tag, $counter)) {
             return [ScanResult::Suspicious, $reason];
         }
@@ -109,6 +115,27 @@ class VerifyController extends Controller
         }
 
         return [ScanResult::Authenticated, null];
+    }
+
+    /**
+     * Tag code rule. A tag that was secured with a tag code must send it, and it
+     * must match the code the server derives for this UID. Tags secured before
+     * the code existed are not checked until they are secured again.
+     *
+     * Anyone who can read the genuine tag can copy the code with the UID, so
+     * this stops typed, guessed, and UID-only copies, not a full copy.
+     */
+    private function codeProblem(NfcTag $tag, ?string $code): ?string
+    {
+        if (! $tag->code_enabled) {
+            return null;
+        }
+
+        if ($code === null || trim($code) === '') {
+            return 'code_missing';
+        }
+
+        return TagSecurity::codeMatches($tag->uid, $code) ? null : 'code_invalid';
     }
 
     /**
@@ -147,7 +174,8 @@ class VerifyController extends Controller
     }
 
     /**
-     * Remember the highest counter seen, unless this scan was flagged for the counter itself.
+     * Remember the highest counter seen, unless this scan was flagged for the counter or the tag code
+     * (a forged request must not move the saved counter).
      */
     private function rememberCounter(?NfcTag $tag, ?int $counter, ?string $reason): void
     {
@@ -155,7 +183,7 @@ class VerifyController extends Controller
             return;
         }
 
-        if (in_array($reason, ['counter_rollback', 'counter_missing', 'counter_jump'], true)) {
+        if (in_array($reason, ['counter_rollback', 'counter_missing', 'counter_jump', 'code_missing', 'code_invalid'], true)) {
             return;
         }
 

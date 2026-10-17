@@ -17,6 +17,7 @@ class NfcTag extends Model
         'product_id',
         'status',
         'counter_enabled',
+        'code_enabled',
         'last_counter',
         'secured_at',
         'issued_by',
@@ -42,6 +43,7 @@ class NfcTag extends Model
             'issued_at' => 'datetime',
             'secured_at' => 'datetime',
             'counter_enabled' => 'boolean',
+            'code_enabled' => 'boolean',
         ];
     }
 
