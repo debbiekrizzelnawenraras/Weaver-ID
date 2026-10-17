@@ -14,7 +14,8 @@ It listens on 127.0.0.1:8777 only (this laptop, nobody else) and only
 accepts requests from pages served from localhost / 127.0.0.1.
 
 Besides reading a tag's UID, the bridge can secure an NTAG215 tag (POST /secure):
-it sets the tag's write password and turns on the tag's read counter. It never
+it sets the tag's write password, turns on the tag's read counter and, when the
+server sends one, writes the tag code record into the tag's memory. It never
 sets the permanent lock bits, so a secured tag can still be repaired.
 """
 import json
@@ -50,14 +51,53 @@ ACCESS_CFGLCK = 0x40
 NTAG215_STORAGE_CODE = 0x11
 
 
+# ----------------------------------------------------------------------------
+# Tag code record
+#
+# The server makes an 8-byte tag code for every UID. The bridge writes it into
+# the tag's user memory (pages 4..10) as a standard NDEF record of external type
+# "weaver.id:t", so the phone can read it with the same READ command it already
+# uses and an ordinary NFC reader shows a harmless unknown record:
+#   03 16            NDEF message TLV, 22 bytes
+#   D4 0B 08         record header (external type), type length 11, payload length 8
+#   "weaver.id:t"    record type
+#   <8 code bytes>   the tag code
+#   FE               end of TLV, then zero padding to a whole page
+# Page 3 (capability container) is never written.
+# ----------------------------------------------------------------------------
+CODE_TYPE = b"weaver.id:t"
+CODE_FIRST_PAGE = 0x04
+CODE_PAGES = 7
+
+
+def build_code_record(code):
+    """28 bytes (7 pages) holding the NDEF record for an 8-byte tag code."""
+    code = bytes(code)
+    if len(code) != 8:
+        raise ValueError("the tag code must be 8 bytes")
+    body = bytes([0xD4, len(CODE_TYPE), len(code)]) + CODE_TYPE + code
+    raw = bytes([0x03, len(body)]) + body + b"\xfe"
+    return raw + bytes(4 * CODE_PAGES - len(raw))
+
+
+def parse_code_record(raw):
+    """Returns the tag code as 16 hex characters, or None when the memory holds no Weaver-ID record."""
+    raw = bytes(raw)
+    head = bytes([0x03, 0x16, 0xD4, len(CODE_TYPE), 8]) + CODE_TYPE
+    if len(raw) < len(head) + 8 or raw[:len(head)] != head:
+        return None
+    return raw[len(head):len(head) + 8].hex().upper()
+
+
 class SecureError(Exception):
     """A problem the person at the tag desk can understand and fix."""
 
 
-def secure_ntag215(link, uid_hex, pwd, pack):
+def secure_ntag215(link, uid_hex, pwd, pack, code=None):
     """Set the write password and turn on the read counter. Returns the counter value.
 
     `link` offers uid(), read16(page), write(page, 4 bytes) and thru(command bytes).
+    With `code` (8 bytes) it also writes the tag code record into user memory.
     Safe to run again on a tag it already secured with the same password.
     PROT stays 0, so anybody can still READ the tag (the phone app needs that);
     only WRITING needs the password. CFGLCK is never set.
@@ -106,11 +146,27 @@ def secure_ntag215(link, uid_hex, pwd, pack):
         if bytes(reply[:2]) != pack:
             raise SecureError("The password check failed after writing. Do not use this tag; try securing it again.")
 
+    if code is not None:
+        write_code_record(link, code)
+
     link.read16(4)                                        # a memory read makes the tag count this tap
     raw = link.thru(b"\x39\x02")
     if len(raw) < 3:
         raise SecureError("The tag's counter could not be read.")
     return int.from_bytes(bytes(raw[:3]), "little")
+
+
+def write_code_record(link, code):
+    """Write the tag code record (the tag is already authenticated) and read it back."""
+    record = build_code_record(code)
+    try:
+        for i in range(CODE_PAGES):
+            link.write(CODE_FIRST_PAGE + i, record[4 * i:4 * i + 4])
+        back = bytes(link.read16(CODE_FIRST_PAGE)) + bytes(link.read16(CODE_FIRST_PAGE + 4))[:12]
+    except IOError:
+        raise SecureError("The tag code could not be written. Hold the tag flat on the reader and try again.")
+    if back != record:
+        raise SecureError("The tag code did not read back correctly. Do not use this tag; try securing it again.")
 
 
 class FakeNtag215:
@@ -266,12 +322,12 @@ class Reader:
         return None
 
     # ---- securing (needs the card to stay connected for the whole procedure)
-    def secure(self, uid_hex, pwd, pack, timeout):
+    def secure(self, uid_hex, pwd, pack, timeout, code=None):
         """Wait for the tag, make sure it is the expected one, then secure it. Returns the counter."""
         if self.fake:
             tag = self.fake_tag or FakeNtag215("04AABBCCDDEE80")
             tag.new_session()
-            return secure_ntag215(tag, uid_hex if self.fake_tag else tag.uid(), pwd, pack)
+            return secure_ntag215(tag, uid_hex if self.fake_tag else tag.uid(), pwd, pack, code)
         ctypes, D, H = self.ctypes, self.D, self.H
         end = time.time() + timeout
         while True:
@@ -282,7 +338,7 @@ class Reader:
                 raise SecureError("No tag was placed on the reader.")
             time.sleep(0.2)
         try:
-            return secure_ntag215(PcscLink(self, card, proto), uid_hex, pwd, pack)
+            return secure_ntag215(PcscLink(self, card, proto), uid_hex, pwd, pack, code)
         finally:
             self.w.SCardDisconnect(card, 0)
 
@@ -383,9 +439,10 @@ class Handler(BaseHTTPRequestHandler):
             pwd = bytes.fromhex(str(body.get("password", "")))
             pack = bytes.fromhex(str(body.get("pack", "")))
             timeout = min(max(int(body.get("timeout", 15)), 1), 60)
+            code = bytes.fromhex(str(body["code"])) if body.get("code") else None
         except (ValueError, TypeError, json.JSONDecodeError):
             return self._send(400, {"error": "bad request"})
-        if not re.fullmatch(r"[0-9A-F]{8,20}", uid) or len(pwd) != 4 or len(pack) != 2:
+        if not re.fullmatch(r"[0-9A-F]{8,20}", uid) or len(pwd) != 4 or len(pack) != 2 or (code is not None and len(code) != 8):
             return self._send(400, {"error": "bad request"})
         if not READER.ok and hasattr(READER, "w"):
             READER._find_reader()
@@ -394,14 +451,14 @@ class Handler(BaseHTTPRequestHandler):
         if not LOCK.acquire(blocking=False):
             return self._send(409, {"error": "the reader is busy"})
         try:
-            counter = READER.secure(uid, pwd, pack, timeout)
+            counter = READER.secure(uid, pwd, pack, timeout, code)
         except SecureError as err:
             return self._send(422, {"error": str(err)})
         except Exception as err:
             return self._send(500, {"error": "Could not secure the tag (%s). Place it flat on the reader and try again." % err})
         finally:
             LOCK.release()
-        return self._send(200, {"ok": True, "uid": uid, "counter": counter})
+        return self._send(200, {"ok": True, "uid": uid, "counter": counter, "code_written": code is not None})
 
     def do_GET(self):
         # Refuse pages from other websites (a stranger's web page must not read your tags).
