@@ -235,3 +235,33 @@ it('returns 422 when an association user adds a product to its inactive weaver',
     $this->postJson('/api/association/products', ['weaver_id' => $weaver->id, 'title' => 'x', 'category' => 'y'])
         ->assertStatus(422);
 });
+
+it('blocks association users from every staff route', function () {
+    Sanctum::actingAs(User::factory()->association()->create());
+
+    $weaver = \App\Models\Weaver::factory()->create();
+    $product = \App\Models\Product::factory()->create();
+
+    $routes = [
+        ['getJson',  '/api/staff/associations'],
+        ['postJson', '/api/staff/associations'],
+        ['getJson',  '/api/staff/products'],
+        ['postJson', '/api/staff/products'],
+        ['putJson',  "/api/staff/products/{$product->id}"],
+        ['getJson',  '/api/staff/weavers'],
+        ['postJson', '/api/staff/weavers'],
+        ['putJson',  "/api/staff/weavers/{$weaver->id}"],
+    ];
+
+    foreach ($routes as [$method, $url]) {
+        $this->{$method}($url, [])->assertForbidden();
+    }
+});
+
+it('lets staff users reach the staff list routes', function () {
+    Sanctum::actingAs(User::factory()->staff()->create());
+
+    $this->getJson('/api/staff/associations')->assertOk();
+    $this->getJson('/api/staff/products')->assertOk();
+    $this->getJson('/api/staff/weavers')->assertOk();
+});

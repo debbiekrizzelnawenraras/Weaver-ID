@@ -50,7 +50,7 @@
   function securedBadge(t) {
     if (t.status !== 'active') { return ''; }
     return t.counter_enabled
-      ? ' <span class="badge bg-info text-dark" title="Write password set and read counter on">secured</span>'
+      ? ' <span class="badge bg-info text-dark" title="Write password set and read counter on' + (t.code_enabled ? ', tag code written' : '; no tag code yet (Re-secure to add it)') + '">secured</span>'
       : ' <span class="badge bg-warning text-dark" title="This tag has no write password or counter yet">not secured</span>';
   }
 
@@ -58,7 +58,9 @@
     tag_revoked: 'tag revoked', product_inactive: 'product inactive', weaver_inactive: 'member inactive',
     many_devices: 'many devices', counter_rollback: 'possible copy (counter went back)',
     counter_missing: 'secured tag read without counter',
-    counter_jump: 'counter jumped too far (not saved)'
+    counter_jump: 'counter jumped too far (not saved)',
+    code_missing: 'secured tag read without its tag code',
+    code_invalid: 'tag code does not match this UID (copied or forged)'
   };
 
   function when(value) {
@@ -415,12 +417,12 @@
       return fetch(READER_URL + '/secure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid: key.uid, password: key.password, pack: key.pack, timeout: 15 })
+        body: JSON.stringify({ uid: key.uid, password: key.password, pack: key.pack, code: key.code, timeout: 15 })
       }).then(function (res) {
         return res.json().then(function (d) { return { ok: res.ok, d: d }; });
       }).then(function (r) {
         if (!r.ok) { throw new Error(r.d.error || 'Reader error.'); }
-        return Weaver.post('/api/nfc-tags/' + tag.id + '/secured', { counter: r.d.counter });
+        return Weaver.post('/api/nfc-tags/' + tag.id + '/secured', { counter: r.d.counter, code_written: r.d.code_written === true });
       });
     });
   }

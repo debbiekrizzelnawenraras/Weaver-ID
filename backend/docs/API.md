@@ -15,6 +15,7 @@ Request body:
 - `uid`: hex UID read from the tag. Colons, spaces, dashes and lowercase are accepted. 8 to 20 hex characters.
 - `device_id`: optional stable id for the phone's app install. Used by the suspicious-scan rule. If omitted, the IP address is used.
 - `counter`: optional. The tag's own read counter (0 to 16777215), sent by the app for tags that were secured. A secured tag without a counter, with a counter lower than the saved one, or with one more than `WEAVER_COUNTER_WINDOW` above it is `suspicious`. Flagged counters are not saved. See `docs/TAG-SECURITY.md`.
+- `code`: optional. The tag code (16 hex characters) the app read from the tag's memory. A tag that was secured with a tag code and arrives without one, or with one that does not match the UID, is `suspicious` (and its counter is not saved). The code is never stored in the scan log or returned.
 
 Response (HTTP 200 for all three outcomes):
 

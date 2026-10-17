@@ -37,6 +37,33 @@ class TagSecurity
     }
 
     /**
+     * The tag code: a short code the server derives from the UID and the secret
+     * key, written onto the tag when it is secured. The phone reads it back and
+     * sends it with the UID, so a typed UID, a UID-only copy, or a code copied
+     * from another tag (different UID) fails. Anyone who can read the genuine
+     * tag can copy UID and code together, so this is not proof of the chip.
+     *
+     * @return string 8 bytes as 16 hex characters
+     */
+    public static function code(string $uid): string
+    {
+        $key = config('weaver.tag_key');
+
+        if (! is_string($key) || strlen($key) < 16) {
+            throw new RuntimeException('WEAVER_TAG_KEY is not set or is too short.');
+        }
+
+        $raw = hash_hmac('sha256', 'weaver-id/tag-code/v1|'.strtoupper($uid), $key, true);
+
+        return strtoupper(bin2hex(substr($raw, 0, 8)));
+    }
+
+    public static function codeMatches(string $uid, ?string $code): bool
+    {
+        return is_string($code) && hash_equals(self::code($uid), strtoupper(trim($code)));
+    }
+
+    /**
      * True when a counter is further above the last saved one than the window
      * allows. A genuine tag only gets there after that many taps that never
      * reached the server, so a bigger jump is treated as a forged number.

@@ -35,6 +35,16 @@ class NfcTagFactory extends Factory
         ]);
     }
 
+    /**
+     * A secured tag that also carries the tag code (scans must send it).
+     */
+    public function withCode(int $counter = 10): static
+    {
+        return $this->secured($counter)->state(fn (array $attributes) => [
+            'code_enabled' => true,
+        ]);
+    }
+
     public function revoked(): static
     {
         return $this->state(fn (array $attributes) => [
