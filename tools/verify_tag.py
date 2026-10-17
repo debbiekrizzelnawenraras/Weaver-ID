@@ -13,6 +13,12 @@ Usage (Windows, no packages needed, ACR122U plugged in, Laravel server running):
     python verify_tag.py --no-code           send no tag code (what the OLD app does)
     python verify_tag.py --server http://127.0.0.1:8000
 
+Forgery tests. The script still reads the real tag, then lies about one thing, the way a
+forger would. Each is clearly labelled FORGED in the output. The tag itself is never changed:
+    python verify_tag.py --code 0000000000000000   send a wrong tag code (16 hex characters)
+    python verify_tag.py --counter 5000            send this counter instead of the tag's own
+    python verify_tag.py --device phone-2          send as another device (many-devices test)
+
 Every real run is a genuine scan: the tag's counter goes up by one and the server
 writes a scan log. Use --dry-run to avoid the server log (the tag still counts the tap).
 """
@@ -54,9 +60,9 @@ def read_like_the_app(link):
     return uid, counter, code
 
 
-def build_request(uid, counter, code):
+def build_request(uid, counter, code, device=DEVICE_ID):
     """The JSON body the app sends. Fields the tag did not give are left out."""
-    body = {"uid": uid, "device_id": DEVICE_ID}
+    body = {"uid": uid, "device_id": device}
     if counter is not None:
         body["counter"] = counter
     if code is not None:
@@ -103,18 +109,28 @@ def _connect(reader, timeout):
     return cts._connect(reader, timeout)
 
 
-FLAGS = ("--dry-run", "--no-code", "--server")
+FLAGS = ("--dry-run", "--no-code", "--server", "--code", "--counter", "--device")
+MAX_COUNTER = 16777215          # 24-bit NFC counter, same limit as the server
 USAGE = """Usage:
     python verify_tag.py                     read one tag and verify it
     python verify_tag.py --dry-run           read the tag and print it, send nothing
     python verify_tag.py --no-code           send no tag code (what the OLD app does)
-    python verify_tag.py --server ADDRESS    default http://127.0.0.1:8000"""
+    python verify_tag.py --server ADDRESS    default http://127.0.0.1:8000
+  Forgery tests (the tag is only read, never changed):
+    python verify_tag.py --code HEX16        send this tag code (16 hex characters)
+    python verify_tag.py --counter NUMBER    send this counter (0 to 16777215)
+    python verify_tag.py --device NAME       send as this device name"""
+
+
+def _is_hex16(text):
+    return len(text) == 16 and all(c in "0123456789abcdefABCDEF" for c in text)
 
 
 def parse_args(argv):
     """Returns (options, error). Anything not understood is an error, never ignored,
     so a typo such as `--no code` cannot quietly run the wrong test."""
-    opts = {"dry_run": False, "no_code": False, "server": DEFAULT_SERVER}
+    opts = {"dry_run": False, "no_code": False, "server": DEFAULT_SERVER,
+            "code": None, "counter": None, "device": None}
     i = 0
     while i < len(argv):
         arg = argv[i]
@@ -127,6 +143,21 @@ def parse_args(argv):
                 return None, "--server needs a web address, for example http://127.0.0.1:8000"
             i += 1
             opts["server"] = argv[i]
+        elif arg == "--code":
+            if i + 1 >= len(argv) or not _is_hex16(argv[i + 1]):
+                return None, "--code needs exactly 16 hex characters, for example 0000000000000000"
+            i += 1
+            opts["code"] = argv[i].upper()
+        elif arg == "--counter":
+            if i + 1 >= len(argv) or not argv[i + 1].isdigit() or int(argv[i + 1]) > MAX_COUNTER:
+                return None, "--counter needs a whole number from 0 to %d" % MAX_COUNTER
+            i += 1
+            opts["counter"] = int(argv[i])
+        elif arg == "--device":
+            if i + 1 >= len(argv) or argv[i + 1].startswith("-") or not 0 < len(argv[i + 1]) <= 100:
+                return None, "--device needs a name of 1 to 100 characters, for example phone-2"
+            i += 1
+            opts["device"] = argv[i]
         else:
             import difflib
 
@@ -134,6 +165,8 @@ def parse_args(argv):
             hint = " Did you mean %s?" % near[0] if near else ""
             return None, "I don't understand '%s'.%s" % (arg, hint)
         i += 1
+    if opts["no_code"] and opts["code"] is not None:
+        return None, "--no-code and --code cannot be used together."
     return opts, None
 
 
@@ -173,12 +206,21 @@ def main(argv):
     if opts["no_code"]:
         code = None
         print("Sending:  WITHOUT the tag code (--no-code)")
+    if opts["code"] is not None:
+        code = opts["code"]
+        print("FORGED:   sending tag code %s instead of the tag's own (--code)" % code)
+    if opts["counter"] is not None:
+        counter = opts["counter"]
+        print("FORGED:   sending counter %d instead of the tag's own (--counter)" % counter)
+    device = opts["device"] or DEVICE_ID
+    if opts["device"]:
+        print("Device:   sending as '%s' (--device)" % device)
     if opts["dry_run"]:
         print("Dry run: nothing was sent to the server.")
         return 0
 
     try:
-        status, data = post_verify(server, build_request(uid, counter, code))
+        status, data = post_verify(server, build_request(uid, counter, code, device))
     except (urllib.error.URLError, OSError) as err:
         print("Could not reach the server at %s (%s). Is `php artisan serve` running?" % (server, err))
         return 2

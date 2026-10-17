@@ -116,7 +116,8 @@ class Arguments(unittest.TestCase):
     def test_no_arguments_gives_the_defaults(self):
         opts, error = vt.parse_args([])
         self.assertIsNone(error)
-        self.assertEqual(opts, {"dry_run": False, "no_code": False, "server": vt.DEFAULT_SERVER})
+        self.assertEqual(opts, {"dry_run": False, "no_code": False, "server": vt.DEFAULT_SERVER,
+                                "code": None, "counter": None, "device": None})
 
     def test_known_flags_are_understood(self):
         opts, error = vt.parse_args(["--dry-run", "--no-code", "--server", "http://127.0.0.1:9000"])
@@ -147,6 +148,45 @@ class Arguments(unittest.TestCase):
     def test_server_needs_an_address(self):
         self.assertIsNotNone(vt.parse_args(["--server"])[1])
         self.assertIsNotNone(vt.parse_args(["--server", "--dry-run"])[1])
+
+
+class ForgeryOptions(unittest.TestCase):
+    def test_code_counter_and_device_are_understood(self):
+        opts, error = vt.parse_args(["--code", "0000000000000000", "--counter", "5000", "--device", "phone-2"])
+        self.assertIsNone(error)
+        self.assertEqual((opts["code"], opts["counter"], opts["device"]), ("0000000000000000", 5000, "phone-2"))
+
+    def test_code_is_upper_cased_like_the_real_one(self):
+        self.assertEqual(vt.parse_args(["--code", "0a1b2c3d4e5f6a7b"])[0]["code"], "0A1B2C3D4E5F6A7B")
+
+    def test_a_code_of_the_wrong_shape_is_refused(self):
+        for bad in (["--code"], ["--code", "123"], ["--code", "ZZZZZZZZZZZZZZZZ"], ["--code", "00000000000000000"]):
+            self.assertIsNotNone(vt.parse_args(bad)[1], bad)
+
+    def test_counter_zero_and_the_maximum_are_allowed(self):
+        self.assertEqual(vt.parse_args(["--counter", "0"])[0]["counter"], 0)
+        self.assertEqual(vt.parse_args(["--counter", "16777215"])[0]["counter"], 16777215)
+
+    def test_a_bad_counter_is_refused(self):
+        for bad in (["--counter"], ["--counter", "-1"], ["--counter", "abc"], ["--counter", "1.5"],
+                    ["--counter", "16777216"], ["--counter", "--dry-run"]):
+            self.assertIsNotNone(vt.parse_args(bad)[1], bad)
+
+    def test_a_bad_device_name_is_refused(self):
+        for bad in (["--device"], ["--device", "--dry-run"], ["--device", "x" * 101]):
+            self.assertIsNotNone(vt.parse_args(bad)[1], bad)
+
+    def test_no_code_and_code_together_are_refused(self):
+        self.assertIn("cannot be used together", vt.parse_args(["--no-code", "--code", "0000000000000000"])[1])
+
+    def test_a_near_miss_suggests_the_new_flags(self):
+        self.assertIn("--counter", vt.parse_args(["--conter", "5"])[1])
+        self.assertIn("--device", vt.parse_args(["--devise", "x"])[1])
+
+    def test_the_request_carries_the_device_name(self):
+        body = vt.build_request(UID, 1, None, "phone-2")
+        self.assertEqual(body["device_id"], "phone-2")
+        self.assertEqual(vt.build_request(UID, 1, None)["device_id"], vt.DEVICE_ID)
 
 
 if __name__ == "__main__":
