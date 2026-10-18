@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Association;
 use App\Models\Product;
+use App\Support\ProductPhoto;
 use App\Models\Weaver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,8 +44,17 @@ class StaffController extends Controller
             return $this->forbidden('You can only register associations in your own municipality.');
         }
 
+        // One association name for the whole province, whichever municipality or user registered it.
+        $name = trim(preg_replace('/\s+/u', ' ', $validated['name']));
+
+        if (Association::nameTaken($name)) {
+            throw ValidationException::withMessages([
+                'name' => 'An association with this name is already registered.',
+            ]);
+        }
+
         $association = Association::create([
-            'name' => $validated['name'],
+            'name' => $name,
             // Staff are matched by exact municipality, so store their canonical spelling.
             'municipality' => $user->role === 'staff' ? $user->municipality : $validated['municipality'],
             'status' => 'active',
@@ -132,7 +142,7 @@ class StaffController extends Controller
     public function products(Request $request): JsonResponse
     {
         $products = Product::manageableBy($request->user())
-            ->with('weaver.association')
+            ->with('weaver.association', 'latestPhotoEvent.user')
             ->get();
 
         return response()->json([
@@ -167,9 +177,12 @@ class StaffController extends Controller
             'status' => 'active',
         ]);
 
+        $product->load('weaver.association');
+
         return response()->json([
-            'message' => 'Product created successfully.',
-            'product' => $product->load('weaver.association'),
+            // Names the association so the user can see where the product was registered.
+            'message' => 'Product created for '.$product->weaver->association->name.' (member: '.$product->weaver->name.').',
+            'product' => $product,
         ], 201);
     }
 
@@ -214,6 +227,37 @@ class StaffController extends Controller
         return response()->json([
             'message' => 'Product updated successfully.',
             'product' => $product->fresh()->load('weaver.association'),
+        ]);
+    }
+
+    public function uploadProductPhoto(Request $request, Product $product): JsonResponse
+    {
+        // The association (or the municipal staff helping it) photographs the real product.
+        if ($request->user()->role === 'admin') {
+            return $this->forbidden('Administrators can remove a photo but not add one. The association or its municipal staff adds the photo.');
+        }
+
+        if (! Product::manageableBy($request->user())->whereKey($product->id)->exists()) {
+            return $this->forbidden('You cannot manage this product.');
+        }
+
+        $request->validate(['photo' => ProductPhoto::rules()]);
+
+        return response()->json([
+            'message' => 'Product photo saved.',
+            'product' => ProductPhoto::replace($product, $request->file('photo'), $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
+        ]);
+    }
+
+    public function deleteProductPhoto(Request $request, Product $product): JsonResponse
+    {
+        if (! Product::manageableBy($request->user())->whereKey($product->id)->exists()) {
+            return $this->forbidden('You cannot manage this product.');
+        }
+
+        return response()->json([
+            'message' => 'Product photo removed.',
+            'product' => ProductPhoto::remove($product, $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
         ]);
     }
 

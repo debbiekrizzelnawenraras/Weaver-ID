@@ -30,6 +30,39 @@
     nfc: 'NFC Tags', logs: 'Scan Logs', users: 'Users'
   };
 
+  // Shrinks a chosen photo in the browser before it is uploaded: the longest
+  // side becomes at most 1000 px and the file is saved as JPEG, which usually
+  // turns a 3-8 MB phone photo into 100-300 KB. If anything goes wrong the
+  // original file is returned and the server's own limits still apply.
+  var PHOTO_MAX_SIDE = 1000;
+  var PHOTO_KEEP_BELOW = 300 * 1024;
+
+  function shrinkPhoto(file) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var scale = Math.min(1, PHOTO_MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+        if (scale === 1 && file.size <= PHOTO_KEEP_BELOW) { resolve(file); return; }
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff'; // JPEG has no transparency
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function (blob) {
+          if (!blob || blob.size >= file.size) { resolve(file); return; }
+          blob.name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+          resolve(blob);
+        }, 'image/jpeg', 0.82);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
   function $(id) { return document.getElementById(id); }
 
   // ------------------------------------------------------------ small helpers
@@ -238,16 +271,25 @@
 
   function renderProducts() {
     var rows = data.products.filter(function (p) {
-      return matches([p.title, p.category, p.weaver ? p.weaver.name : '']);
+      return matches([p.title, p.category, p.weaver ? p.weaver.name : '', productAssociation(p)]);
     }).map(function (p) {
       var tag = activeTagFor(p.id);
-      return '<tr><td class="fw-semibold">' + esc(p.title) + '</td><td>' + esc(p.category) + '</td><td>' +
-        esc(p.weaver ? p.weaver.name : '-') + '</td><td>' +
+      var thumb = p.photo_url
+        ? '<img src="' + esc(p.photo_url) + '" alt="" title="' + esc(photoNote(p)) + '" width="36" height="36" class="rounded me-2 border" style="object-fit:cover">'
+        : '<span class="d-inline-flex align-items-center justify-content-center rounded me-2 border text-muted" style="width:36px;height:36px;vertical-align:middle"><i class="bi bi-image"></i></span>';
+      return '<tr><td class="fw-semibold">' + thumb + esc(p.title) + '</td><td>' + esc(p.category) + '</td><td>' +
+        esc(p.weaver ? p.weaver.name : '-') + '</td>' +
+        (isAssoc ? '' : '<td>' + esc(productAssociation(p) || '-') + '</td>') + '<td>' +
         (tag ? '<code>' + esc(tag.uid) + '</code>' : '<span class="text-muted">none</span>') + '</td><td>' + badge(p.status) +
-        '</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-product" data-id="' +
+        '</td><td class="text-end pe-3" style="white-space:normal;min-width:200px">' +
+        // Administrators may remove a photo but not add one: the association or its staff photographs the product.
+        (isAdmin ? '' : '<button class="btn btn-sm btn-outline-primary py-0 me-1" data-action="photo-product" data-id="' +
+        esc(p.id) + '">' + (p.photo_url ? 'Change photo' : 'Add photo') + '</button>') +
+        (p.photo_url ? '<button class="btn btn-sm btn-outline-danger py-0 me-1" data-action="remove-photo" data-id="' + esc(p.id) + '">Remove photo</button>' : '') +
+        '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-product" data-id="' +
         esc(p.id) + '">' + (p.status === 'active' ? 'Deactivate' : 'Activate') + '</button></td></tr>';
     });
-    $('productsBody').innerHTML = rows.length ? rows.join('') : empty(6, 'No products to show.');
+    $('productsBody').innerHTML = rows.length ? rows.join('') : empty(isAssoc ? 6 : 7, 'No products to show.');
   }
 
   function renderTags() {
@@ -363,6 +405,7 @@
   function collect() {
     var out = {};
     activeFields.forEach(function (f) {
+      if (f.skip) { return; }          // helper field, not sent to the server
       var el = $('f_' + f.name);
       if (f.type === 'checkbox') { out[f.name] = el.checked; return; }
       var v = el.value.trim();
@@ -393,6 +436,25 @@
   function activeWeaverOptions() {
     return data.weavers.filter(function (w) { return w.status === 'active'; })
       .map(function (w) { return { value: w.id, label: w.name }; });
+  }
+  // Active members of one association only (staff and admin pick the association first).
+  function memberOptionsFor(associationId) {
+    return data.weavers.filter(function (w) { return w.status === 'active' && String(w.association_id) === String(associationId); })
+      .map(function (w) { return { value: w.id, label: w.name }; });
+  }
+  function fillMemberSelect(associationId) {
+    var sel = $('f_weaver_id');
+    var opts = associationId ? memberOptionsFor(associationId) : [];
+    sel.innerHTML = '<option value="">' + (!associationId ? 'Select an association first' : (opts.length ? 'Select...' : 'This association has no active members')) + '</option>' +
+      opts.map(function (o) { return '<option value="' + esc(o.value) + '">' + esc(o.label) + '</option>'; }).join('');
+    sel.disabled = !opts.length;
+  }
+  function productAssociation(p) {
+    return p.weaver && p.weaver.association ? p.weaver.association.name : '';
+  }
+  function photoNote(p) {
+    var e = p.latest_photo_event;
+    return e ? 'Photo ' + e.action + ' by ' + (e.user ? e.user.name : 'a removed user') + ' on ' + when(e.created_at) : 'Product photo';
   }
   function activeProductOptions(ignoreTagId) {
     return data.products.filter(function (p) { return p.status === 'active'; }).map(function (p) {
@@ -452,11 +514,48 @@
       ], function (v) { return Weaver.post('/api/staff/associations', v); });
     },
     'add-product': function () {
-      openForm('Add product', 'Save', [
+      var fields = [
         { name: 'weaver_id', label: 'Member', type: 'select', options: activeWeaverOptions(), int: true },
         { name: 'title', label: 'Product name' },
         { name: 'category', label: 'Category', placeholder: 'e.g. Blanket, Table runner' }
-      ], function (v) { return Weaver.post(API.product, v); });
+      ];
+      if (!isAssoc) {
+        // Staff and admin choose the association first, then a member of that association.
+        fields.unshift({ name: 'association_id', label: 'Association', type: 'select', options: assocOptions(), skip: true });
+        fields[1].options = [];
+      }
+      openForm('Add product', 'Save', fields, function (v) { return Weaver.post(API.product, v); });
+      if (!isAssoc) {
+        fillMemberSelect('');
+        $('f_association_id').addEventListener('change', function () { fillMemberSelect(this.value); });
+      }
+    },
+    // Product photo: pick an image, upload it, refresh the list.
+    'photo-product': function (id) {
+      if (isAdmin) { toast('Administrators can remove a photo but not add one.', 'danger'); return; }
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/jpeg,image/png,image/webp';
+      input.onchange = function () {
+        var file = input.files && input.files[0];
+        if (!file) { return; }
+        toast('Preparing the photo...', 'info');
+        shrinkPhoto(file).then(function (small) {
+          if (small.size > 3 * 1024 * 1024) { toast('The photo is still larger than 3 MB. Choose a smaller one.', 'danger'); return; }
+          var form = new FormData();
+          form.append('photo', small, small.name || file.name);
+          toast('Uploading the photo...', 'info');
+          run(Weaver.upload(API.product + '/' + id + '/photo', form));
+        });
+      };
+      input.click();
+    },
+    'remove-photo': function (id) {
+      var p = byId(data.products, id);
+      if (!p) { return; }
+      confirmThen('Remove the photo of ' + p.title + '?', function () {
+        run(Weaver.del(API.product + '/' + p.id + '/photo'));
+      });
     },
     'toggle-product': function (id) {
       var p = byId(data.products, id);

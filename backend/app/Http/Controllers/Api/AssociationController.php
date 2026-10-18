@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ScanLog;
 use App\Models\Weaver;
+use App\Support\ProductPhoto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -53,7 +54,7 @@ class AssociationController extends Controller
             $query->where('association_id', $user->association_id);
         })
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
-            ->with('weaver')
+            ->with('weaver', 'latestPhotoEvent.user')
             ->get();
 
         return response()->json([
@@ -243,6 +244,54 @@ class AssociationController extends Controller
     /**
      * ?status=active (default) | inactive | all, so deactivated records can be found and reactivated.
      */
+    public function uploadProductPhoto(Request $request, Product $product): JsonResponse
+    {
+        if ($denied = $this->denyForeignProduct($request, $product)) {
+            return $denied;
+        }
+
+        $request->validate(['photo' => ProductPhoto::rules()]);
+
+        return response()->json([
+            'message' => 'Product photo saved.',
+            'product' => ProductPhoto::replace($product, $request->file('photo'), $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
+        ]);
+    }
+
+    public function deleteProductPhoto(Request $request, Product $product): JsonResponse
+    {
+        if ($denied = $this->denyForeignProduct($request, $product)) {
+            return $denied;
+        }
+
+        return response()->json([
+            'message' => 'Product photo removed.',
+            'product' => ProductPhoto::remove($product, $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
+        ]);
+    }
+
+    /** A 403 response unless the product belongs to the user's own association. */
+    private function denyForeignProduct(Request $request, Product $product): ?JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->association_id) {
+            return response()->json([
+                'message' => 'Association account is not linked to an association.',
+            ], 403);
+        }
+
+        $product->loadMissing('weaver');
+
+        if ((int) $product->weaver->association_id !== (int) $user->association_id) {
+            return response()->json([
+                'message' => 'You are not authorized to modify this product.',
+            ], 403);
+        }
+
+        return null;
+    }
+
     private function statusFilter(Request $request): string
     {
         $validated = $request->validate([

@@ -67,6 +67,7 @@ class VerifyController extends Controller
             $payload['product'] = [
                 'title' => $product->title,
                 'category' => $product->category,
+                'photo_url' => $product->photo_url,
             ];
             // Public shows the business only. Member names are private.
             $association = $weaver->association;

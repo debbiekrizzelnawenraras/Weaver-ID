@@ -64,8 +64,13 @@
     if (t) { headers['Authorization'] = 'Bearer ' + t; }
     var init = { method: method, headers: headers };
     if (body !== undefined && body !== null) {
-      headers['Content-Type'] = 'application/json';
-      init.body = JSON.stringify(body);
+      if (typeof FormData !== 'undefined' && body instanceof FormData) {
+        // File upload: the browser sets the multipart Content-Type itself.
+        init.body = body;
+      } else {
+        headers['Content-Type'] = 'application/json';
+        init.body = JSON.stringify(body);
+      }
     }
     return fetch(base + path, init).then(function (res) {
       return res.text().then(function (raw) {
@@ -117,6 +122,7 @@
   window.Weaver = {
     get: function (path) { return request('GET', path); },
     post: function (path, body) { return request('POST', path, body === undefined ? {} : body); },
+    upload: function (path, formData) { return request('POST', path, formData); },
     patch: function (path, body) { return request('PATCH', path, body === undefined ? {} : body); },
     del: function (path) { return request('DELETE', path); },
     login: login,

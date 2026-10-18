@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AssociationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\NfcTagController;
+use App\Http\Controllers\Api\ProductPhotoController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\VerifyController;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:lo
 
 // Public: the mobile app verifies a scanned NFC tag without logging in.
 Route::post('/verify', VerifyController::class)->middleware('throttle:verify');
+Route::get('/product-photos/{filename}', [ProductPhotoController::class, 'show'])
+    ->where('filename', '[0-9a-f\-]{36}\.(jpg|png|webp)');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -31,6 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/association/products', [AssociationController::class, 'products']);
         Route::post('/association/products', [AssociationController::class, 'storeProduct']);
         Route::put('/association/products/{product}', [AssociationController::class, 'updateProduct']);
+        Route::post('/association/products/{product}/photo', [AssociationController::class, 'uploadProductPhoto']);
+        Route::delete('/association/products/{product}/photo', [AssociationController::class, 'deleteProductPhoto']);
 
         Route::get('/association/scan-logs', [AssociationController::class, 'scanLogs']);
     });
@@ -47,6 +52,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/staff/products', [StaffController::class, 'products']);
         Route::post('/staff/products', [StaffController::class, 'storeProduct']);
         Route::put('/staff/products/{product}', [StaffController::class, 'updateProduct']);
+        Route::post('/staff/products/{product}/photo', [StaffController::class, 'uploadProductPhoto']);
+        Route::delete('/staff/products/{product}/photo', [StaffController::class, 'deleteProductPhoto']);
     });
 
     // Tag linking is shared by admin, staff and association users, each within their own scope.

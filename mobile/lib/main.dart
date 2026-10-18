@@ -61,6 +61,7 @@ class VerifyResult {
     required this.message,
     this.productTitle,
     this.productCategory,
+    this.photoPath,
     this.associationName,
     this.associationMunicipality,
   });
@@ -69,6 +70,9 @@ class VerifyResult {
   final String message;
   final String? productTitle;
   final String? productCategory;
+
+  /// Address of the product photo as sent by the server (relative or absolute).
+  final String? photoPath;
   final String? associationName;
   final String? associationMunicipality;
 
@@ -99,6 +103,7 @@ class VerifyResult {
       message: (json['message'] ?? '').toString(),
       productTitle: product?['title']?.toString(),
       productCategory: product?['category']?.toString(),
+      photoPath: product?['photo_url']?.toString(),
       associationName: association?['name']?.toString(),
       associationMunicipality: association?['municipality']?.toString(),
     );
@@ -106,6 +111,17 @@ class VerifyResult {
 }
 
 // ------------------------------------------------------------------ api
+
+/// Full address of a product photo. The server sends a path such as
+/// /api/product-photos/<name>.jpg; it is joined to the server address saved in
+/// the app. Returns null when there is no photo.
+String? resolvePhotoUrl(String serverUrl, String? photoPath) {
+  if (photoPath == null || photoPath.trim().isEmpty) return null;
+  final path = photoPath.trim();
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  final base = serverUrl.trim().replaceAll(RegExp(r'/+$'), '');
+  return path.startsWith('/') ? '$base$path' : '$base/$path';
+}
 
 class WeaverApi {
   WeaverApi({required this.baseUrl, required this.deviceId});
@@ -417,7 +433,8 @@ class _ScanPageState extends State<ScanPage> {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 16),
-            if (_result != null) ResultCard(result: _result!),
+            if (_result != null)
+              ResultCard(result: _result!, serverUrl: _serverUrl),
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 8),
@@ -459,9 +476,12 @@ class _ScanPageState extends State<ScanPage> {
 // --------------------------------------------------------- result card
 
 class ResultCard extends StatelessWidget {
-  const ResultCard({super.key, required this.result});
+  const ResultCard({super.key, required this.result, this.serverUrl = ''});
 
   final VerifyResult result;
+
+  /// Server address saved in the app; used to load the product photo.
+  final String serverUrl;
 
   MaterialColor get _color {
     switch (result.verdict) {
@@ -535,6 +555,33 @@ class ResultCard extends StatelessWidget {
             Text(result.message),
             if (result.verdict == Verdict.authenticated) ...[
               const Divider(height: 24),
+              if (resolvePhotoUrl(serverUrl, result.photoPath) != null) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    resolvePhotoUrl(serverUrl, result.photoPath)!,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) => progress == null
+                        ? child
+                        : const SizedBox(
+                            height: 200,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                    errorBuilder: (context, error, stack) => const SizedBox(
+                      height: 60,
+                      child: Center(child: Text('Photo could not be loaded.')),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Compare this photo with the product in your hands.',
+                  style: TextStyle(color: Colors.black54, fontSize: 12),
+                ),
+                const SizedBox(height: 10),
+              ],
               _row('Product', result.productTitle),
               _row('Category', result.productCategory),
               _row('Association', result.associationName),

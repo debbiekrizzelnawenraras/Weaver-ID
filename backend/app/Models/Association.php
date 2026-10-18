@@ -35,6 +35,23 @@ class Association extends Model
         };
     }
 
+    /**
+     * The name in a form that ignores case, spaces and punctuation, so that
+     * "Rose Ann's Loom" and "rose anns  loom" count as the same association.
+     */
+    public static function nameKey(string $name): string
+    {
+        return preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($name)) ?? '';
+    }
+
+    /** True when any association in the whole system already has this name. */
+    public static function nameTaken(string $name): bool
+    {
+        $key = self::nameKey($name);
+
+        return $key !== '' && self::query()->pluck('name')->contains(fn (string $existing) => self::nameKey($existing) === $key);
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
