@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\StrongPassword;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class AdminUserController extends Controller
 {
@@ -23,7 +23,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', Password::min(10)],
+            'password' => ['required', 'string', new StrongPassword($request->input('email'), $request->input('name'))],
             'role' => ['required', Rule::in(['admin', 'staff', 'association'])],
             'municipality' => [Rule::requiredIf($request->input('role') === 'staff'), 'nullable', 'string', 'max:255'],
             'association_id' => [
@@ -38,6 +38,8 @@ class AdminUserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
+            // The administrator chose this password, so the person must replace it at first login.
+            'must_change_password' => true,
             'role' => $validated['role'],
             'municipality' => $validated['role'] === 'staff' ? $validated['municipality'] : null,
             'association_id' => $validated['role'] === 'association' ? $validated['association_id'] : null,
@@ -58,7 +60,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => ['nullable', 'string', Password::min(10)],
+            'password' => ['nullable', 'string', new StrongPassword($request->input('email', $user->email), $request->input('name', $user->name))],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'municipality' => [Rule::requiredIf($user->role === 'staff'), 'nullable', 'string', 'max:255'],
             'association_id' => [
@@ -85,6 +87,8 @@ class AdminUserController extends Controller
 
         if (! empty($validated['password'])) {
             $changes['password'] = $validated['password'];
+            // A reset password is known to the administrator, unless they reset their own.
+            $changes['must_change_password'] = ! $user->is($request->user());
         }
 
         $user->update($changes);

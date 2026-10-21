@@ -62,7 +62,7 @@ it('creates a staff user and requires a municipality', function () {
 
     $payload = [
         'name' => 'Negosyo Staff', 'email' => 'ns@example.test',
-        'password' => 'a-long-password-1', 'role' => 'staff',
+        'password' => 'Tg7#kLm92xQv', 'role' => 'staff',
     ];
 
     $this->postJson('/api/admin/users', $payload)
@@ -81,7 +81,7 @@ it('creates an association user and requires an association', function () {
 
     $payload = [
         'name' => 'Assoc User', 'email' => 'au@example.test',
-        'password' => 'a-long-password-1', 'role' => 'association',
+        'password' => 'Tg7#kLm92xQv', 'role' => 'association',
     ];
 
     $this->postJson('/api/admin/users', $payload)
@@ -133,11 +133,11 @@ it('resets a password and signs the user out', function () {
 
     $this->putJson("/api/admin/users/{$staff->id}", [
         'name' => $staff->name, 'email' => $staff->email, 'status' => 'active',
-        'municipality' => 'Bontoc', 'password' => 'brand-new-password-9',
+        'municipality' => 'Bontoc', 'password' => 'Zr4$pWn81vKd',
     ])->assertOk();
 
     expect($staff->tokens()->count())->toBe(0);
     $this->postJson('/api/login', [
-        'email' => $staff->email, 'password' => 'brand-new-password-9', 'role' => 'staff',
+        'email' => $staff->email, 'password' => 'Zr4$pWn81vKd', 'role' => 'staff',
     ])->assertOk();
 });

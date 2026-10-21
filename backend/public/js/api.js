@@ -80,6 +80,13 @@
           clearSession();
           toLogin();
         }
+        if (res.status === 403 && data.code === 'password_change_required') {
+          // The account still has a password an administrator chose. account.js opens the
+          // window that asks for a new one and reloads the page afterwards, so this call
+          // never settles and the page shows no error behind that window.
+          window.dispatchEvent(new Event('weaver:password-required'));
+          return new Promise(function () {});
+        }
         if (!res.ok) { throw new ApiError(res.status, data); }
         return data;
       });
@@ -95,6 +102,16 @@
         store(USER_KEY, JSON.stringify(data.user));
         return data.user;
       });
+  }
+
+  // Sets the signed-in person's own password. Other devices are signed out; this one stays.
+  function changePassword(current, password, confirmation) {
+    return request('POST', '/api/change-password', {
+      current_password: current, password: password, password_confirmation: confirmation
+    }, { noRedirect: true }).then(function (data) {
+      store(USER_KEY, JSON.stringify(data.user));
+      return data;
+    });
   }
 
   function logout() {
@@ -126,6 +143,7 @@
     patch: function (path, body) { return request('PATCH', path, body === undefined ? {} : body); },
     del: function (path) { return request('DELETE', path); },
     login: login,
+    changePassword: changePassword,
     logout: logout,
     user: user,
     token: token,

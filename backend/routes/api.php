@@ -22,12 +22,13 @@ Route::post('/reports', [SuspiciousReportController::class, 'store'])->middlewar
 Route::get('/product-photos/{filename}', [ProductPhotoController::class, 'show'])
     ->where('filename', '[0-9a-f\-]{36}\.(jpg|png|webp)');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'password.changed'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user()->load('association');
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/change-password', [AuthController::class, 'changePassword'])->middleware('throttle:change-password');
 
     Route::middleware('role:association')->group(function () {
         Route::get('/association/weavers', [AssociationController::class, 'weavers']);

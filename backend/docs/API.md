@@ -108,8 +108,8 @@ Staff see reports about tags in their own municipality; admin sees all. Associat
 | `GET /api/admin/scan-logs` | Scan history, 50 per page, newest first. Optional `?result=authenticated\|unregistered\|suspicious`. |
 | `PATCH /api/admin/nfc-tags/{id}/reassign` | Fix a mistake: move a tag to another active product `{ "product_id": 2 }`. 422 if the product is inactive, its weaver is inactive, it already has an active tag, or it is the same product. A revoked tag stays revoked unless `"reactivate": true` is sent. Every change is saved in `nfc_tag_events` with who did it. |
 | `GET /api/admin/users` | All accounts. |
-| `POST /api/admin/users` | Create `{ name, email, password (10+ chars), role, municipality (staff), association_id (association) }`. |
-| `PUT /api/admin/users/{id}` | Edit name, email, status, municipality or association; optional new password. The role cannot change. Deactivating a user or resetting a password signs them out everywhere. An admin cannot deactivate their own account. |
+| `POST /api/admin/users` | Create `{ name, email, password (see Password rules), role, municipality (staff), association_id (association) }`. The new account must change its password at first sign-in. |
+| `PUT /api/admin/users/{id}` | Edit name, email, status, municipality or association; optional new password. The role cannot change. Deactivating a user or resetting a password signs them out everywhere. A reset password must be changed at the next sign-in, unless the admin reset their own. An admin cannot deactivate their own account. |
 
 ## Auth changes (patch 1)
 
@@ -117,6 +117,27 @@ Staff see reports about tags in their own municipality; admin sees all. Associat
 - `POST /api/logout` deletes the current token.
 - Tokens expire after `SANCTUM_EXPIRATION` minutes (default 480).
 - A deactivated user is blocked on every role-protected route, even with a valid token.
+
+## Passwords
+
+**Password rules** (checked by the server for every new password; the dashboards show the same rules as a Weak / Medium / Strong meter):
+
+- at least 12 characters, with a lowercase letter, an uppercase letter, a number and a symbol;
+- not a common password or pattern (password, 123456, qwerty and similar, or the same character four times in a row);
+- does not contain a word of four or more letters from the account's name or the part of its email before the @.
+
+Weak means a rule is not met. Medium means every rule is met (12 to 15 characters). Strong means every rule is met and the password has 16 characters or more. The level measures rule compliance and length, not how fast a password could be cracked. The rules live in `app/Support/PasswordPolicy.php` and, for the live meter, `public/js/password-policy.js`; `tests/fixtures/password-vectors.json` is run against both.
+
+`POST /api/change-password` (any signed-in role, limited to 5 requests per minute per account)
+
+```json
+{ "current_password": "...", "password": "...", "password_confirmation": "..." }
+```
+
+- 422 if the current password is wrong, the new one breaks a rule (every broken rule is listed in `errors.password`), the confirmation differs, or the new password equals the current one.
+- On success the password changes, `must_change_password` is cleared, and every other token of the account is deleted. The token that made the request stays valid.
+
+**Forced change at first sign-in.** An account created by an admin, or whose password an admin reset (except the admin's own), has `must_change_password: true` (returned by `POST /api/login` and `GET /api/user`). Until it changes its password, every route except `GET /api/user`, `POST /api/change-password` and `POST /api/logout` answers 403 with `"code": "password_change_required"`. The dashboards open a window that cannot be closed until the password is changed.
 
 ## Known limits (say these out loud in the defense)
 

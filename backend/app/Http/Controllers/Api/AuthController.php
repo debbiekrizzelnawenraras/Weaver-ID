@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\StrongPassword;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -52,6 +55,59 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'association_id' => $user->association_id,
+                'must_change_password' => (bool) $user->must_change_password,
+            ],
+        ]);
+    }
+
+    /**
+     * The signed-in person sets their own password. The current one is checked
+     * first, then the new one against the password rules. Every other session
+     * of this account is signed out; this one stays.
+     */
+    public function changePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'current_password' => ['required', 'string'],
+        ]);
+
+        // 422, not 401, so the dashboard shows the message instead of signing the person out.
+        if (! Hash::check($request->input('current_password'), $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => 'The current password is not correct.',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'confirmed', new StrongPassword($user->email, $user->name)],
+        ]);
+
+        if (Hash::check($validated['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => 'The new password must be different from the current one.',
+            ]);
+        }
+
+        $user->forceFill([
+            'password' => $validated['password'],
+            'must_change_password' => false,
+        ])->save();
+
+        $current = $user->currentAccessToken();
+        $keep = $current instanceof PersonalAccessToken ? $current->getKey() : null;
+        $user->tokens()->when($keep, fn ($tokens) => $tokens->where('id', '!=', $keep))->delete();
+
+        return response()->json([
+            'message' => 'Password changed. Other devices were signed out.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'association_id' => $user->association_id,
+                'must_change_password' => false,
             ],
         ]);
     }

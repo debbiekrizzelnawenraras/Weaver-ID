@@ -381,8 +381,11 @@
       var scope = u.role === 'staff' ? (u.municipality || '-') : (u.role === 'association' ? (u.association ? u.association.name : '-') : 'All');
       var self = u.id === me.id;
       return '<tr><td class="fw-semibold">' + esc(u.name) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.role) +
-        '</td><td>' + esc(scope) + '</td><td>' + badge(u.status) + '</td><td class="text-end pe-3">' +
-        (self ? '<span class="text-muted fs-8">you</span>' :
+        '</td><td>' + esc(scope) + '</td><td>' + badge(u.status) +
+        (u.must_change_password ? ' <span class="badge bg-warning text-dark" title="This account still has the password an administrator chose.">password not changed yet</span>' : '') +
+        '</td><td class="text-end pe-3">' +
+        (self ? '<span class="text-muted fs-8">you (use the key button)</span>' :
+          '<button class="btn btn-sm btn-outline-secondary py-0 me-1" data-action="reset-user-password" data-id="' + esc(u.id) + '">Reset password</button>' +
           '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-user" data-id="' + esc(u.id) + '">' +
           (u.status === 'active' ? 'Deactivate' : 'Activate') + '</button>') + '</td></tr>';
     });
@@ -435,7 +438,7 @@
         '<button type="button" class="btn btn-outline-success" data-action="read-uid"><i class="bi bi-wifi"></i> Read from reader</button></div>' +
         '<div id="readerMsg" class="form-text"></div></div>';
     }
-    return '<div class="mb-3">' + label + input + '</div>';
+    return '<div class="mb-3">' + label + input + (f.meter ? '<div id="meter_' + esc(f.name) + '" class="mt-2"></div>' : '') + '</div>';
   }
 
   function openForm(title, submitLabel, fields, onSubmit, note) {
@@ -445,6 +448,14 @@
     $('formSubmit').textContent = submitLabel;
     $('formBody').innerHTML = (note ? '<p class="text-muted fs-7">' + esc(note) + '</p>' : '') + fields.map(fieldHtml).join('');
     $('formErr').classList.add('d-none');
+    fields.forEach(function (f) {
+      if (f.meter && window.WeaverPassword) {
+        WeaverPassword.attachMeter($('f_' + f.name), $('meter_' + f.name), {
+          context: f.context,
+          watch: (f.watch || []).map(function (n) { return $('f_' + n); })
+        });
+      }
+    });
     modal = modal || new bootstrap.Modal($('formModal'));
     modal.show();
   }
@@ -703,7 +714,8 @@
       openForm('Add user', 'Create', [
         { name: 'name', label: 'Full name' },
         { name: 'email', label: 'Email', type: 'email' },
-        { name: 'password', label: 'Password (10+ characters)', type: 'password' },
+        { name: 'password', label: 'Starting password (12+ characters)', type: 'password', meter: true, watch: ['name', 'email'],
+          context: function () { return { email: $('f_email').value, name: $('f_name').value }; } },
         { name: 'role', label: 'Role', type: 'select', options: [
           { value: 'staff', label: 'Staff' }, { value: 'association', label: 'Association' }, { value: 'admin', label: 'Admin' }] },
         { name: 'municipality', label: 'Municipality (staff only)' },
@@ -712,7 +724,21 @@
         if (v.role !== 'staff') { delete v.municipality; }
         if (v.role !== 'association') { delete v.association_id; }
         return Weaver.post('/api/admin/users', v);
-      });
+      }, 'The person must choose their own password the first time they sign in.');
+    },
+    'reset-user-password': function (id) {
+      var u = byId(data.users, id);
+      if (!u) { return; }
+      openForm('Reset password: ' + u.name, 'Reset password', [
+        { name: 'password', label: 'New password (12+ characters)', type: 'password', meter: true,
+          context: function () { return { email: u.email, name: u.name }; } }
+      ], function (v) {
+        return put('/api/admin/users/' + u.id, {
+          name: u.name, email: u.email, status: u.status,
+          municipality: u.municipality || null, association_id: u.association_id || null,
+          password: v.password
+        });
+      }, 'They will be signed out of every device and must choose their own password the next time they sign in.');
     },
     'toggle-user': function (id) {
       var u = byId(data.users, id);

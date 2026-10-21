@@ -29,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        // Changing a password asks for the current one, so guessing it is limited per account.
+        RateLimiter::for('change-password', function (Request $request) {
+            return Limit::perMinute(5)->by($request->user()?->id ?: $request->ip());
+        });
+
         // The public verify endpoint is limited per IP address.
         RateLimiter::for('verify', function (Request $request) {
             return Limit::perMinute(30)->by($request->ip());

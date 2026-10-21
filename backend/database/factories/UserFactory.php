@@ -62,6 +62,14 @@ class UserFactory extends Factory
         ]);
     }
 
+    /** A password an administrator chose: the account must replace it before doing anything else. */
+    public function mustChangePassword(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'must_change_password' => true,
+        ]);
+    }
+
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
