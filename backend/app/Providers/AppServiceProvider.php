@@ -33,5 +33,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('verify', function (Request $request) {
             return Limit::perMinute(30)->by($request->ip());
         });
+
+        // Reports are public too, so they are limited harder than scans.
+        RateLimiter::for('reports', function (Request $request) {
+            return Limit::perHour(10)->by($request->ip());
+        });
     }
 }

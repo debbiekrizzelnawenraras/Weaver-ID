@@ -6,6 +6,7 @@ use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
 use App\Models\NfcTag;
 use App\Models\ScanLog;
+use App\Support\ReportRules;
 use App\Support\TagSecurity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,6 +59,17 @@ class VerifyController extends Controller
             'result' => $result->value,
             'message' => $result->message(),
         ];
+
+        // A flagged scan tells the app whether to offer a report. A secured tag read without its counter or
+        // code is most often a cut-short read, so the first such flag asks for another tap instead.
+        if ($result === ScanResult::Suspicious) {
+            $payload['can_report'] = ReportRules::eligibleScan($validated['uid'], $scanner) !== null;
+
+            if (! $payload['can_report'] && ReportRules::isIncompleteRead($reason)) {
+                $payload['retry'] = true;
+                $payload['message'] = 'The tag may not have been read completely. Hold the phone steady on the tag and tap again.';
+            }
+        }
 
         // Product details are only shown for authenticated tags.
         if ($result === ScanResult::Authenticated) {

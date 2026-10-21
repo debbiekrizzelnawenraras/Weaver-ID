@@ -36,6 +36,24 @@ Response (HTTP 200 for all three outcomes):
 
 Invalid `uid` returns HTTP 422. Every valid scan is written to `scan_logs`, including unregistered ones.
 
+A `suspicious` response also carries `can_report` (true when this phone may report the tag, see below). A secured tag that was read without its counter or tag code is most often a read that was cut short, so the first such flag from a phone returns `can_report: false`, `retry: true` and a message asking for another tap. A second flag from the same phone with no authenticated scan in between opens reporting. The reason for the flag is never returned.
+
+## Public: report a suspicious tag
+
+`POST /api/reports`  (no login, limited to 10 requests per hour per IP)
+
+```json
+{ "uid": "04A1B2C3D4E5F6", "device_id": "app-3f2a...", "app_version": "1.0.0",
+  "location": "Souvenir stall, Bontoc public market", "seen_on": "2026-10-21",
+  "note": "optional, up to 1000 characters", "contact": "optional, up to 120 characters" }
+```
+
+- `uid` and `location` (3 to 150 characters) are required. `seen_on` is `YYYY-MM-DD`, not later than tomorrow. Leave `contact` out to report anonymously.
+- The server only accepts a report when the same phone (`device_id`, or the IP address when none is sent) has a flagged scan of that tag within the last `WEAVER_REPORT_WINDOW` minutes (default 60) and the rule above allows reporting. Otherwise it returns 422 asking the person to tap again. The flag reason is copied from that scan on the server; the app cannot send it.
+- One report per phone and tag per `WEAVER_REPORT_DUPLICATE_HOURS` hours (default 24). A repeat returns 200 with `"duplicate": true` and the first reference. A second phone reporting the same tag is stored as its own report.
+- Returns 201 `{ "reference": "SR-20261021-AB12C", "duplicate": false, "message": "..." }`.
+- A report never changes the tag. Revoking a tag stays a separate decision of DTI-Mountain Province.
+
 ## Tag linking (admin, staff and association)
 
 Requires `Authorization: Bearer <token>` from `POST /api/login`. Each role works inside its own scope:
@@ -64,6 +82,15 @@ Staff see and edit only their municipality; admin sees all. Out-of-scope records
 | `POST /api/staff/associations` | Register an association `{ name, municipality }`. Staff may only use their own municipality. |
 | `GET/POST /api/staff/weavers`, `PUT /api/staff/weavers/{id}` | Weavers in scope. |
 | `GET/POST /api/staff/products`, `PUT /api/staff/products/{id}` | Products in scope. A product of an inactive weaver can be edited or deactivated but not reactivated or moved. |
+
+## Reports of suspicious tags (staff and admin)
+
+Staff see reports about tags in their own municipality; admin sees all. Association users get 403.
+
+| Method and path | Purpose |
+|---|---|
+| `GET /api/reports` | Reports, newest first, 25 per page, with product, association, the internal flag reason, how many reports exist for the same tag (`same_tag_reports`) and the review state. Optional `?status=new\|under_review\|verified\|dismissed\|referred`. |
+| `PATCH /api/reports/{id}` | Review a report `{ "status": "under_review", "review_note": "optional" }`. Saves who reviewed it and when. A report outside the caller's scope returns 403. It does not revoke or change the tag. |
 
 ## Association registry
 

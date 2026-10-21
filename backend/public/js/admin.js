@@ -12,6 +12,7 @@
   var isAdmin = me.role === 'admin';
   var isAssoc = me.role === 'association';
   var hasLogs = isAdmin || isAssoc;
+  var hasReports = !isAssoc;
   var API = {
     weavers: isAssoc ? '/api/association/weavers?status=all' : '/api/staff/weavers',
     weaver: isAssoc ? '/api/association/weavers' : '/api/staff/weavers',
@@ -22,12 +23,12 @@
   var esc = Weaver.esc;
   var READER_URL = window.WEAVER_READER_URL || 'http://127.0.0.1:8777';
 
-  var data = { associations: [], weavers: [], products: [], tags: [], users: [], summary: null, logs: null };
-  var state = { tab: 'dashboard', filter: '', logPage: 1, logResult: '', staffMunicipality: '' };
+  var data = { associations: [], weavers: [], products: [], tags: [], users: [], summary: null, logs: null, reports: null };
+  var state = { tab: 'dashboard', filter: '', logPage: 1, logResult: '', reportPage: 1, reportStatus: '', staffMunicipality: '' };
 
   var TITLES = {
     dashboard: 'Dashboard', weavers: 'Members', associations: 'Associations', products: 'Products',
-    nfc: 'NFC Tags', logs: 'Scan Logs', users: 'Users'
+    nfc: 'NFC Tags', logs: 'Scan Logs', reports: 'Reports', users: 'Users'
   };
 
   // Shrinks a chosen photo in the browser before it is uploaded: the longest
@@ -96,6 +97,14 @@
     code_invalid: 'tag code does not match this UID (copied or forged)'
   };
 
+  var REPORT_STATUS = {
+    new: { label: 'New', cls: 'warning text-dark' },
+    under_review: { label: 'Under review', cls: 'info text-dark' },
+    verified: { label: 'Verified', cls: 'danger' },
+    dismissed: { label: 'Dismissed', cls: 'secondary' },
+    referred: { label: 'Referred', cls: 'primary' }
+  };
+
   function when(value) {
     if (!value) { return '-'; }
     var d = new Date(value);
@@ -136,6 +145,7 @@
       jobs.push(Weaver.get('/api/staff/associations').then(function (r) { data.associations = r.associations || []; }));
     }
     if (hasLogs) { jobs.push(loadLogs()); }
+    if (hasReports) { jobs.push(loadReports()); }
     if (isAdmin) {
       jobs.push(Weaver.get('/api/admin/summary').then(function (r) { data.summary = r; }));
       jobs.push(Weaver.get('/api/admin/users').then(function (r) { data.users = r.users || []; }));
@@ -164,6 +174,11 @@
     return Weaver.get(API.logs + q).then(function (r) { data.logs = r; });
   }
 
+  function loadReports() {
+    var q = '?page=' + state.reportPage + (state.reportStatus ? '&status=' + encodeURIComponent(state.reportStatus) : '');
+    return Weaver.get('/api/reports' + q).then(function (r) { data.reports = r; });
+  }
+
   // ---------------------------------------------------------------- rendering
   function renderAll() {
     renderTiles();
@@ -173,6 +188,7 @@
     renderProducts();
     renderTags();
     if (hasLogs) { renderLogs(); }
+    if (hasReports) { renderReports(); }
     if (isAdmin) { renderUsers(); }
   }
 
@@ -331,6 +347,33 @@
     $('logNext').disabled = !l || l.current_page >= l.last_page;
   }
 
+  function reportBadge(status) {
+    var s = REPORT_STATUS[status] || { label: status, cls: 'secondary' };
+    return '<span class="badge bg-' + s.cls + '">' + esc(s.label) + '</span>';
+  }
+
+  function renderReports() {
+    var r = data.reports;
+    var items = r && r.data ? r.data : [];
+    var rows = items.filter(function (x) {
+      return matches([x.reference, x.uid, x.location, x.status, x.product ? x.product.title : '',
+        x.association ? x.association.name : '']);
+    }).map(function (x) {
+      return '<tr><td>' + when(x.created_at) + '</td><td><code>' + esc(x.reference) + '</code></td><td><code>' + esc(x.uid) +
+        '</code></td><td>' + esc(x.product ? x.product.title : '-') +
+        (x.association ? '<div class="text-muted fs-8">' + esc(x.association.name) + '</div>' : '') +
+        '</td><td>' + esc(REASONS[x.flag_reason] || x.flag_reason || '-') +
+        '</td><td class="text-wrap" style="min-width:12rem">' + esc(x.location) +
+        '</td><td>' + esc(x.same_tag_reports) + '</td><td>' + reportBadge(x.status) +
+        '</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-success py-0" data-action="review-report" data-id="' +
+        esc(x.id) + '">Review</button></td></tr>';
+    });
+    $('reportsBody').innerHTML = rows.length ? rows.join('') : empty(9, 'No reports to show.');
+    $('reportPageInfo').textContent = r ? 'Page ' + r.current_page + ' of ' + r.last_page + ' (' + r.total + ' reports)' : '';
+    $('reportPrev').disabled = !r || r.current_page <= 1;
+    $('reportNext').disabled = !r || r.current_page >= r.last_page;
+  }
+
   function renderUsers() {
     var rows = data.users.filter(function (u) {
       return matches([u.name, u.email, u.role, u.municipality || '', u.association ? u.association.name : '']);
@@ -372,6 +415,10 @@
     if (f.type === 'checkbox') {
       return '<div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="' + id + '" name="' + esc(f.name) +
         '"><label class="form-check-label fs-7" for="' + id + '">' + esc(f.label) + '</label></div>';
+    }
+    if (f.type === 'textarea') {
+      return '<div class="mb-3">' + label + '<textarea class="form-control" id="' + id + '" name="' + esc(f.name) + '" rows="' +
+        esc(f.rows || 3) + '"' + (f.readonly ? ' readonly' : '') + '>' + esc(f.value || '') + '</textarea></div>';
     }
     if (f.type === 'select') {
       var opts = (f.options || []).map(function (o) {
@@ -635,6 +682,23 @@
         return Weaver.patch('/api/admin/nfc-tags/' + t.id + '/reassign', body);
       }, 'Use this to fix a mistake. Every change is recorded in the audit trail.');
     },
+    'review-report': function (id) {
+      var x = data.reports && data.reports.data ? byId(data.reports.data, id) : null;
+      if (!x) { return; }
+      var statusOptions = Object.keys(REPORT_STATUS).map(function (k) { return { value: k, label: REPORT_STATUS[k].label }; });
+      openForm('Report ' + x.reference, 'Save review', [
+        { name: 'r_tag', label: 'Tag UID and why it was flagged', value: x.uid + ' - ' + (REASONS[x.flag_reason] || x.flag_reason || '-'), readonly: true, skip: true },
+        { name: 'r_where', label: 'Where it was found', value: x.location, readonly: true, skip: true },
+        { name: 'r_seen', label: 'Date seen', value: x.seen_on || '-', readonly: true, skip: true },
+        { name: 'r_note', label: 'What the person wrote', type: 'textarea', value: x.note || '-', readonly: true, skip: true },
+        { name: 'r_contact', label: 'Contact (optional, only if they chose to give it)', value: x.contact || 'none (anonymous)', readonly: true, skip: true },
+        { name: 'status', label: 'Status', type: 'select', value: x.status, options: statusOptions },
+        { name: 'review_note', label: 'Review note (what you checked or decided)', type: 'textarea', value: x.review_note || '' }
+      ], function (v) {
+        return Weaver.patch('/api/reports/' + x.id, { status: v.status, review_note: v.review_note || null })
+          .then(function () { return { message: 'Review saved.' }; });
+      }, 'A report does not change the tag. Revoking a tag is a separate step in NFC Tags, done only on your decision. Referral to other offices is also your decision.');
+    },
     'add-user': function () {
       openForm('Add user', 'Create', [
         { name: 'name', label: 'Full name' },
@@ -711,6 +775,9 @@
     if (!hasLogs) {
       Array.prototype.forEach.call(document.querySelectorAll('.logs-ui'), function (el) { el.remove(); });
     }
+    if (!hasReports) {
+      Array.prototype.forEach.call(document.querySelectorAll('.reports-ui'), function (el) { el.remove(); });
+    }
 
     $('sideNav').addEventListener('click', function (e) {
       var a = e.target.closest('[data-tab]');
@@ -739,6 +806,15 @@
       });
       $('logPrev').addEventListener('click', function () { state.logPage--; loadLogs().then(renderLogs); });
       $('logNext').addEventListener('click', function () { state.logPage++; loadLogs().then(renderLogs); });
+    }
+
+    if (hasReports) {
+      $('reportFilter').addEventListener('change', function () {
+        state.reportStatus = this.value; state.reportPage = 1;
+        loadReports().then(renderReports);
+      });
+      $('reportPrev').addEventListener('click', function () { state.reportPage--; loadReports().then(renderReports); });
+      $('reportNext').addEventListener('click', function () { state.reportPage++; loadReports().then(renderReports); });
     }
 
     showTab('dashboard');

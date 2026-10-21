@@ -5,6 +5,10 @@
 // tag's own read counter (NTAG21x) and the code is the tag code the tag desk
 // wrote into the tag's memory; each is only sent when the tag has one.
 //
+// After a suspicious result the server says whether the person may report the
+// tag (can_report). The report goes to POST {server}/api/reports and is reviewed
+// by DTI-Mountain Province; it never changes the tag by itself.
+//
 // Real NFC reading works on an Android phone. On Windows/Edge you can still
 // test the screen by typing a UID into the "Test with a UID" box.
 
@@ -19,6 +23,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(const WeaverIdApp());
+
+/// Sent with a report so DTI knows which app version it came from.
+const appVersion = '1.0.0';
 
 /// The tag code record the tag desk writes into a secured tag (pages 4..10):
 /// an NDEF message with one external-type record "weaver.id:t" whose 8-byte
@@ -64,6 +71,8 @@ class VerifyResult {
     this.photoPath,
     this.associationName,
     this.associationMunicipality,
+    this.canReport = false,
+    this.retry = false,
   });
 
   final Verdict verdict;
@@ -75,6 +84,12 @@ class VerifyResult {
   final String? photoPath;
   final String? associationName;
   final String? associationMunicipality;
+
+  /// True when the server allows a report for this tag from this phone.
+  final bool canReport;
+
+  /// True when the flag may come from a read that was cut short: tap again first.
+  final bool retry;
 
   factory VerifyResult.error(String message) =>
       VerifyResult(verdict: Verdict.error, message: message);
@@ -106,9 +121,26 @@ class VerifyResult {
       photoPath: product?['photo_url']?.toString(),
       associationName: association?['name']?.toString(),
       associationMunicipality: association?['municipality']?.toString(),
+      canReport: json['can_report'] == true,
+      retry: json['retry'] == true,
     );
   }
 }
+
+/// What came back from sending a report.
+class ReportOutcome {
+  ReportOutcome({required this.ok, required this.message, this.reference});
+
+  final bool ok;
+  final String message;
+
+  /// Reference number the person can quote to DTI-Mountain Province.
+  final String? reference;
+}
+
+/// Today's date as the server expects it (yyyy-MM-dd).
+String formatDate(DateTime d) =>
+    '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 // ------------------------------------------------------------------ api
 
@@ -168,6 +200,73 @@ class WeaverApi {
           'Cannot reach the server. Check the address in Settings and that both devices are on the same network.');
     }
   }
+
+  /// Sends a report about a tag the server flagged. Only [location] is required;
+  /// leave [contact] empty to report anonymously.
+  Future<ReportOutcome> report(
+    String uid, {
+    required String location,
+    String? seenOn,
+    String? note,
+    String? contact,
+  }) async {
+    final base = baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$base/api/reports'),
+            headers: const {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'uid': uid,
+              'device_id': deviceId,
+              'app_version': appVersion,
+              'location': location,
+              if (seenOn != null && seenOn.isNotEmpty) 'seen_on': seenOn,
+              if (note != null && note.isNotEmpty) 'note': note,
+              if (contact != null && contact.isNotEmpty) 'contact': contact,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      Map<String, dynamic> data = {};
+      try {
+        data = jsonDecode(response.body) as Map<String, dynamic>;
+      } catch (_) {}
+      final message = (data['message'] ?? '').toString();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ReportOutcome(
+          ok: true,
+          message: message.isNotEmpty ? message : 'Your report was sent.',
+          reference: data['reference']?.toString(),
+        );
+      }
+      if (response.statusCode == 422) {
+        return ReportOutcome(
+            ok: false,
+            message: message.isNotEmpty
+                ? message
+                : 'The report could not be accepted. Check the fields and try again.');
+      }
+      if (response.statusCode == 429) {
+        return ReportOutcome(
+            ok: false, message: 'Too many reports from this network. Try again later.');
+      }
+      return ReportOutcome(
+          ok: false, message: 'Server error (${response.statusCode}).');
+    } on TimeoutException {
+      return ReportOutcome(
+          ok: false,
+          message: 'The server did not answer. Check the server address and Wi-Fi.');
+    } catch (_) {
+      return ReportOutcome(
+          ok: false,
+          message: 'Cannot reach the server. Check the address in Settings.');
+    }
+  }
 }
 
 // ----------------------------------------------------------------- page
@@ -188,6 +287,9 @@ class _ScanPageState extends State<ScanPage> {
   bool _busy = false;
   String _status = 'Ready.';
   VerifyResult? _result;
+
+  /// UID of the tag the shown result is about (needed to report it).
+  String? _resultUid;
   final _uidController = TextEditingController();
 
   bool get _nfcPlatform =>
@@ -230,6 +332,7 @@ class _ScanPageState extends State<ScanPage> {
       _busy = true;
       _status = 'Checking $uid ...';
       _result = null;
+      _resultUid = uid;
     });
     final api = WeaverApi(baseUrl: _serverUrl, deviceId: _deviceId);
     final result = await api.verify(uid, counter: counter, code: code);
@@ -333,6 +436,19 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  Future<void> _openReport() async {
+    final uid = _resultUid;
+    if (uid == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ReportPage(
+          api: WeaverApi(baseUrl: _serverUrl, deviceId: _deviceId),
+          uid: uid,
+        ),
+      ),
+    );
+  }
+
   Future<void> _manualVerify() async {
     final uid = _normalizeUid(_uidController.text);
     if (uid.length < 8 || uid.length > 20) {
@@ -434,7 +550,11 @@ class _ScanPageState extends State<ScanPage> {
                 style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 16),
             if (_result != null)
-              ResultCard(result: _result!, serverUrl: _serverUrl),
+              ResultCard(
+                result: _result!,
+                serverUrl: _serverUrl,
+                onReport: _busy ? null : _openReport,
+              ),
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 8),
@@ -476,9 +596,13 @@ class _ScanPageState extends State<ScanPage> {
 // --------------------------------------------------------- result card
 
 class ResultCard extends StatelessWidget {
-  const ResultCard({super.key, required this.result, this.serverUrl = ''});
+  const ResultCard(
+      {super.key, required this.result, this.serverUrl = '', this.onReport});
 
   final VerifyResult result;
+
+  /// Opens the report screen. The button shows only when the server allows a report.
+  final VoidCallback? onReport;
 
   /// Server address saved in the app; used to load the product photo.
   final String serverUrl;
@@ -553,6 +677,16 @@ class ResultCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(result.message),
+            if (result.verdict == Verdict.suspicious &&
+                result.canReport &&
+                onReport != null) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: onReport,
+                icon: const Icon(Icons.flag_outlined),
+                label: const Text('Report this tag to DTI'),
+              ),
+            ],
             if (result.verdict == Verdict.authenticated) ...[
               const Divider(height: 24),
               if (resolvePhotoUrl(serverUrl, result.photoPath) != null) ...[
@@ -610,6 +744,199 @@ class ResultCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// --------------------------------------------------------- report page
+
+/// Form shown after a suspicious result. Only the place is required; the date,
+/// a note and contact details are optional, and leaving the contact empty
+/// sends the report anonymously.
+class ReportPage extends StatefulWidget {
+  const ReportPage({super.key, required this.api, required this.uid});
+
+  final WeaverApi api;
+  final String uid;
+
+  @override
+  State<ReportPage> createState() => _ReportPageState();
+}
+
+class _ReportPageState extends State<ReportPage> {
+  final _location = TextEditingController();
+  final _note = TextEditingController();
+  final _contact = TextEditingController();
+  DateTime _seenOn = DateTime.now();
+  bool _sending = false;
+  String? _error;
+  ReportOutcome? _done;
+
+  @override
+  void dispose() {
+    _location.dispose();
+    _note.dispose();
+    _contact.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _seenOn,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now,
+    );
+    if (picked != null && mounted) setState(() => _seenOn = picked);
+  }
+
+  Future<void> _send() async {
+    final place = _location.text.trim();
+    if (place.length < 3) {
+      setState(() => _error =
+          'Tell us where you found it: a shop, stall or market and the town, or the online seller.');
+      return;
+    }
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    final outcome = await widget.api.report(
+      widget.uid,
+      location: place,
+      seenOn: formatDate(_seenOn),
+      note: _note.text.trim(),
+      contact: _contact.text.trim(),
+    );
+    if (!mounted) return;
+    setState(() {
+      _sending = false;
+      if (outcome.ok) {
+        _done = outcome;
+      } else {
+        _error = outcome.message;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final done = _done;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Report a tag')),
+      body: SafeArea(
+        child: done != null ? _thanks(context, done) : _form(context),
+      ),
+    );
+  }
+
+  Widget _thanks(BuildContext context, ReportOutcome done) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const SizedBox(height: 24),
+        const Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
+        const SizedBox(height: 12),
+        Text(done.message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium),
+        if (done.reference != null) ...[
+          const SizedBox(height: 12),
+          Text('Reference: ${done.reference}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
+        const SizedBox(height: 8),
+        const Text(
+          'DTI-Mountain Province decides what happens next. Please do not confront the seller.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.black54),
+        ),
+        const SizedBox(height: 24),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Done'),
+        ),
+      ],
+    );
+  }
+
+  Widget _form(BuildContext context) {
+    final small = Theme.of(context).textTheme.bodySmall;
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text('Tag ${widget.uid}',
+            style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        const Text(
+          'This tag was flagged as suspicious. That is not proof that the product is fake. DTI-Mountain Province reviews every report.',
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _location,
+          enabled: !_sending,
+          maxLength: 150,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Where did you find it? (required)',
+            hintText: 'Stall name and town, or the online seller or link',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 8),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.calendar_today),
+          title: Text('Date seen: ${formatDate(_seenOn)}'),
+          trailing: TextButton(
+            onPressed: _sending ? null : _pickDate,
+            child: const Text('Change'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _note,
+          enabled: !_sending,
+          maxLines: 3,
+          maxLength: 1000,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'What did you notice? (optional)',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _contact,
+          enabled: !_sending,
+          maxLength: 120,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            labelText: 'Your phone or email (optional)',
+            helperText: 'Leave empty to report anonymously.',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Privacy: DTI-Mountain Province uses this report only to review the tag. The app also sends the tag ID, the scan time and this phone\'s app ID. Do not include photos or names of other people.',
+          style: small,
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          Text(_error!, style: const TextStyle(color: Colors.red)),
+        ],
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: _sending ? null : _send,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(_sending ? 'Sending ...' : 'Send report'),
+          ),
+        ),
+      ],
     );
   }
 }

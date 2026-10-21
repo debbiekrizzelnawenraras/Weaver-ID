@@ -210,6 +210,7 @@
           <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Products</a>
           <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
           <a class="nav-link logs-ui" data-tab="logs"><i class="bi bi-journal-check"></i> Scan Logs</a>
+          <a class="nav-link reports-ui" data-tab="reports"><i class="bi bi-flag"></i> Reports</a>
           <a class="nav-link admin-only" data-tab="users"><i class="bi bi-person-gear"></i> Users</a>
         </nav>
       </div>
@@ -341,6 +342,39 @@
             <div class="btn-group btn-group-sm">
               <button class="btn btn-outline-secondary" id="logPrev">Previous</button>
               <button class="btn btn-outline-secondary" id="logNext">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS OF SUSPICIOUS TAGS -->
+      <div id="view-reports" class="tab-view d-none reports-ui">
+        <div class="dashboard-card p-0">
+          <div class="p-3 d-flex justify-content-between align-items-center border-bottom gap-2 flex-wrap">
+            <div>
+              <h6 class="fw-bold mb-0">Reports of suspicious tags</h6>
+              <small class="text-muted">Sent from the app after a scan was flagged. A report does not change the tag: review it, then decide.</small>
+            </div>
+            <select id="reportFilter" class="form-select form-select-sm" style="width:auto">
+              <option value="">All statuses</option>
+              <option value="new">New</option>
+              <option value="under_review">Under review</option>
+              <option value="verified">Verified</option>
+              <option value="dismissed">Dismissed</option>
+              <option value="referred">Referred</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>Received</th><th>Reference</th><th>Tag UID</th><th>Product</th><th>Why flagged</th><th>Where found</th><th>Reports</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
+              <tbody id="reportsBody"></tbody>
+            </table>
+          </div>
+          <div class="p-3 d-flex justify-content-between align-items-center border-top fs-7">
+            <span id="reportPageInfo" class="text-muted"></span>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary" id="reportPrev">Previous</button>
+              <button class="btn btn-outline-secondary" id="reportNext">Next</button>
             </div>
           </div>
         </div>

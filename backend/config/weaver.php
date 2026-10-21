@@ -48,6 +48,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Suspicious tag reports
+    |--------------------------------------------------------------------------
+    |
+    | A phone may report a tag only if the server flagged a scan of that tag
+    | from the same phone within this many minutes. One phone can report the
+    | same tag once per this many hours.
+    |
+    */
+
+    'report_window_minutes' => (int) env('WEAVER_REPORT_WINDOW', 60),
+
+    'report_duplicate_hours' => (int) env('WEAVER_REPORT_DUPLICATE_HOURS', 24),
+
+    /*
+    |--------------------------------------------------------------------------
     | Seeder password
     |--------------------------------------------------------------------------
     |

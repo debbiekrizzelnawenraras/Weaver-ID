@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\NfcTagController;
 use App\Http\Controllers\Api\ProductPhotoController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\SuspiciousReportController;
 use App\Http\Controllers\Api\VerifyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,8 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:lo
 
 // Public: the mobile app verifies a scanned NFC tag without logging in.
 Route::post('/verify', VerifyController::class)->middleware('throttle:verify');
+// Public: the app sends a report after a scan the server flagged (checked again on the server).
+Route::post('/reports', [SuspiciousReportController::class, 'store'])->middleware('throttle:reports');
 Route::get('/product-photos/{filename}', [ProductPhotoController::class, 'show'])
     ->where('filename', '[0-9a-f\-]{36}\.(jpg|png|webp)');
 
@@ -54,6 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/staff/products/{product}', [StaffController::class, 'updateProduct']);
         Route::post('/staff/products/{product}/photo', [StaffController::class, 'uploadProductPhoto']);
         Route::delete('/staff/products/{product}/photo', [StaffController::class, 'deleteProductPhoto']);
+
+        // Reports of suspicious tags: staff see their municipality, admin sees all.
+        Route::get('/reports', [SuspiciousReportController::class, 'index']);
+        Route::patch('/reports/{report}', [SuspiciousReportController::class, 'update']);
     });
 
     // Tag linking is shared by admin, staff and association users, each within their own scope.
