@@ -24,11 +24,11 @@
     var wrap = document.createElement('div');
     wrap.innerHTML =
       '<div class="modal fade" id="changePwModal" tabindex="-1" aria-labelledby="changePwTitle" aria-hidden="true">' +
-      '<div class="modal-dialog"><form class="modal-content" id="changePwForm" novalidate>' +
+      '<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><form class="modal-content" id="changePwForm" novalidate>' +
       '<div class="modal-header"><h5 class="modal-title fw-bold" id="changePwTitle">Change password</h5>' +
       '<button type="button" class="btn-close" id="cpClose" data-bs-dismiss="modal" aria-label="Close"></button></div>' +
       '<div class="modal-body">' +
-      '<p class="text-muted fs-7" id="cpIntro"></p>' +
+      '<p class="text-muted fs-7 mb-3" id="cpIntro"></p>' +
       '<div class="mb-3"><label class="form-label fs-7 fw-semibold" for="cpCurrent">Current password</label>' +
       '<input type="password" class="form-control" id="cpCurrent" autocomplete="current-password"></div>' +
       '<div class="mb-2"><label class="form-label fs-7 fw-semibold" for="cpNew">New password</label>' +

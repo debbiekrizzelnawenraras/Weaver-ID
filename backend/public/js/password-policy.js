@@ -104,7 +104,7 @@
       '.wpw-medium .wpw-bar span:nth-child(-n+2){background:#9a5b00}' +
       '.wpw-strong .wpw-bar span{background:#0e523a}' +
       '.wpw-level{font-size:.85rem}.wpw-weak .wpw-word{color:#b42318}.wpw-medium .wpw-word{color:#9a5b00}.wpw-strong .wpw-word{color:#0e523a}' +
-      '.wpw-rules{list-style:none;padding:0;margin:.4rem 0 0;font-size:.8rem;columns:2}' +
+      '.wpw-rules{list-style:none;padding:0;margin:.3rem 0 0;font-size:.8rem;line-height:1.4;columns:2}' +
       '.wpw-rules li{break-inside:avoid;color:#64748b}.wpw-rules li.ok{color:#0e523a}' +
       '.wpw-rules i{margin-right:.35rem}' +
       '@media (max-width:575.98px){.wpw-rules{columns:1}}';

@@ -3,7 +3,10 @@
 use App\Http\Controllers\Api\AdminReportController;
 use App\Http\Controllers\Api\AdminTagController;
 use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AssociationApplicationController;
+use App\Http\Controllers\Api\AssociationApplicationReviewController;
 use App\Http\Controllers\Api\AssociationController;
+use App\Http\Controllers\Api\AttentionController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\NfcTagController;
 use App\Http\Controllers\Api\ProductPhotoController;
@@ -19,6 +22,10 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:lo
 Route::post('/verify', VerifyController::class)->middleware('throttle:verify');
 // Public: the app sends a report after a scan the server flagged (checked again on the server).
 Route::post('/reports', [SuspiciousReportController::class, 'store'])->middleware('throttle:reports');
+// Public: an association applies to be registered; staff decide. Nothing is created until approval.
+Route::get('/municipalities', [AssociationApplicationController::class, 'municipalities']);
+Route::post('/association-applications', [AssociationApplicationController::class, 'store'])->middleware('throttle:applications');
+Route::post('/association-applications/status', [AssociationApplicationController::class, 'status'])->middleware('throttle:application-status');
 Route::get('/product-photos/{filename}', [ProductPhotoController::class, 'show'])
     ->where('filename', '[0-9a-f\-]{36}\.(jpg|png|webp)');
 
@@ -62,10 +69,18 @@ Route::middleware(['auth:sanctum', 'password.changed'])->group(function () {
         // Reports of suspicious tags: staff see their municipality, admin sees all.
         Route::get('/reports', [SuspiciousReportController::class, 'index']);
         Route::patch('/reports/{report}', [SuspiciousReportController::class, 'update']);
+
+        // Association applications: staff decide their municipality's, admin decides all.
+        Route::get('/applications', [AssociationApplicationReviewController::class, 'index']);
+        Route::post('/applications/{application}/approve', [AssociationApplicationReviewController::class, 'approve']);
+        Route::post('/applications/{application}/reject', [AssociationApplicationReviewController::class, 'reject']);
     });
 
     // Tag linking is shared by admin, staff and association users, each within their own scope.
     Route::middleware('role:admin,staff,association')->group(function () {
+        // What needs attention now: new reports and recent suspicious scans, within each user's own scope.
+        Route::get('/attention', AttentionController::class);
+
         Route::get('/nfc-tags', [NfcTagController::class, 'index']);
         Route::post('/nfc-tags', [NfcTagController::class, 'store']);
         Route::patch('/nfc-tags/{nfcTag}/revoke', [NfcTagController::class, 'revoke']);

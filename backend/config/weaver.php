@@ -63,6 +63,45 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Dashboard attention window
+    |--------------------------------------------------------------------------
+    |
+    | The "Needs attention" panel counts suspicious scans from this many hours
+    | back. New reports are counted until someone reviews them, however old.
+    |
+    */
+
+    'attention_hours' => (int) env('WEAVER_ATTENTION_HOURS', 24),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Municipalities of Mountain Province
+    |--------------------------------------------------------------------------
+    |
+    | The choices on the association application form. Staff accounts are tied to
+    | one of these by name, so the spelling here is the one every record uses.
+    |
+    */
+
+    'municipalities' => [
+        'Barlig', 'Bauko', 'Besao', 'Bontoc', 'Natonin',
+        'Paracelis', 'Sabangan', 'Sadanga', 'Sagada', 'Tadian',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Privacy notice version
+    |--------------------------------------------------------------------------
+    |
+    | Saved with each association application next to the time the applicant
+    | accepted the notice. Change it whenever the notice text changes.
+    |
+    */
+
+    'application_notice_version' => env('WEAVER_NOTICE_VERSION', '2026-10'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Seeder password
     |--------------------------------------------------------------------------
     |

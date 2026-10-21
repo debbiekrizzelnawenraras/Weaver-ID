@@ -39,6 +39,18 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->ip());
         });
 
+        // Association applications are public and write to the database, so they are limited. Every try
+        // counts, including ones refused by the form rules, and an office may help several associations
+        // from one address, so the limit allows for that.
+        RateLimiter::for('applications', function (Request $request) {
+            return Limit::perHour(10)->by($request->ip());
+        });
+
+        // Looking up an application needs its reference and email, so guessing is limited per IP address.
+        RateLimiter::for('application-status', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
         // Reports are public too, so they are limited harder than scans.
         RateLimiter::for('reports', function (Request $request) {
             return Limit::perHour(10)->by($request->ip());

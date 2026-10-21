@@ -13,22 +13,28 @@
   var isAssoc = me.role === 'association';
   var hasLogs = isAdmin || isAssoc;
   var hasReports = !isAssoc;
+  var hasApps = !isAssoc;          // association applications: staff and admin decide them
   var API = {
     weavers: isAssoc ? '/api/association/weavers?status=all' : '/api/staff/weavers',
     weaver: isAssoc ? '/api/association/weavers' : '/api/staff/weavers',
     products: isAssoc ? '/api/association/products?status=all' : '/api/staff/products',
     product: isAssoc ? '/api/association/products' : '/api/staff/products',
-    logs: isAssoc ? '/api/association/scan-logs' : '/api/admin/scan-logs'
+    logs: isAssoc ? '/api/association/scan-logs' : '/api/admin/scan-logs',
+    attention: '/api/attention'
   };
   var esc = Weaver.esc;
   var READER_URL = window.WEAVER_READER_URL || 'http://127.0.0.1:8777';
 
-  var data = { associations: [], weavers: [], products: [], tags: [], users: [], summary: null, logs: null, reports: null };
-  var state = { tab: 'dashboard', filter: '', logPage: 1, logResult: '', reportPage: 1, reportStatus: '', staffMunicipality: '' };
+  var data = { associations: [], weavers: [], products: [], tags: [], users: [], summary: null, logs: null, reports: null, applications: null, municipalities: [], attention: null, attentionAt: null };
+  var state = { tab: 'dashboard', filter: '', logPage: 1, logResult: '', reportPage: 1, reportStatus: '', appPage: 1, appStatus: 'pending', staffMunicipality: '',
+    seen: { report: 0, scan: 0, application: 0 } };
+
+  // How often the page asks what needs attention. window.WEAVER_POLL_MS exists for testing only.
+  var POLL_MS = window.WEAVER_POLL_MS || 60000;
 
   var TITLES = {
     dashboard: 'Dashboard', weavers: 'Members', associations: 'Associations', products: 'Products',
-    nfc: 'NFC Tags', logs: 'Scan Logs', reports: 'Reports', users: 'Users'
+    nfc: 'NFC Tags', logs: 'Scan Logs', reports: 'Reports', applications: 'Applications', users: 'Users'
   };
 
   // Shrinks a chosen photo in the browser before it is uploaded: the longest
@@ -67,12 +73,19 @@
   function $(id) { return document.getElementById(id); }
 
   // ------------------------------------------------------------ small helpers
-  function toast(message, kind) {
+  // opts.ms: how long it stays (default 4.5 s); opts.go: tab to open when it is clicked.
+  function toast(message, kind, opts) {
+    opts = opts || {};
     var el = document.createElement('div');
     el.className = 'alert alert-' + (kind || 'success') + ' shadow-sm py-2 fs-7';
     el.textContent = message;
+    if (opts.go) {
+      el.style.cursor = 'pointer';
+      el.title = 'Click to open';
+      el.addEventListener('click', function () { goTo(opts.go); el.remove(); });
+    }
     $('toastHost').appendChild(el);
-    setTimeout(function () { el.remove(); }, 4500);
+    setTimeout(function () { el.remove(); }, opts.ms || 4500);
   }
 
   function badge(status) {
@@ -146,9 +159,13 @@
     }
     if (hasLogs) { jobs.push(loadLogs()); }
     if (hasReports) { jobs.push(loadReports()); }
+    if (hasApps) { jobs.push(loadApplications()); }
+    jobs.push(loadAttention());
     if (isAdmin) {
       jobs.push(Weaver.get('/api/admin/summary').then(function (r) { data.summary = r; }));
       jobs.push(Weaver.get('/api/admin/users').then(function (r) { data.users = r.users || []; }));
+      // The list for the staff Municipality choice in Add user. If it cannot be loaded the form falls back to typing.
+      jobs.push(Weaver.get('/api/municipalities').then(function (r) { data.municipalities = r.municipalities || []; }).catch(function () { data.municipalities = []; }));
     } else {
       jobs.push(Weaver.get('/api/user').then(function (r) {
         var u = r.user || r;
@@ -174,6 +191,20 @@
     return Weaver.get(API.logs + q).then(function (r) { data.logs = r; });
   }
 
+  // The panel and the badge are extras: if this call fails the rest of the page still loads.
+  function loadAttention() {
+    return Weaver.get(API.attention).then(function (a) {
+      data.attention = a;
+      data.attentionAt = new Date();
+      state.seen = newestIds(a, state.seen);
+    }).catch(function () { data.attention = null; });
+  }
+
+  function loadApplications() {
+    var q = '?page=' + state.appPage + (state.appStatus ? '&status=' + encodeURIComponent(state.appStatus) : '');
+    return Weaver.get('/api/applications' + q).then(function (r) { data.applications = r; });
+  }
+
   function loadReports() {
     var q = '?page=' + state.reportPage + (state.reportStatus ? '&status=' + encodeURIComponent(state.reportStatus) : '');
     return Weaver.get('/api/reports' + q).then(function (r) { data.reports = r; });
@@ -182,6 +213,8 @@
   // ---------------------------------------------------------------- rendering
   function renderAll() {
     renderTiles();
+    renderAttention();
+    renderBadges();
     renderDashboardExtras();
     renderWeavers();
     if (!isAssoc) { renderAssociations(); }
@@ -189,6 +222,7 @@
     renderTags();
     if (hasLogs) { renderLogs(); }
     if (hasReports) { renderReports(); }
+    if (hasApps) { renderApplications(); }
     if (isAdmin) { renderUsers(); }
   }
 
@@ -257,6 +291,146 @@
         '<div class="text-muted fs-8">' + esc(l.uid) + ' | ' + esc(product) + '</div></div></div>' +
         '<span class="text-muted fs-8">' + when(l.created_at) + '</span></div>';
     }).join('<hr class="my-1">') : '<div class="text-muted fs-7">No scans yet.</div>';
+  }
+
+  // ------------------------------------------------------------ attention panel
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
+
+  function newestIds(a, previous) {
+    var newestReport = a && a.new_reports && a.new_reports.latest.length ? a.new_reports.latest[0].id : 0;
+    var newestScan = a && a.suspicious_scans && a.suspicious_scans.latest.length ? a.suspicious_scans.latest[0].id : 0;
+    var newestApplication = a && a.pending_applications && a.pending_applications.latest.length ? a.pending_applications.latest[0].id : 0;
+    // Never go backwards: deciding the newest one must not make an older one look new.
+    return {
+      report: Math.max(newestReport, previous ? previous.report : 0),
+      scan: Math.max(newestScan, previous ? previous.scan : 0),
+      application: Math.max(newestApplication, previous ? previous.application : 0)
+    };
+  }
+
+  function attentionBlock(title, goTab, goLabel, items, total, line) {
+    var rows = items.map(function (x) {
+      return '<li class="d-flex justify-content-between gap-3 py-1 border-top"><span class="text-break">' + line(x) +
+        '</span><span class="text-muted fs-8 text-nowrap">' + when(x.created_at) + '</span></li>';
+    }).join('');
+    return '<div class="attn-block"><div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">' +
+      '<div class="fw-semibold">' + esc(title) + '</div>' +
+      '<button type="button" class="btn btn-sm btn-dti" data-goto="' + esc(goTab) + '">' + esc(goLabel) + '</button></div>' +
+      '<ul class="list-unstyled fs-7 mb-0 mt-2">' + rows + '</ul>' +
+      (total > items.length ? '<div class="text-muted fs-8 mt-1">and ' + esc(total - items.length) + ' more in the list.</div>' : '') +
+      '</div>';
+  }
+
+  function renderAttention() {
+    var host = $('attention');
+    var a = data.attention;
+    if (!host || !a) { if (host) { host.innerHTML = ''; } return; }
+
+    var blocks = [];
+    var r = a.new_reports;
+    if (r && r.count > 0) {
+      blocks.push(attentionBlock(plural(r.count, 'new report') + ' waiting for review', 'reports', 'Open Reports', r.latest, r.count,
+        function (x) {
+          return '<code>' + esc(x.reference) + '</code> ' + esc(x.product || 'Unknown tag') +
+            ' <span class="text-muted">' + esc(REASONS[x.flag_reason] || x.flag_reason || '') + '</span>';
+        }));
+    }
+    var ap = a.pending_applications;
+    if (ap && ap.count > 0) {
+      blocks.push(attentionBlock(plural(ap.count, 'association application') + ' waiting for a decision', 'applications', 'Open Applications', ap.latest, ap.count,
+        function (x) {
+          return '<code>' + esc(x.reference) + '</code> ' + esc(x.association_name) + ' <span class="text-muted">' + esc(x.municipality) + '</span>';
+        }));
+    }
+    var s = a.suspicious_scans;
+    if (s && s.count > 0) {
+      var hours = a.window_hours === 24 ? 'in the last 24 hours' : 'in the last ' + plural(a.window_hours, 'hour');
+      blocks.push(attentionBlock(plural(s.count, 'suspicious scan') + (isAssoc ? ' of your tags ' : ' ') + hours, 'logs', 'Open Scan Logs', s.latest, s.count,
+        function (x) {
+          return '<code>' + esc(x.uid) + '</code> ' + esc(x.product || 'Unknown tag') +
+            ' <span class="text-muted">' + esc(REASONS[x.flag_reason] || x.flag_reason || '') + '</span>';
+        }));
+    }
+
+    var checked = data.attentionAt ? 'Checked ' + data.attentionAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '. Updates every minute.' : '';
+    if (!blocks.length) {
+      host.innerHTML = '<div class="attention-card attention-clear d-flex align-items-center justify-content-between gap-2 flex-wrap">' +
+        '<div><i class="bi bi-check-circle-fill text-success me-2"></i><span class="fw-semibold">Nothing needs attention right now.</span></div>' +
+        '<span class="text-muted fs-8">' + esc(checked) + '</span></div>';
+      return;
+    }
+    host.innerHTML = '<div class="attention-card">' +
+      '<div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">' +
+      '<h6 class="fw-bold mb-0"><i class="bi bi-bell-fill text-danger me-2"></i>Needs attention</h6>' +
+      '<span class="text-muted fs-8">' + esc(checked) + '</span></div>' +
+      blocks.join('<hr class="my-2">') + '</div>';
+  }
+
+  function setBadge(id, n, noun) {
+    var badgeEl = $(id);
+    if (!badgeEl) { return; }
+    badgeEl.textContent = n > 99 ? '99+' : String(n);
+    badgeEl.setAttribute('aria-label', plural(n, noun));
+    badgeEl.classList.toggle('d-none', n === 0);
+  }
+
+  function renderBadges() {
+    var a = data.attention;
+    setBadge('reportsBadge', a && a.new_reports ? a.new_reports.count : 0, 'new report');
+    setBadge('appsBadge', a && a.pending_applications ? a.pending_applications.count : 0, 'application waiting for a decision');
+  }
+
+  // Opens a tab from the panel or a toast; reports and logs open already narrowed to what needs attention.
+  function goTo(tab) {
+    if (tab === 'reports' && hasReports) {
+      state.reportStatus = 'new'; state.reportPage = 1;
+      $('reportFilter').value = 'new';
+      loadReports().then(renderReports);
+    } else if (tab === 'applications' && hasApps) {
+      state.appStatus = 'pending'; state.appPage = 1;
+      $('applicationFilter').value = 'pending';
+      loadApplications().then(renderApplications);
+    } else if (tab === 'logs' && hasLogs) {
+      state.logResult = 'suspicious'; state.logPage = 1;
+      $('logFilter').value = 'suspicious';
+      loadLogs().then(renderLogs);
+    }
+    showTab(tab);
+  }
+
+  // Asks the server what needs attention. When something new arrived since the last look,
+  // says so in a toast and reloads the lists so the tabs match.
+  var polling = false;
+  function poll() {
+    if (polling || document.hidden) { return; }
+    polling = true;
+    Weaver.get(API.attention).then(function (a) {
+      var before = state.seen;
+      var firstLook = !data.attention;      // the first load failed or has not finished: set the baseline, announce nothing
+      var fresh = [];
+      var newReports = a.new_reports ? a.new_reports.latest.filter(function (x) { return x.id > before.report; }).length : 0;
+      var newScans = a.suspicious_scans ? a.suspicious_scans.latest.filter(function (x) { return x.id > before.scan; }).length : 0;
+      var newApps = a.pending_applications ? a.pending_applications.latest.filter(function (x) { return x.id > before.application; }).length : 0;
+      if (newReports && !firstLook) {
+        fresh.push(function () { toast((newReports >= 5 ? '5 or more' : String(newReports)) + ' new ' + (newReports === 1 ? 'report' : 'reports') + ' received.', 'warning', { ms: 12000, go: 'reports' }); });
+      }
+      if (newApps && !firstLook) {
+        fresh.push(function () { toast((newApps >= 5 ? '5 or more' : String(newApps)) + ' new association ' + (newApps === 1 ? 'application' : 'applications') + ' waiting.', 'info', { ms: 12000, go: 'applications' }); });
+      }
+      if (newScans && !firstLook) {
+        fresh.push(function () { toast((newScans >= 5 ? '5 or more' : String(newScans)) + ' new suspicious ' + (newScans === 1 ? 'scan' : 'scans') + '.', 'danger', { ms: 12000, go: 'logs' }); });
+      }
+      data.attention = a;
+      data.attentionAt = new Date();
+      state.seen = newestIds(a, before);
+      renderAttention();
+      renderBadges();
+      if (fresh.length) {
+        fresh.forEach(function (f) { f(); });
+        return loadAll();
+      }
+    }).catch(function () { /* a missed check is not worth an error message; the next one tries again */ })
+      .then(function () { polling = false; });
   }
 
   function renderWeavers() {
@@ -374,6 +548,42 @@
     $('reportNext').disabled = !r || r.current_page >= r.last_page;
   }
 
+  var APPLICATION_STATUS = {
+    pending: { label: 'Waiting', cls: 'warning text-dark' },
+    approved: { label: 'Approved', cls: 'success' },
+    rejected: { label: 'Rejected', cls: 'secondary' }
+  };
+
+  function renderApplications() {
+    var r = data.applications;
+    var items = r && r.data ? r.data : [];
+    var rows = items.filter(function (x) {
+      return matches([x.reference, x.association_name, x.municipality, x.contact_name, x.email, x.contact_phone, x.registration_details || '', x.status]);
+    }).map(function (x) {
+      var st = APPLICATION_STATUS[x.status] || { label: x.status, cls: 'secondary' };
+      var decided = x.status === 'pending' ? '' :
+        '<div class="text-muted fs-8 mt-1">' + esc(x.decided_by || 'a removed user') + ', ' + when(x.decided_at) + '</div>' +
+        (x.decision_note ? '<div class="fs-8 mt-1 text-wrap" style="max-width:16rem">' + esc(x.decision_note) + '</div>' : '');
+      var conflicts = (x.conflict || []).map(function (c) {
+        return '<div class="text-danger fs-8 mt-1 text-wrap" style="max-width:18rem"><i class="bi bi-exclamation-triangle-fill me-1"></i>' + esc(c) + '</div>';
+      }).join('');
+      var actions = x.status === 'pending'
+        ? '<button class="btn btn-sm btn-outline-success py-0 me-1" data-action="approve-application" data-id="' + esc(x.id) + '">Approve</button>' +
+          '<button class="btn btn-sm btn-outline-danger py-0" data-action="reject-application" data-id="' + esc(x.id) + '">Reject</button>'
+        : '';
+      return '<tr><td class="text-nowrap">' + when(x.created_at) + '<div class="text-muted fs-8"><code>' + esc(x.reference) + '</code></div></td>' +
+        '<td class="fw-semibold">' + esc(x.association_name) + '<div class="text-muted fs-8 fw-normal">' + esc(x.municipality) + '</div></td>' +
+        '<td style="min-width:13rem">' + esc(x.contact_name) + '<div class="text-muted fs-8">' + esc(x.contact_phone) + '</div><div class="text-muted fs-8 text-break">' + esc(x.email) + '</div></td>' +
+        '<td class="text-wrap" style="min-width:9rem">' + (x.registration_details ? esc(x.registration_details) : '<span class="text-muted">not given</span>') + '</td>' +
+        '<td><span class="badge bg-' + st.cls + '">' + esc(st.label) + '</span>' + decided + conflicts + '</td>' +
+        '<td class="text-end pe-3 text-nowrap">' + actions + '</td></tr>';
+    });
+    $('applicationsBody').innerHTML = rows.length ? rows.join('') : empty(6, 'No applications to show.');
+    $('applicationPageInfo').textContent = r ? 'Page ' + r.current_page + ' of ' + r.last_page + ' (' + r.total + ' applications)' : '';
+    $('applicationPrev').disabled = !r || r.current_page <= 1;
+    $('applicationNext').disabled = !r || r.current_page >= r.last_page;
+  }
+
   function renderUsers() {
     var rows = data.users.filter(function (u) {
       return matches([u.name, u.email, u.role, u.municipality || '', u.association ? u.association.name : '']);
@@ -433,6 +643,11 @@
     var input = '<input class="form-control" id="' + id + '" name="' + esc(f.name) + '" type="' +
       esc(f.type || 'text') + '" value="' + esc(f.value || '') + '"' + (f.readonly ? ' readonly' : '') +
       (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + (f.type === 'password' ? ' autocomplete="new-password"' : '') + '>';
+    if (f.type === 'password') {
+      // Only lets the person see what they are typing. Saved passwords are one-way hashes and cannot be shown.
+      input += '<div class="form-check mt-2"><input class="form-check-input js-show-password" type="checkbox" id="show_' + esc(f.name) +
+        '" data-for="' + id + '"><label class="form-check-label fs-7" for="show_' + esc(f.name) + '">Show password</label></div>';
+    }
     if (f.reader) {
       return '<div class="mb-3">' + label + '<div class="input-group">' + input +
         '<button type="button" class="btn btn-outline-success" data-action="read-uid"><i class="bi bi-wifi"></i> Read from reader</button></div>' +
@@ -441,7 +656,7 @@
     return '<div class="mb-3">' + label + input + (f.meter ? '<div id="meter_' + esc(f.name) + '" class="mt-2"></div>' : '') + '</div>';
   }
 
-  function openForm(title, submitLabel, fields, onSubmit, note) {
+  function openForm(title, submitLabel, fields, onSubmit, note, onReady) {
     activeFields = fields;
     activeSubmit = onSubmit;
     $('formTitle').textContent = title;
@@ -456,6 +671,10 @@
         });
       }
     });
+    Array.prototype.forEach.call($('formBody').querySelectorAll('.js-show-password'), function (box) {
+      box.addEventListener('change', function () { $(box.getAttribute('data-for')).type = box.checked ? 'text' : 'password'; });
+    });
+    if (onReady) { onReady(); }
     modal = modal || new bootstrap.Modal($('formModal'));
     modal.show();
   }
@@ -710,6 +929,28 @@
           .then(function () { return { message: 'Review saved.' }; });
       }, 'A report does not change the tag. Revoking a tag is a separate step in NFC Tags, done only on your decision. Referral to other offices is also your decision.');
     },
+    'approve-application': function (id) {
+      var x = data.applications && data.applications.data ? byId(data.applications.data, id) : null;
+      if (!x) { return; }
+      openForm('Approve ' + x.association_name, 'Approve', [
+        { name: 'a_name', label: 'Association', value: x.association_name + ' (' + x.municipality + ')', readonly: true, skip: true },
+        { name: 'a_contact', label: 'Contact person', value: x.contact_name + ', ' + x.contact_phone, readonly: true, skip: true },
+        { name: 'a_email', label: 'Will sign in with', value: x.email, readonly: true, skip: true },
+        { name: 'a_reg', label: 'Registration details they gave', value: x.registration_details || 'not given', readonly: true, skip: true }
+      ], function () {
+        return Weaver.post('/api/applications/' + x.id + '/approve', {});
+      }, 'Approving creates the association and the login right away, with the password the applicant chose. Check that this is a real association first. Weaver-ID sends no email, so tell them yourself; they can also look up the result with their reference number.');
+    },
+    'reject-application': function (id) {
+      var x = data.applications && data.applications.data ? byId(data.applications.data, id) : null;
+      if (!x) { return; }
+      openForm('Reject ' + x.association_name, 'Reject application', [
+        { name: 'a_name', label: 'Association', value: x.association_name + ' (' + x.municipality + ')', readonly: true, skip: true },
+        { name: 'note', label: 'Reason (the applicant will read this)', type: 'textarea', rows: 4 }
+      ], function (v) {
+        return Weaver.post('/api/applications/' + x.id + '/reject', { note: v.note });
+      }, 'The applicant can look up this decision and your reason with their reference number, and may apply again. Their saved password is deleted.');
+    },
     'add-user': function () {
       openForm('Add user', 'Create', [
         { name: 'name', label: 'Full name' },
@@ -718,13 +959,29 @@
           context: function () { return { email: $('f_email').value, name: $('f_name').value }; } },
         { name: 'role', label: 'Role', type: 'select', options: [
           { value: 'staff', label: 'Staff' }, { value: 'association', label: 'Association' }, { value: 'admin', label: 'Admin' }] },
-        { name: 'municipality', label: 'Municipality (staff only)' },
-        { name: 'association_id', label: 'Association (association accounts only)', type: 'select', options: assocOptions(), int: true }
+        data.municipalities.length
+          ? { name: 'municipality', label: 'Municipality', type: 'select', options: data.municipalities.map(function (m) { return { value: m, label: m }; }) }
+          : { name: 'municipality', label: 'Municipality' },
+        { name: 'association_id', label: 'Association', type: 'select', options: assocOptions(), int: true }
       ], function (v) {
         if (v.role !== 'staff') { delete v.municipality; }
         if (v.role !== 'association') { delete v.association_id; }
         return Weaver.post('/api/admin/users', v);
-      }, 'The person must choose their own password the first time they sign in.');
+      }, 'The person must choose their own password the first time they sign in.', function () {
+        // Staff are tied to a municipality, association accounts to an association, admins to neither:
+        // show only the field that belongs to the chosen role, and forget what was typed in the other.
+        var role = $('f_role');
+        function sync() {
+          [['f_municipality', 'staff'], ['f_association_id', 'association']].forEach(function (pair) {
+            var input = $(pair[0]);
+            var show = role.value === pair[1];
+            input.closest('.mb-3').classList.toggle('d-none', !show);
+            if (!show) { input.value = ''; }
+          });
+        }
+        role.addEventListener('change', sync);
+        sync();
+      });
     },
     'reset-user-password': function (id) {
       var u = byId(data.users, id);
@@ -804,6 +1061,9 @@
     if (!hasReports) {
       Array.prototype.forEach.call(document.querySelectorAll('.reports-ui'), function (el) { el.remove(); });
     }
+    if (!hasApps) {
+      Array.prototype.forEach.call(document.querySelectorAll('.apps-ui'), function (el) { el.remove(); });
+    }
 
     $('sideNav').addEventListener('click', function (e) {
       var a = e.target.closest('[data-tab]');
@@ -819,6 +1079,8 @@
     });
 
     document.addEventListener('click', function (e) {
+      var go = e.target.closest('[data-goto]');
+      if (go) { goTo(go.getAttribute('data-goto')); return; }
       var el = e.target.closest('[data-action]');
       if (!el) { return; }
       var fn = actions[el.getAttribute('data-action')];
@@ -843,8 +1105,20 @@
       $('reportNext').addEventListener('click', function () { state.reportPage++; loadReports().then(renderReports); });
     }
 
+    if (hasApps) {
+      $('applicationFilter').addEventListener('change', function () {
+        state.appStatus = this.value; state.appPage = 1;
+        loadApplications().then(renderApplications);
+      });
+      $('applicationPrev').addEventListener('click', function () { state.appPage--; loadApplications().then(renderApplications); });
+      $('applicationNext').addEventListener('click', function () { state.appPage++; loadApplications().then(renderApplications); });
+    }
+
     showTab('dashboard');
     loadAll();
+
+    setInterval(poll, POLL_MS);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) { poll(); } });
   }
 
   init();

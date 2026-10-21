@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weaver-ID | Apply for an association account</title>
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --dti-green: #0a4d2e;
+      --dti-green-hover: #073822;
+      --bg-canvas: #f4f6f8;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem 1rem;
+      color: #333333;
+    }
+
+    .apply-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #eaeaea;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .brand-header-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 1rem; }
+    .brand-logo-img { height: 48px; width: auto; object-fit: contain; }
+    .brand-divider { width: 1px; height: 38px; background-color: #cbd5e1; }
+    .brand-title { font-size: 1.25rem; font-weight: 700; color: #005a36; line-height: 1.1; margin: 0; }
+    .brand-subtitle { font-size: 0.85rem; color: #64748b; margin-top: 2px; }
+
+    .btn-dti { background-color: var(--dti-green); color: white; font-weight: 500; }
+    .btn-dti:hover, .btn-dti:focus { background-color: var(--dti-green-hover); color: white; }
+    .btn-dti:disabled { background-color: var(--dti-green); color: white; opacity: .65; }
+
+    .form-control:focus, .form-select:focus { border-color: var(--dti-green); box-shadow: 0 0 0 0.25rem rgba(10, 77, 46, 0.15); }
+    .form-check-input:checked { background-color: var(--dti-green); border-color: var(--dti-green); }
+
+    .fs-7 { font-size: 0.85rem; }
+    .fs-8 { font-size: 0.75rem; }
+
+    .switcher { display: flex; gap: .5rem; background: #f1f5f9; padding: .25rem; border-radius: 10px; margin-bottom: 1.5rem; }
+    .switcher button { flex: 1; border: 0; background: transparent; padding: .55rem .5rem; border-radius: 8px; font-size: .9rem; font-weight: 500; color: #475569; }
+    .switcher button[aria-selected="true"] { background: #ffffff; color: var(--dti-green); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    .notice-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: .75rem 1rem; font-size: .85rem; color: #475569; }
+
+    /* Hidden field for bots: people never see or reach it. */
+    .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+    .reference-box { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.5rem; font-weight: 700; letter-spacing: .04em; color: var(--dti-green); background: #e8f5e9; border-radius: 10px; padding: .75rem 1rem; text-align: center; user-select: all; overflow-wrap: anywhere; }
+
+    .result-badge { font-size: .8rem; }
+
+    @media (max-width: 575.98px) {
+      body { padding: 1rem .5rem; }
+      .apply-card { padding: 1.25rem; border-radius: 12px; }
+      .reference-box { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="apply-card">
+    <div class="text-center mb-3">
+      <div class="brand-header-container">
+        <img src="logo.png" alt="WEAVER-ID Logo" class="brand-logo-img">
+        <div class="brand-divider"></div>
+        <div style="text-align:left">
+          <h1 class="brand-title">Weaver-ID</h1>
+          <div class="brand-subtitle">Association account</div>
+        </div>
+      </div>
+      <p class="text-muted fs-7 mb-0">DTI-Mountain Province reviews every application before an account is created.</p>
+    </div>
+
+    <div class="switcher" role="tablist" aria-label="Apply or check">
+      <button type="button" role="tab" id="tabApply" aria-selected="true" aria-controls="paneApply">Apply</button>
+      <button type="button" role="tab" id="tabCheck" aria-selected="false" aria-controls="paneCheck">Check your application</button>
+    </div>
+
+    <!-- APPLY -->
+    <section id="paneApply" role="tabpanel" aria-labelledby="tabApply">
+      <form id="applyForm" novalidate>
+        <div id="applyError" class="alert alert-danger py-2 fs-7 d-none" role="alert"></div>
+
+        <div class="mb-3">
+          <label for="association_name" class="form-label fs-7 fw-semibold">Name of the association or cooperative</label>
+          <input type="text" id="association_name" class="form-control" maxlength="255" autocomplete="organization">
+          <div class="invalid-feedback" data-for="association_name"></div>
+        </div>
+
+        <div class="mb-3">
+          <label for="municipality" class="form-label fs-7 fw-semibold">Municipality</label>
+          <select id="municipality" class="form-select"><option value="">Loading...</option></select>
+          <div class="invalid-feedback" data-for="municipality"></div>
+        </div>
+
+        <div class="mb-3">
+          <label for="registration_details" class="form-label fs-7 fw-semibold">Registration or accreditation number <span class="text-muted fw-normal">(optional)</span></label>
+          <input type="text" id="registration_details" class="form-control" maxlength="150" placeholder="DTI, CDA or SEC number">
+          <div class="form-text">It helps the reviewer confirm your association.</div>
+          <div class="invalid-feedback" data-for="registration_details"></div>
+        </div>
+
+        <hr class="my-4">
+        <p class="fs-7 text-muted mb-3">The contact person signs in for the association. The email below is the login.</p>
+
+        <div class="mb-3">
+          <label for="contact_name" class="form-label fs-7 fw-semibold">Contact person</label>
+          <input type="text" id="contact_name" class="form-control" maxlength="255" autocomplete="name">
+          <div class="invalid-feedback" data-for="contact_name"></div>
+        </div>
+
+        <div class="mb-3">
+          <label for="contact_phone" class="form-label fs-7 fw-semibold">Mobile number</label>
+          <input type="tel" id="contact_phone" class="form-control" placeholder="0917 123 4567" autocomplete="tel" inputmode="tel">
+          <div class="invalid-feedback" data-for="contact_phone"></div>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label fs-7 fw-semibold">Email (your login)</label>
+          <input type="email" id="email" class="form-control" maxlength="255" autocomplete="email">
+          <div class="invalid-feedback" data-for="email"></div>
+        </div>
+
+        <div class="mb-2">
+          <label for="password" class="form-label fs-7 fw-semibold">Choose a password</label>
+          <input type="password" id="password" class="form-control" autocomplete="new-password">
+          <div class="invalid-feedback" data-for="password"></div>
+        </div>
+        <div id="meter" class="mb-3"></div>
+
+        <div class="mb-2">
+          <label for="password_confirmation" class="form-label fs-7 fw-semibold">Confirm password</label>
+          <input type="password" id="password_confirmation" class="form-control" autocomplete="new-password">
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="showPw">
+          <label class="form-check-label fs-7" for="showPw">Show passwords</label>
+        </div>
+
+        <!-- Bot trap: left empty by every real person. -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="website">Leave this field empty</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="notice-box mb-3" id="privacyNotice">
+          <strong>Privacy notice.</strong>
+          DTI-Mountain Province collects these details only to check your application and, if it is approved, to create your association's Weaver-ID account.
+          They are seen only by DTI-Mountain Province staff of your municipality and by system administrators. Your password is stored only in scrambled form
+          and the stored copy is deleted once your application is decided. Weaver-ID does not send emails or text messages.
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="privacy_consent">
+          <label class="form-check-label fs-7" for="privacy_consent">I have read the privacy notice and agree.</label>
+          <div class="invalid-feedback" data-for="privacy_consent"></div>
+        </div>
+
+        <button type="submit" id="applyBtn" class="btn btn-dti w-100 py-2">Send application</button>
+        <p class="text-center fs-7 text-muted mt-3 mb-0">Already have an account? <a href="login.html">Sign in</a></p>
+      </form>
+
+      <!-- Shown after a successful application. -->
+      <div id="applyDone" class="d-none" aria-live="polite">
+        <div class="text-center mb-3">
+          <i class="bi bi-check-circle-fill text-success" style="font-size:2.5rem"></i>
+          <h2 class="h5 fw-bold mt-2">Application received</h2>
+        </div>
+        <div class="reference-box mb-2" id="doneReference"></div>
+        <div class="text-center mb-3">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="copyRef"><i class="bi bi-clipboard"></i> Copy reference</button>
+        </div>
+        <div class="alert alert-warning fs-7">
+          <strong>Write this number down.</strong> Weaver-ID does not send emails or text messages. To find out the result, come back to this page,
+          choose <em>Check your application</em> and enter this reference number with the email you applied with.
+        </div>
+        <p class="fs-7 text-muted">DTI-Mountain Province staff will review your application. Until it is approved you cannot sign in.</p>
+        <div class="d-grid gap-2">
+          <button type="button" class="btn btn-dti" id="goCheck">Check your application</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECK -->
+    <section id="paneCheck" role="tabpanel" aria-labelledby="tabCheck" class="d-none">
+      <form id="checkForm" novalidate>
+        <div id="checkError" class="alert alert-danger py-2 fs-7 d-none" role="alert"></div>
+        <div class="mb-3">
+          <label for="check_reference" class="form-label fs-7 fw-semibold">Reference number</label>
+          <input type="text" id="check_reference" class="form-control" placeholder="AP-20261022-XXXXX" autocomplete="off" autocapitalize="characters">
+        </div>
+        <div class="mb-3">
+          <label for="check_email" class="form-label fs-7 fw-semibold">Email you applied with</label>
+          <input type="email" id="check_email" class="form-control" autocomplete="email">
+        </div>
+        <button type="submit" id="checkBtn" class="btn btn-dti w-100 py-2">Check</button>
+      </form>
+
+      <div id="checkResult" class="d-none mt-4" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="js/password-policy.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

@@ -92,6 +92,61 @@ Staff see reports about tags in their own municipality; admin sees all. Associat
 | `GET /api/reports` | Reports, newest first, 25 per page, with product, association, the internal flag reason, how many reports exist for the same tag (`same_tag_reports`) and the review state. Optional `?status=new\|under_review\|verified\|dismissed\|referred`. |
 | `PATCH /api/reports/{id}` | Review a report `{ "status": "under_review", "review_note": "optional" }`. Saves who reviewed it and when. A report outside the caller's scope returns 403. It does not revoke or change the tag. |
 
+## What needs attention (admin, staff and association)
+
+`GET /api/attention` feeds the dashboard's "Needs attention" panel, the badge on the Reports tab and the check the page makes every 60 seconds. It adds no new data: each caller gets only numbers for what they can already open in the tabs.
+
+```json
+{
+  "window_hours": 24,
+  "since": "2026-10-20T11:00:00.000000Z",
+  "new_reports": { "count": 2, "latest": [ { "id": 7, "reference": "SR-...", "uid": "04...", "product": "Table runner", "flag_reason": "many_devices", "location": "...", "created_at": "..." } ] },
+  "pending_applications": { "count": 1, "latest": [ { "id": 3, "reference": "AP-...", "association_name": "...", "municipality": "Sagada", "created_at": "..." } ] },
+  "suspicious_scans": { "count": 3, "latest": [ { "id": 41, "uid": "04...", "product": "Table runner", "flag_reason": "many_devices", "created_at": "..." } ] }
+}
+```
+
+| Caller | `new_reports` | `pending_applications` | `suspicious_scans` |
+|---|---|---|---|
+| admin | every report with status `new`, however old | every application still waiting | every scan flagged suspicious in the last `WEAVER_ATTENTION_HOURS` (default 24) |
+| staff | `new` reports about tags in their own municipality | waiting applications of their own municipality | `null` (staff have no scan log view) |
+| association | `null` (no Reports tab) | `null` | flagged scans of their own association's tags |
+
+- `latest` holds the 5 newest items, newest first; `count` is the full number. The reporter's note, contact and device are never included.
+- An association account that is not linked to an association gets 403, like its scan log.
+- Reviewing a report (any status other than `new`) removes it from the count; deciding an application does the same for applications. Applicant names, phone numbers and emails are never included.
+
+## Association applications (public apply, staff and admin decide)
+
+An association applies on `register.html`; nothing exists in `associations` or `users` until staff approve. Weaver-ID sends no emails or text messages: the applicant keeps the reference number and looks up the result on the same page.
+
+**Public, no login**
+
+| Method and path | Purpose |
+|---|---|
+| `GET /api/municipalities` | The 10 municipalities of Mountain Province (`config/weaver.php`), for the form's dropdown. |
+| `POST /api/association-applications` | Apply: `{ association_name, municipality, contact_name, contact_phone, email, password, password_confirmation, registration_details (optional), privacy_consent: true }`. Returns 201 `{ reference: "AP-YYYYMMDD-XXXXX", status: "pending" }`. Limited to 10 tries an hour per IP address (every try counts, valid or not). |
+| `POST /api/association-applications/status` | `{ reference, email }` returns the status, the reason when rejected, and a message. A wrong reference and a wrong email get the same 404. Limited to 10 a minute per IP address. |
+
+Rules on the apply call:
+
+- The municipality must be one of the listed ones. The mobile number must be a Philippine mobile number and is saved as `09XXXXXXXXX` (`+63 917 ...`, `63917...` and spaces or dashes are accepted).
+- The password follows the same rules as every other account (12+ characters, upper, lower, number, symbol, not common, not containing the contact name or email) and must be confirmed. It is saved only as a hash, kept only while the application is waiting, and deleted when it is decided. It is never returned, not even to administrators.
+- The association name may not match a registered association or a waiting application (capitals, spaces and punctuation ignored). The email may not belong to an account or a waiting application. The email answer is the same words for both reasons, so the form does not say which emails have accounts.
+- `privacy_consent` must be `true`. The time and `config('weaver.application_notice_version')` (env `WEAVER_NOTICE_VERSION`) are saved with the application.
+- A hidden field `website` is a bot trap: if it is filled the call answers 201 and saves nothing.
+- A rejected association may apply again with the same name and email.
+
+**Staff (their own municipality) and admin (all)**. Association users get 403.
+
+| Method and path | Purpose |
+|---|---|
+| `GET /api/applications` | Applications, newest first, 25 per page, with contact details. Optional `?status=pending\|approved\|rejected`. Each waiting one carries `conflict`: reasons an approval would now fail (the name was registered or the email got an account since). The password hash is never included. |
+| `POST /api/applications/{id}/approve` | Creates the association (`active`) and an `association` account for the contact person, with the password the applicant chose (no forced change), in one transaction. 422 if already decided or if the name or email is now taken (nothing is created); 403 outside the caller's municipality. |
+| `POST /api/applications/{id}/reject` | `{ "note": "reason, 5 to 500 characters" }`. The applicant can read the note. 422 if already decided; 403 outside the caller's municipality. |
+
+Municipality scope for applications ignores capitals (`sagada` matches `Sagada`).
+
 ## Association registry
 
 `GET /api/association/weavers` and `GET /api/association/products` accept `?status=active|inactive|all` (default `active`) so deactivated records can be found and reactivated.
@@ -145,3 +200,4 @@ Weak means a rule is not met. Medium means every rule is met (12 to 15 character
 - The public response names the association (business) and its municipality only. Member names are never returned to the public (data minimisation, RA 10173). The old `weavers.proprietor` column is kept as an optional, unused column and is no longer collected.
 - Tag linking is self-service for staff and associations, so a UID's origin is no longer proven by DTI. The controls are the `issued_by` audit trail, revocation, municipality scoping and the admin summary of tags issued per role.
 - Staff scope follows the association's municipality, not the weaver's. A weaver in another town under a Sagada association is managed by Sagada staff.
+- Association applications: the email address is not verified (no email or OTP step), so the staff member who clicks Approve is the real control. Check the association against its registration before approving. The form still tells a visitor that an email "cannot be used", which lets someone test whether an address is already taken; the throttle (10 tries an hour per IP address) slows that down but does not stop it. A bot with many IP addresses could fill the Applications list with junk rows; staff reject them. The applicant is not told the result by message; they must look it up with the reference number or be told by staff.
