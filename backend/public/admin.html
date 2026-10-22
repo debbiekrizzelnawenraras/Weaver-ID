@@ -6,188 +6,8 @@
   <title>Weaver-ID | Control Panel</title>
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --sidebar-width: 260px;
-      --dti-green: #0a4d2e;
-      --dti-green-hover: #073822;
-      --bg-canvas: #f4f6f8;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-canvas);
-      min-height: 100vh;
-      color: #333333;
-    }
-
-    /* Sidebar Navigation */
-    .sidebar {
-      width: var(--sidebar-width);
-      position: fixed;
-      top: 0; bottom: 0; left: 0;
-      background-color: #ffffff;
-      border-right: 1px solid #e9ecef;
-      z-index: 1000;
-    }
-
-    .sidebar-brand {
-      padding: 1.25rem 1rem;
-      border-bottom: 1px solid #f1f3f5;
-    }
-
-    .sidebar-nav .nav-link {
-      color: #495057;
-      padding: 0.75rem 1.25rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      cursor: pointer;
-      border-radius: 8px;
-      margin: 0.2rem 0.75rem;
-      transition: all 0.2s ease;
-    }
-
-    .sidebar-nav .nav-link:hover {
-      color: var(--dti-green);
-      background-color: #f8f9fa;
-    }
-
-    .sidebar-nav .nav-link.active {
-      color: var(--dti-green);
-      background-color: #e8f5e9;
-      font-weight: 600;
-    }
-
-    .main-content {
-      margin-left: var(--sidebar-width);
-      padding: 2rem;
-      max-width: 1200px;
-    }
-
-    /* Search Input Bar */
-    .search-box {
-      background-color: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 0.6rem 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-
-    .search-box input {
-      border: none;
-      outline: none;
-      width: 100%;
-      background: transparent;
-      font-size: 0.9rem;
-    }
-
-    /* Metric Cards Grid */
-    .metric-card {
-      background-color: #ffffff;
-      border-radius: 16px;
-      padding: 1.25rem;
-      border: 1px solid #eaeaea;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      height: 100%;
-    }
-
-    .metric-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-
-    .icon-weavers { background-color: #e8f5e9; color: #2e7d32; }
-    .icon-products { background-color: #e3f2fd; color: #1565c0; }
-    .icon-nfc { background-color: #fff8e1; color: #f57f17; }
-    .icon-verifications { background-color: #f3e5f5; color: #7b1fa2; }
-
-    /* Content Cards */
-    .dashboard-card {
-      background-color: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #eaeaea;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      padding: 1.25rem;
-      height: 100%;
-    }
-
-    /* Standalone Box Styles for Associations */
-    .association-box {
-      background-color: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 1.25rem;
-      height: 100%;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-    }
-
-    .association-box:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
-      border-color: #a5d6a7;
-    }
-
-    .scan-status-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      flex-shrink: 0;
-    }
-
-    .btn-dti {
-      background-color: var(--dti-green);
-      color: white;
-    }
-
-    .btn-dti:hover {
-      background-color: var(--dti-green-hover);
-      color: white;
-    }
-
-    .fs-7 { font-size: 0.85rem; }
-    .fs-8 { font-size: 0.75rem; }
-    .me-name { white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
-
-    @media (max-width: 991.98px) {
-      .sidebar {
-        position: relative !important;
-        width: 100% !important;
-        height: auto !important;
-        border-right: none;
-        border-bottom: 1px solid #e9ecef;
-      }
-      .main-content {
-        margin-left: 0 !important;
-        padding: 1rem !important;
-      }
-    }
-  
-    .table td, .table th { vertical-align: middle; }
-    .bar-track { background:#eef1f4; border-radius:6px; height:10px; overflow:hidden; }
-    .bar-fill { height:100%; border-radius:6px; }
-    #toastHost { position: fixed; top: 1rem; right: 1rem; z-index: 2000; width: min(380px, calc(100% - 2rem)); }
-    .empty-row { color:#6c757d; text-align:center; padding:1.5rem !important; }
-    .attention-card { background:#fff; border:1px solid #eaeaea; border-left:4px solid #b42318; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.02); padding:1rem 1.25rem; }
-    .attention-card.attention-clear { border-left-color:#2e7d32; padding:.75rem 1.25rem; }
-    .attn-block ul li:first-child { border-top:0 !important; }
-</style>
+  <link href="css/weaver.css?v=4" rel="stylesheet">
+  <script src="js/layout.js"></script>
 </head>
 <body data-roles="admin,staff">
 
@@ -195,13 +15,15 @@
 
   <div id="app-container">
 
-    <aside class="sidebar d-flex flex-column justify-content-between">
+    <div class="sidebar-backdrop" id="menuBackdrop"></div>
+
+    <aside class="sidebar" id="sidebar">
       <div>
         <div class="sidebar-brand d-flex align-items-center gap-3">
-          <img src="logo.png" alt="WEAVER-ID Logo" style="width: 45px; height: auto; object-fit: contain;">
-          <div class="vr" style="height: 40px; opacity: 0.25;"></div>
-          <div>
-            <h6 class="fw-bold mb-0" style="font-size: 1.1rem; color: #0d5c3a;">Weaver-ID</h6>
+          <img src="logo.png" alt="WEAVER-ID Logo">
+          <div class="vr" style="height: 2.5rem; opacity: 0.25;"></div>
+          <div class="brand-text">
+            <h6 class="brand-name fw-bold mb-0">Weaver-ID</h6>
             <small class="text-muted" id="panelName">Control Panel</small>
           </div>
         </div>
@@ -219,21 +41,24 @@
         </nav>
       </div>
 
-      <div class="p-3 border-top d-flex align-items-center gap-2">
-        <div class="bg-light rounded-circle p-2"><i class="bi bi-person-fill text-secondary"></i></div>
-        <div class="overflow-hidden me-auto">
+      <div class="sidebar-foot">
+        <div class="avatar"><i class="bi bi-person-fill"></i></div>
+        <div class="overflow-hidden me-auto me-block">
           <div class="fw-bold fs-7 me-name" id="meName">-</div>
           <div class="text-muted fs-8 text-truncate" id="meSub">-</div>
         </div>
-        <button type="button" id="logoutBtn" class="btn btn-sm btn-light border-0" title="Log out">
+        <button type="button" id="logoutBtn" class="btn btn-sm btn-light border-0" title="Log out" aria-label="Log out">
           <i class="bi bi-box-arrow-right text-danger fs-6"></i>
         </button>
       </div>
     </aside>
 
     <main class="main-content">
-      <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 class="fw-bold mb-0" id="sectionTitle">Dashboard</h4>
+      <div class="page-head">
+        <div class="d-flex align-items-center gap-2 min-w-0">
+          <button type="button" class="btn btn-light border btn-sm" id="menuToggle" aria-controls="sidebar" aria-expanded="true" aria-label="Open the menu" title="Open the menu"><i class="bi bi-list fs-5"></i></button>
+          <h4 class="fw-bold mb-0" id="sectionTitle">Dashboard</h4>
+        </div>
         <button class="btn btn-light border btn-sm" id="refreshBtn"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
       </div>
 

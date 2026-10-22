@@ -1,0 +1,335 @@
+/*
+ * Weaver-ID: one look for the sign-in page, the application page and the three dashboards.
+ *
+ * Light and minimal, with friendly cards. The green is DTI's own; the gold is the one touch
+ * taken from the logo, used only to mark where you are in the menu.
+ *
+ * Bootstrap's colour variables are re-pointed in :root, so badges, alerts and links that the
+ * scripts create pick up this palette without the scripts changing.
+ *
+ * Sizes are in rem. The base size grows on big screens (see the end of this file), and
+ * everything - text, menu, cards - grows with it.
+ */
+
+:root {
+  color-scheme: light;
+
+  --wid-forest: #0a4d2e;
+  --wid-forest-deep: #073822;
+  --wid-fern: #e4efe8;
+  --wid-fern-weak: #f0f6f2;
+  --wid-gold: #c99a2e;
+  --wid-canvas: #f5f7f6;
+  --wid-surface: #ffffff;
+  --wid-ink: #1c2a23;
+  --wid-muted: #5d6b63;
+  --wid-line: #e1e7e3;
+  --wid-line-strong: #cbd5ce;
+  --wid-ok: #1f7a4a;
+  --wid-warn: #a86a00;
+  --wid-danger: #b42318;
+
+  --wid-radius-lg: 14px;   /* cards */
+  --wid-radius: 10px;      /* chips, toasts, inner boxes */
+  --wid-radius-sm: 8px;    /* buttons, fields */
+
+  --sidebar-width: 16rem;
+  --sidebar-rail: 4.75rem;
+  --content-max: 112rem;
+
+  --bs-body-font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --bs-body-color: #1c2a23;
+  --bs-body-color-rgb: 28, 42, 35;
+  --bs-secondary-color: #5d6b63;
+  --bs-secondary-rgb: 93, 107, 99;
+  --bs-border-color: #e1e7e3;
+  --bs-border-radius: .5rem;
+  --bs-border-radius-lg: .875rem;
+  --bs-link-color-rgb: 10, 77, 46;
+  --bs-link-hover-color-rgb: 7, 56, 34;
+
+  --bs-success-rgb: 31, 122, 74;
+  --bs-danger-rgb: 180, 35, 24;
+  --bs-warning-rgb: 242, 184, 75;
+  --bs-primary-rgb: 10, 77, 46;
+
+  --bs-success-bg-subtle: #e4f1e9;
+  --bs-success-border-subtle: #b9d9c6;
+  --bs-success-text-emphasis: #124d2e;
+  --bs-danger-bg-subtle: #fbe9e7;
+  --bs-danger-border-subtle: #f2c1bb;
+  --bs-danger-text-emphasis: #7a1d14;
+  --bs-warning-bg-subtle: #fdf1d3;
+  --bs-warning-border-subtle: #f0d48a;
+  --bs-warning-text-emphasis: #6b4a05;
+  --bs-info-bg-subtle: #e6eef5;
+  --bs-info-border-subtle: #c0d3e4;
+  --bs-info-text-emphasis: #1f4466;
+  --bs-secondary-bg-subtle: #eef1ef;
+  --bs-secondary-border-subtle: #d4dbd6;
+  --bs-secondary-text-emphasis: #3f4b44;
+
+  --bs-form-invalid-border-color: #b42318;
+  --bs-form-invalid-color: #b42318;
+}
+
+/* The page is grey-green; cards, fields, tables and windows stay white. (--bs-body-bg is left alone on purpose:
+   Bootstrap paints those from it.) */
+body {
+  background-color: var(--wid-canvas);
+  color: var(--wid-ink);
+  min-height: 100vh;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Small-text helpers the pages already use. */
+.fs-7 { font-size: .875rem; }
+.fs-8 { font-size: .8rem; }
+.me-name { white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
+.min-w-0 { min-width: 0; }
+
+/* Keyboard focus: always visible, in the brand colour. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--wid-forest); outline-offset: 2px; }
+.btn:focus-visible { outline: 0; box-shadow: 0 0 0 .2rem rgba(10, 77, 46, .3); }
+
+/* ------------------------------------------------------------------ buttons */
+.btn { border-radius: var(--wid-radius-sm); font-weight: 500; }
+.btn-dti { background-color: var(--wid-forest); border-color: var(--wid-forest); color: #fff; font-weight: 500; }
+.btn-dti:hover, .btn-dti:focus { background-color: var(--wid-forest-deep); border-color: var(--wid-forest-deep); color: #fff; }
+.btn-dti:disabled { background-color: var(--wid-forest); border-color: var(--wid-forest); color: #fff; opacity: .65; }
+
+.btn-light { --bs-btn-bg: #fff; --bs-btn-border-color: var(--wid-line-strong); --bs-btn-hover-bg: var(--wid-fern-weak); --bs-btn-hover-border-color: var(--wid-line-strong); --bs-btn-active-bg: var(--wid-fern); --bs-btn-color: var(--wid-ink); }
+
+.btn-outline-secondary { --bs-btn-color: #44514a; --bs-btn-border-color: var(--wid-line-strong); --bs-btn-hover-bg: #44514a; --bs-btn-hover-border-color: #44514a; --bs-btn-active-bg: #44514a; --bs-btn-active-border-color: #44514a; --bs-btn-disabled-color: #7a867f; --bs-btn-disabled-border-color: var(--wid-line); }
+.btn-outline-success { --bs-btn-color: var(--wid-ok); --bs-btn-border-color: var(--wid-ok); --bs-btn-hover-bg: var(--wid-ok); --bs-btn-hover-border-color: var(--wid-ok); --bs-btn-active-bg: #176338; --bs-btn-active-border-color: #176338; }
+.btn-outline-danger { --bs-btn-color: var(--wid-danger); --bs-btn-border-color: var(--wid-danger); --bs-btn-hover-bg: var(--wid-danger); --bs-btn-hover-border-color: var(--wid-danger); --bs-btn-active-bg: #8f1c12; --bs-btn-active-border-color: #8f1c12; }
+.btn-outline-primary { --bs-btn-color: var(--wid-forest); --bs-btn-border-color: var(--wid-forest); --bs-btn-hover-bg: var(--wid-forest); --bs-btn-hover-border-color: var(--wid-forest); --bs-btn-active-bg: var(--wid-forest-deep); --bs-btn-active-border-color: var(--wid-forest-deep); }
+.btn-secondary { --bs-btn-bg: #5d6b63; --bs-btn-border-color: #5d6b63; --bs-btn-hover-bg: #48554d; --bs-btn-hover-border-color: #48554d; }
+
+/* ------------------------------------------------------------- form fields */
+.form-label { font-weight: 600; }
+.form-control, .form-select { border-color: var(--wid-line-strong); border-radius: var(--wid-radius-sm); }
+.form-control:focus, .form-select:focus { border-color: var(--wid-forest); box-shadow: 0 0 0 .22rem rgba(10, 77, 46, .16); }
+.form-check-input:checked { background-color: var(--wid-forest); border-color: var(--wid-forest); }
+.form-check-input:focus { border-color: var(--wid-forest); box-shadow: 0 0 0 .22rem rgba(10, 77, 46, .16); }
+.input-group-text { border-color: var(--wid-line-strong); background-color: var(--wid-fern-weak) !important; }
+
+/* ------------------------------------------------------------------ badges */
+.badge { font-weight: 600; letter-spacing: .01em; }
+.badge.bg-warning { color: #3d2b00 !important; }
+
+/* ------------------------------------------------------------------ cards */
+.metric-card, .dashboard-card, .association-box, .attention-card {
+  background-color: var(--wid-surface);
+  border: 1px solid var(--wid-line);
+  border-radius: var(--wid-radius-lg);
+  height: 100%;
+}
+.metric-card, .dashboard-card, .association-box { padding: 1.25rem; }
+.dashboard-card.p-0 { overflow: hidden; height: auto; }
+
+/* Numbers first: one quiet chip, one big figure, one small caption. */
+.metric-icon {
+  width: 2.5rem; height: 2.5rem; margin-bottom: .9rem;
+  border-radius: var(--wid-radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  background-color: var(--wid-fern); color: var(--wid-forest);
+}
+/* The four tiles used four colours that meant nothing; colour is kept for status. */
+.icon-weavers, .icon-products, .icon-nfc, .icon-verifications { background-color: var(--wid-fern); color: var(--wid-forest); }
+.metric-card h2 { font-size: 2rem; line-height: 1.1; letter-spacing: -.01em; }
+
+.association-box { height: 100%; }
+
+.scan-status-icon { width: 2.25rem; height: 2.25rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; }
+
+/* The one panel that asks you to act. */
+.attention-card { border-left: 4px solid var(--wid-danger); padding: 1rem 1.25rem; height: auto; }
+.attention-card.attention-clear { border-left-color: var(--wid-ok); padding: .75rem 1.25rem; }
+.attn-block ul li:first-child { border-top: 0 !important; }
+
+.bar-track { background: #ebf0ed; border-radius: 6px; height: .6rem; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 6px; }
+
+/* ------------------------------------------------------------------ tables */
+.table { --bs-table-hover-bg: var(--wid-fern-weak); --bs-table-border-color: var(--wid-line); }
+.table-light { --bs-table-bg: #f3f6f4; --bs-table-color: var(--wid-muted); --bs-table-border-color: var(--wid-line); }
+.table > :not(caption) > * > * { padding: .7rem .85rem; }
+.table th { font-weight: 600; white-space: nowrap; }
+.table td, .table th { vertical-align: middle; }
+.table tr > :first-child { padding-left: 1.1rem; }
+.table tr > :last-child { padding-right: 1.1rem; }
+.empty-row { color: var(--wid-muted); text-align: center; padding: 1.75rem !important; }
+/* A login email must stay in one piece; the table scrolls sideways instead of splitting it after a hyphen. */
+#applicationsBody .text-break { white-space: nowrap; }
+
+/* ------------------------------------------------------------- search bar */
+.search-box {
+  background-color: var(--wid-surface);
+  border: 1px solid var(--wid-line);
+  border-radius: var(--wid-radius-lg);
+  padding: .6rem 1rem;
+  display: flex; align-items: center; gap: .75rem;
+}
+.search-box:focus-within { border-color: var(--wid-forest); box-shadow: 0 0 0 .22rem rgba(10, 77, 46, .12); }
+.search-box input { border: none; outline: none; width: 100%; background: transparent; font-size: .95rem; }
+
+/* ------------------------------------------------------------ modals, toasts */
+.modal-content { border: 0; border-radius: var(--wid-radius-lg); box-shadow: 0 18px 48px rgba(16, 40, 28, .22); }
+.modal-header, .modal-footer { border-color: var(--wid-line); }
+.modal-backdrop { --bs-backdrop-bg: #0f1e16; --bs-backdrop-opacity: .5; }
+
+#toastHost { position: fixed; top: 1rem; right: 1rem; z-index: 2000; width: min(24rem, calc(100% - 2rem)); display: flex; flex-direction: column; gap: .5rem; }
+#toastHost .alert { margin: 0; border-left-width: 4px; border-radius: var(--wid-radius); padding: .7rem .9rem; box-shadow: 0 8px 24px rgba(16, 40, 28, .16); }
+#toastHost .alert-success { border-left-color: var(--wid-ok); }
+#toastHost .alert-danger { border-left-color: var(--wid-danger); }
+#toastHost .alert-warning { border-left-color: var(--wid-gold); }
+#toastHost .alert-info { border-left-color: #3b6a96; }
+
+/* ==================================================== dashboard frame ==== */
+.sidebar-backdrop { display: none; }
+
+.sidebar {
+  width: var(--sidebar-width);
+  position: fixed; top: 0; bottom: 0; left: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  background-color: var(--wid-surface);
+  border-right: 1px solid var(--wid-line);
+  z-index: 1000;
+}
+.sidebar > div:first-child { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.sidebar-brand { padding: 1.25rem 1rem; border-bottom: 1px solid var(--wid-line); }
+.sidebar-brand img { width: 2.8rem; height: auto; object-fit: contain; }
+.sidebar-brand .brand-name { font-size: 1.1rem; color: var(--wid-forest); }
+
+.sidebar-nav .nav-link {
+  position: relative;
+  display: flex; align-items: center; gap: .85rem;
+  margin: .15rem .75rem; padding: .7rem 1rem;
+  color: #44514a; font-size: .9rem; font-weight: 500;
+  border-radius: var(--wid-radius-sm);
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease;
+}
+.sidebar-nav .nav-link .bi { font-size: 1.05rem; }
+.sidebar-nav .nav-link:hover { color: var(--wid-forest); background-color: var(--wid-fern-weak); }
+.sidebar-nav .nav-link.active { color: var(--wid-forest); background-color: var(--wid-fern); font-weight: 600; }
+/* The gold mark: where you are. */
+.sidebar-nav .nav-link.active::before {
+  content: ""; position: absolute; left: -.75rem; top: 50%;
+  width: 3px; height: 1.4rem; transform: translateY(-50%);
+  background: var(--wid-gold); border-radius: 0 3px 3px 0;
+}
+.sidebar-nav .nav-link:focus-visible { outline: 2px solid var(--wid-forest); outline-offset: -2px; box-shadow: none; }
+
+.sidebar-foot { padding: .9rem 1rem; border-top: 1px solid var(--wid-line); display: flex; align-items: center; gap: .5rem; }
+.sidebar-foot .avatar { width: 2.1rem; height: 2.1rem; flex-shrink: 0; border-radius: 50%; background: var(--wid-fern); color: var(--wid-forest); display: flex; align-items: center; justify-content: center; }
+.sidebar-foot .btn-light { border: 0 !important; background: transparent; }
+.sidebar-foot .btn-light:hover { background: var(--wid-fern-weak); }
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  /* Fills the screen, but stops growing text lines apart on very wide monitors. */
+  padding: 1.5rem max(clamp(1rem, 2.2vw, 2.5rem), calc((100vw - var(--sidebar-width) - var(--content-max)) / 2));
+  transition: margin-left .2s ease;
+}
+
+.page-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1.25rem; }
+.page-head h4 { font-size: 1.45rem; font-weight: 650; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.page-head .btn { white-space: nowrap; }
+
+/* -------- wide screens: the menu can fold to icons; the choice is remembered. -------- */
+@media (min-width: 992px) {
+  html.menu-folded { --sidebar-width: var(--sidebar-rail); }
+  html.menu-folded .sidebar-brand { padding-left: 0; padding-right: 0; justify-content: center; }
+  html.menu-folded .sidebar-brand .vr,
+  html.menu-folded .sidebar-brand .brand-text { display: none; }
+  html.menu-folded .sidebar-nav .nav-link { font-size: 0; justify-content: center; gap: 0; margin-left: .6rem; margin-right: .6rem; padding: .8rem 0; }
+  html.menu-folded .sidebar-nav .nav-link .bi { font-size: 1.2rem; }
+  html.menu-folded .sidebar-nav .nav-link .badge { position: absolute; top: .1rem; right: .2rem; margin: 0 !important; font-size: .65rem; }
+  html.menu-folded .sidebar-nav .nav-link.active::before { left: -.6rem; }
+  html.menu-folded .sidebar-foot { flex-direction: column; padding: .75rem .25rem; }
+  html.menu-folded .sidebar-foot .avatar,
+  html.menu-folded .sidebar-foot .me-block { display: none; }
+}
+
+/* -------- tablets and phones: the menu slides in over the page. -------- */
+@media (max-width: 991.98px) {
+  .sidebar {
+    width: min(18rem, 86vw);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform .22s ease, visibility 0s linear .22s;
+  }
+  html.menu-open .sidebar { transform: none; visibility: visible; transition: transform .22s ease, visibility 0s; box-shadow: 0 0 48px rgba(16, 40, 28, .28); }
+  .sidebar-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 999;
+    background: rgba(15, 30, 22, .45);
+    opacity: 0; visibility: hidden;
+    transition: opacity .22s ease, visibility 0s linear .22s;
+  }
+  html.menu-open .sidebar-backdrop { opacity: 1; visibility: visible; transition: opacity .22s ease, visibility 0s; }
+  html.menu-open { overflow: hidden; }
+  .main-content { margin-left: 0; padding: 1rem; }
+  .page-head h4 { font-size: 1.3rem; }
+}
+
+@media (max-width: 575.98px) {
+  .metric-card, .dashboard-card, .association-box { padding: 1rem; }
+  /* Panel rows: the time goes under the text instead of squeezing it. */
+  .attn-block ul li { flex-direction: column; gap: .1rem !important; }
+  /* Messages sit at the bottom, so they never cover the menu button at the top. */
+  #toastHost { top: auto; bottom: .75rem; left: .75rem; right: .75rem; width: auto; }
+  .metric-card h2 { font-size: 1.7rem; }
+  .attention-card { padding: .85rem 1rem; }
+  .modal-dialog { margin: .75rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar, .sidebar-backdrop, .main-content, .sidebar-nav .nav-link { transition: none !important; }
+}
+
+/* ================================================== sign-in and application pages ==== */
+.page-center { display: flex; align-items: center; justify-content: center; margin: 0; padding: 1.5rem 1rem; }
+.page-public { margin: 0; padding: 2rem 1rem; }
+
+.login-card, .apply-card {
+  background: var(--wid-surface);
+  border: 1px solid var(--wid-line);
+  border-radius: var(--wid-radius-lg);
+  box-shadow: 0 6px 28px rgba(16, 40, 28, .07);
+  width: 100%;
+}
+.login-card { max-width: 26.5rem; padding: 2.25rem; }
+.apply-card { max-width: 37.5rem; margin: 0 auto; padding: 2rem; }
+
+.brand-header-container { display: flex; align-items: center; justify-content: center; gap: .75rem; margin-bottom: 1rem; }
+.brand-logo-img { height: 3rem; width: auto; object-fit: contain; }
+.brand-divider { width: 1px; height: 2.4rem; background-color: var(--wid-line-strong); }
+.brand-text-block { text-align: left; }
+.brand-title { font-size: 1.3rem; font-weight: 700; color: var(--wid-forest); line-height: 1.1; margin: 0; }
+.brand-subtitle { font-size: .875rem; color: var(--wid-muted); margin-top: 2px; }
+
+/* Apply / Check your application */
+.switcher { display: flex; gap: .5rem; background: #edf2ef; padding: .25rem; border-radius: var(--wid-radius); margin-bottom: 1.5rem; }
+.switcher button { flex: 1; border: 0; background: transparent; padding: .55rem .5rem; border-radius: var(--wid-radius-sm); font-size: .9rem; font-weight: 500; color: #44514a; }
+.switcher button[aria-selected="true"] { background: #fff; color: var(--wid-forest); box-shadow: 0 1px 3px rgba(16, 40, 28, .14); }
+.notice-box { background: var(--wid-fern-weak); border: 1px solid var(--wid-line); border-radius: var(--wid-radius); padding: .75rem 1rem; font-size: .875rem; color: #44514a; }
+.reference-box { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.5rem; font-weight: 700; letter-spacing: .04em; color: var(--wid-forest); background: var(--wid-fern); border-radius: var(--wid-radius); padding: .75rem 1rem; text-align: center; user-select: all; overflow-wrap: anywhere; }
+.result-badge { font-size: .8rem; }
+
+@media (max-width: 575.98px) {
+  .page-center { padding: 1rem .5rem; }
+  .page-public { padding: 1rem .5rem; }
+  .login-card { padding: 1.5rem; }
+  .apply-card { padding: 1.25rem; border-radius: var(--wid-radius-lg); }
+  .reference-box { font-size: 1.15rem; }
+}
+
+/* ============================================================ big screens ==== */
+/* One lever: everything above is in rem, so a larger base size enlarges all of it. */
+@media (min-width: 1700px) { html { font-size: 17px; } }
+@media (min-width: 2200px) { html { font-size: 18px; } }
