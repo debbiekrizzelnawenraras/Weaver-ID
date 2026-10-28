@@ -21,7 +21,7 @@ it('ships the shared stylesheet and the menu script', function () {
 
 it('links the shared stylesheet from every page', function (string $page) {
     expect(layoutFile($page))->toContain('css/weaver.css');
-})->with(['login.html', 'register.html', 'admin.html', 'association_dashboard.html']);
+})->with(['login.html', 'register.html', 'forgot-password.html', 'admin.html', 'association_dashboard.html']);
 
 it('keeps no private copy of the look inside a page', function (string $page) {
     $html = layoutFile($page);
@@ -30,7 +30,7 @@ it('keeps no private copy of the look inside a page', function (string $page) {
     expect($html)->not->toContain('max-width: 1200px')
         ->and($html)->not->toContain('--sidebar-width')
         ->and($html)->not->toContain('.dashboard-card {');
-})->with(['login.html', 'register.html', 'admin.html', 'association_dashboard.html']);
+})->with(['login.html', 'register.html', 'forgot-password.html', 'admin.html', 'association_dashboard.html']);
 
 it('lets the dashboards fill the screen instead of stopping at 1200 px', function () {
     $css = layoutFile('css/weaver.css');
@@ -62,6 +62,29 @@ it('keeps the hidden bot field on the application page hidden even if the styles
 
     expect($html)->toContain('.hp-field')
         ->and($html)->toContain('left: -9999px');
+});
+
+it('lets the text columns of a wide table wrap, so the table fits a laptop screen', function () {
+    $css = layoutFile('css/weaver.css');
+
+    expect($css)->toContain('.table-responsive > .table.text-nowrap { white-space: normal !important; }')
+        ->and($css)->toContain('@media (min-width: 768px)');
+});
+
+it('shows every table row as a card with the column names on a phone', function () {
+    $css = layoutFile('css/weaver.css');
+
+    expect($css)->toContain('@media (max-width: 767.98px)')
+        ->and($css)->toContain('.table-stack td[data-label]::before')
+        ->and($css)->toContain('content: attr(data-label)');
+});
+
+it('has the menu script copy the column names onto the cells for the phone cards', function () {
+    $script = layoutFile('js/layout.js');
+
+    expect($script)->toContain('.table-responsive > table')
+        ->and($script)->toContain("'table-stack'")
+        ->and($script)->toContain("setAttribute('data-label'");
 });
 
 it('styles every class the dashboards and scripts rely on', function (string $selector) {

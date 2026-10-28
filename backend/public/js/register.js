@@ -7,7 +7,11 @@
   'use strict';
 
   var API = (window.WEAVER_API_BASE || '').replace(/\/$/, '');
-  var FIELDS = ['association_name', 'municipality', 'registration_details', 'contact_name', 'contact_phone', 'email', 'password', 'privacy_consent'];
+  var FIELDS = ['association_name', 'municipality', 'registration_details', 'contact_name', 'contact_phone', 'email', 'email_code', 'password', 'privacy_consent'];
+
+  var codesOn = true;      // the server tells us in the municipality answer
+  var codeEmail = '';      // the address the last code was sent to
+  var resendTimer = null;
 
   function $(id) { return document.getElementById(id); }
 
@@ -70,6 +74,13 @@
       o.textContent = name;
       select.appendChild(o);
     });
+    codesOn = res.email_codes !== false;
+    if (!codesOn) {
+      // Email codes are switched off on this server (rehearsal without internet): no button, no code box.
+      var send = $('sendCode');
+      if (send && send.parentNode) { send.parentNode.removeChild(send); }
+      $('codeBlock').classList.add('d-none');
+    }
   }).catch(function (err) {
     $('municipality').innerHTML = '<option value="">Could not load the list</option>';
     showFormError(failureText(err));
@@ -108,6 +119,7 @@
     var fb = document.querySelector('[data-for="' + field + '"]');
     if (input) { input.classList.add('is-invalid'); }
     if (fb) { fb.textContent = text; fb.style.display = 'block'; }
+    if (field === 'email_code') { $('codeBlock').classList.remove('d-none'); }
   }
 
   // An error disappears as soon as the person edits that field, so a corrected field never stays red.
@@ -128,6 +140,89 @@
     if (bad) { bad.focus(); bad.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   }
 
+  // ------------------------------------------------------------- email code
+  function sendLabel() { return codeEmail ? 'Send again' : 'Send code'; }
+
+  // A red message from an earlier try must not stay under the box once a fresh code is on its way.
+  function clearCodeError() {
+    $('email_code').classList.remove('is-invalid');
+    var fb = document.querySelector('[data-for="email_code"]');
+    if (fb) { fb.textContent = ''; }
+  }
+
+  function countdown(seconds) {
+    var button = $('sendCode');
+    var left = seconds;
+    clearInterval(resendTimer);
+    function tick() {
+      if (left <= 0) {
+        clearInterval(resendTimer);
+        button.disabled = false;
+        button.textContent = sendLabel();
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Resend in ' + left + ' s';
+      left -= 1;
+    }
+    tick();
+    resendTimer = setInterval(tick, 1000);
+  }
+
+  // The code belongs to one address. Change the address and the code box goes away.
+  function forgetCode() {
+    clearInterval(resendTimer);
+    codeEmail = '';
+    $('email_code').value = '';
+    $('codeHelp').textContent = '';
+    clearCodeError();
+    $('codeBlock').classList.add('d-none');
+    var button = $('sendCode');
+    if (button) { button.disabled = false; button.textContent = sendLabel(); }
+  }
+
+  $('email').addEventListener('input', function () {
+    if (codeEmail && this.value.trim().toLowerCase() !== codeEmail.toLowerCase()) { forgetCode(); }
+  });
+
+  $('sendCode').addEventListener('click', function () {
+    var button = this;
+    var email = $('email').value.trim();
+    $('applyError').classList.add('d-none');
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      fieldError('email', 'Enter a valid email address.');
+      $('email').focus();
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Sending...';
+    call('POST', '/api/email-codes', { email: email }).then(function (res) {
+      codeEmail = email;
+      $('codeBlock').classList.remove('d-none');
+      $('email_code').value = '';
+      clearCodeError();
+      $('codeHelp').textContent = 'We sent a 6-digit code to ' + email + '. It works for ' + Math.round((res.expires_in || 600) / 60) +
+        ' minutes. Check your spam folder too.';
+      $('email_code').focus();
+      countdown(res.resend_in || 60);
+    }).catch(function (err) {
+      if (err.status === 429 && err.data && err.data.retry_after) {
+        // A code was sent a moment ago and is still good: keep the box open and wait.
+        codeEmail = email;
+        $('codeBlock').classList.remove('d-none');
+        clearCodeError();
+        $('codeHelp').textContent = err.message;
+        countdown(err.data.retry_after);
+        return;
+      }
+      var fields = (err.data && err.data.errors) || {};
+      fieldError('email', (fields.email && fields.email[0]) || (err.status === 503 ? err.message : failureText(err)));
+      button.disabled = false;
+      button.textContent = sendLabel();
+    });
+  });
+
   // ------------------------------------------------------------------- apply
   var lastEmail = '';
 
@@ -138,6 +233,9 @@
     if (v.contact_name.length < 3) { problems.contact_name = 'Enter the name of the contact person.'; }
     if (!/^(?:\+63|63|0)9\d{9}$/.test(v.contact_phone.replace(/[\s\-().]+/g, ''))) { problems.contact_phone = 'Enter a mobile number such as 0917 123 4567.'; }
     if (!/^\S+@\S+\.\S+$/.test(v.email)) { problems.email = 'Enter a valid email address.'; }
+    if (codesOn && !/^\d{6}$/.test(v.email_code)) {
+      problems.email_code = codeEmail ? 'Type the 6-digit code from your email.' : 'Press "Send code", then type the 6-digit code from your email.';
+    }
     var check = WeaverPassword.evaluate(v.password, { email: v.email, name: v.contact_name });
     if (!check.ok) { problems.password = WeaverPassword.MESSAGES[check.failed[0]]; }
     else if (v.password !== v.password_confirmation) { problems.password = 'The password and its confirmation do not match.'; }
@@ -156,6 +254,7 @@
       contact_name: $('contact_name').value.trim(),
       contact_phone: $('contact_phone').value.trim(),
       email: $('email').value.trim(),
+      email_code: codesOn ? $('email_code').value.trim() : '',
       password: $('password').value,
       password_confirmation: $('password_confirmation').value,
       privacy_consent: $('privacy_consent').checked,
@@ -181,6 +280,7 @@
       $('applyForm').classList.add('d-none');
       $('applyDone').classList.remove('d-none');
       $('applyForm').reset();
+      forgetCode();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }).catch(function (err) {
       var fields = (err.data && err.data.errors) || {};

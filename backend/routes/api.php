@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\AssociationApplicationReviewController;
 use App\Http\Controllers\Api\AssociationController;
 use App\Http\Controllers\Api\AttentionController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmailCodeController;
 use App\Http\Controllers\Api\NfcTagController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\ProductPhotoController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\SuspiciousReportController;
@@ -18,12 +20,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
+// Public: forgot password, for every role. A 6-digit code goes to the account's email, then the code
+// is typed with a new password. The answers do not say whether an email has an account.
+Route::post('/password/forgot', [PasswordResetController::class, 'forgot'])->middleware('throttle:password-forgot');
+Route::post('/password/reset', [PasswordResetController::class, 'reset'])->middleware('throttle:password-reset');
+
 // Public: the mobile app verifies a scanned NFC tag without logging in.
 Route::post('/verify', VerifyController::class)->middleware('throttle:verify');
 // Public: the app sends a report after a scan the server flagged (checked again on the server).
 Route::post('/reports', [SuspiciousReportController::class, 'store'])->middleware('throttle:reports');
 // Public: an association applies to be registered; staff decide. Nothing is created until approval.
 Route::get('/municipalities', [AssociationApplicationController::class, 'municipalities']);
+Route::post('/email-codes', [EmailCodeController::class, 'send'])->middleware('throttle:email-codes');
 Route::post('/association-applications', [AssociationApplicationController::class, 'store'])->middleware('throttle:applications');
 Route::post('/association-applications/status', [AssociationApplicationController::class, 'status'])->middleware('throttle:application-status');
 Route::get('/product-photos/{filename}', [ProductPhotoController::class, 'show'])

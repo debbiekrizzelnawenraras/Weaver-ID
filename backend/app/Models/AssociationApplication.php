@@ -18,6 +18,7 @@ class AssociationApplication extends Model
         'contact_name',
         'contact_phone',
         'email',
+        'email_verified_at',
         'password_hash',
         'registration_details',
         'status',
@@ -40,6 +41,7 @@ class AssociationApplication extends Model
         return [
             'consented_at' => 'datetime',
             'decided_at' => 'datetime',
+            'email_verified_at' => 'datetime',
         ];
     }
 

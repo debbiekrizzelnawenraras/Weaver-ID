@@ -166,6 +166,51 @@ body {
 /* A login email must stay in one piece; the table scrolls sideways instead of splitting it after a hyphen. */
 #applicationsBody .text-break { white-space: nowrap; }
 
+/* Wide tables.
+   Laptop and tablet: the text columns may wrap, so a table fits the card instead of being cut off at the right.
+   Ids, badges and buttons stay in one piece, and so does a login email. On a laptop the cells are a little
+   tighter. A table that is still too wide for a narrow window scrolls sideways inside its card. */
+@media (min-width: 768px) {
+  .table-responsive > .table.text-nowrap { white-space: normal !important; }
+  .table td code, .table td .badge, .table td .btn { white-space: nowrap; }
+  #usersBody td:nth-child(2) { white-space: nowrap; }
+}
+@media (min-width: 768px) and (max-width: 1399.98px) {
+  .table-responsive > .table > :not(caption) > * > * { padding: .65rem .55rem; }
+  .table-responsive > .table tr > :first-child { padding-left: .9rem; }
+  .table-responsive > .table tr > :last-child { padding-right: .9rem; }
+}
+
+/* Phones: each row becomes a small card. The script (layout.js) copies the column names into data-label,
+   so every value keeps its name. A table the script could not label keeps scrolling sideways. */
+@media (max-width: 767.98px) {
+  .table-responsive:has(> .table-stack) { overflow-x: visible; }
+  .table-stack, .table-stack tbody { display: block; }
+  .table-stack thead { display: none; }
+  .table-stack tr {
+    display: block; margin: .6rem; padding: .3rem .85rem;
+    background: var(--wid-surface); border: 1px solid var(--wid-line); border-radius: .75rem;
+  }
+  .table-stack td {
+    display: block; position: relative; min-height: 2rem;
+    padding: .45rem 0 .45rem 38% !important; border: 0; text-align: right;
+    background: transparent; box-shadow: none; white-space: normal !important; overflow-wrap: anywhere;
+    min-width: 0 !important; /* some cells carry a minimum width for the table layout */
+  }
+  .table-stack td[data-label]::before {
+    content: attr(data-label); position: absolute; left: 0; top: .45rem; width: 34%;
+    text-align: left; font-weight: 600; color: var(--wid-muted);
+  }
+  .table-stack td > div { margin-top: .1rem; }
+  /* the buttons of a row sit under the values, without a name */
+  .table-stack td.text-end { padding: .6rem 0 .35rem !important; margin-top: .25rem; border-top: 1px solid var(--wid-line); }
+  .table-stack td.text-end[data-label]::before { display: none; }
+  .table-stack td.text-end .btn { margin: .15rem 0 .15rem .35rem; }
+  .table-stack td.empty-row { padding: 1.25rem 0 !important; text-align: center; }
+  /* a login email may break at any point on a phone, instead of running off the card */
+  #applicationsBody .text-break { white-space: normal; overflow-wrap: anywhere; }
+}
+
 /* ------------------------------------------------------------- search bar */
 .search-box {
   background-color: var(--wid-surface);

@@ -118,20 +118,22 @@ Staff see reports about tags in their own municipality; admin sees all. Associat
 
 ## Association applications (public apply, staff and admin decide)
 
-An association applies on `register.html`; nothing exists in `associations` or `users` until staff approve. Weaver-ID sends no emails or text messages: the applicant keeps the reference number and looks up the result on the same page.
+An association applies on `register.html`; nothing exists in `associations` or `users` until staff approve. The only emails Weaver-ID sends are 6-digit codes (see *Email codes and forgot password* below). The result is not emailed or texted: the applicant keeps the reference number and looks up the result on the same page.
 
 **Public, no login**
 
 | Method and path | Purpose |
 |---|---|
-| `GET /api/municipalities` | The 10 municipalities of Mountain Province (`config/weaver.php`), for the form's dropdown. |
-| `POST /api/association-applications` | Apply: `{ association_name, municipality, contact_name, contact_phone, email, password, password_confirmation, registration_details (optional), privacy_consent: true }`. Returns 201 `{ reference: "AP-YYYYMMDD-XXXXX", status: "pending" }`. Limited to 10 tries an hour per IP address (every try counts, valid or not). |
+| `GET /api/municipalities` | The 10 municipalities of Mountain Province (`config/weaver.php`), for the form's dropdown, and `email_codes: true\|false` so the form knows whether to ask for an emailed code. |
+| `POST /api/email-codes` | `{ email }` emails a 6-digit code to the address (see below). Same answer whether or not the address has an account. |
+| `POST /api/association-applications` | Apply: `{ association_name, municipality, contact_name, contact_phone, email, email_code, password, password_confirmation, registration_details (optional), privacy_consent: true }`. Returns 201 `{ reference: "AP-YYYYMMDD-XXXXX", status: "pending" }`. Limited to 10 tries an hour per IP address (every try counts, valid or not). |
 | `POST /api/association-applications/status` | `{ reference, email }` returns the status, the reason when rejected, and a message. A wrong reference and a wrong email get the same 404. Limited to 10 a minute per IP address. |
 
 Rules on the apply call:
 
 - The municipality must be one of the listed ones. The mobile number must be a Philippine mobile number and is saved as `09XXXXXXXXX` (`+63 917 ...`, `63917...` and spaces or dashes are accepted).
 - The password follows the same rules as every other account (12+ characters, upper, lower, number, symbol, not common, not containing the contact name or email) and must be confirmed. It is saved only as a hash, kept only while the application is waiting, and deleted when it is decided. It is never returned, not even to administrators.
+- `email_code` is the 6-digit code emailed to `email` (required while `WEAVER_EMAIL_CODES` is on; ignored when it is off). The form's other rules are checked first, so a typo elsewhere does not use up a try on the code. The code is checked **before** anything is said about the email being in use, so only a person who can read the mailbox learns whether an address already has an account. The code is used up only when the application is saved; a clash on the association name leaves it usable. The application is saved with `email_verified_at` set (or empty when codes are off).
 - The association name may not match a registered association or a waiting application (capitals, spaces and punctuation ignored). The email may not belong to an account or a waiting application. The email answer is the same words for both reasons, so the form does not say which emails have accounts.
 - `privacy_consent` must be `true`. The time and `config('weaver.application_notice_version')` (env `WEAVER_NOTICE_VERSION`) are saved with the application.
 - A hidden field `website` is a bot trap: if it is filled the call answers 201 and saves nothing.
@@ -141,8 +143,8 @@ Rules on the apply call:
 
 | Method and path | Purpose |
 |---|---|
-| `GET /api/applications` | Applications, newest first, 25 per page, with contact details. Optional `?status=pending\|approved\|rejected`. Each waiting one carries `conflict`: reasons an approval would now fail (the name was registered or the email got an account since). The password hash is never included. |
-| `POST /api/applications/{id}/approve` | Creates the association (`active`) and an `association` account for the contact person, with the password the applicant chose (no forced change), in one transaction. 422 if already decided or if the name or email is now taken (nothing is created); 403 outside the caller's municipality. |
+| `GET /api/applications` | Applications, newest first, 25 per page, with contact details. Optional `?status=pending\|approved\|rejected`. Each waiting one carries `conflict`: reasons an approval would now fail (the name was registered or the email got an account since). Each carries `email_verified` (true when the applicant typed the emailed code). The password hash is never included. |
+| `POST /api/applications/{id}/approve` | Creates the association (`active`) and an `association` account for the contact person, with the password the applicant chose (no forced change) and, when the applicant confirmed the email, a confirmed email (`email_verified_at`), in one transaction. 422 if already decided or if the name or email is now taken (nothing is created); 403 outside the caller's municipality. |
 | `POST /api/applications/{id}/reject` | `{ "note": "reason, 5 to 500 characters" }`. The applicant can read the note. 422 if already decided; 403 outside the caller's municipality. |
 
 Municipality scope for applications ignores capitals (`sagada` matches `Sagada`).
@@ -194,10 +196,25 @@ Weak means a rule is not met. Medium means every rule is met (12 to 15 character
 
 **Forced change at first sign-in.** An account created by an admin, or whose password an admin reset (except the admin's own), has `must_change_password: true` (returned by `POST /api/login` and `GET /api/user`). Until it changes its password, every route except `GET /api/user`, `POST /api/change-password` and `POST /api/logout` answers 403 with `"code": "password_change_required"`. The dashboards open a window that cannot be closed until the password is changed.
 
+## Email codes and forgot password
+
+Weaver-ID sends one kind of email: a plain-text message with a 6-digit code. It is sent when an association asks to confirm its email while applying (`purpose = application`) and when anyone asks to choose a new password (`purpose = password_reset`). Results, approvals and rejections are never emailed.
+
+Rules for every code (`app/Support/EmailCodes.php`): one code per address and purpose, replaced by a new one; works once; valid 10 minutes (`WEAVER_EMAIL_CODE_MINUTES`); dead after 5 wrong tries; another code can be asked for after 60 seconds; only a keyed hash is stored in `email_codes`, never the code; expired codes are cleared whenever a new one is made. If the email cannot be sent (no internet, wrong mail settings) the request answers 503, the reason goes to `storage/logs/laravel.log` (never the code), and a code that was valid before stays valid.
+
+| Method and path | Purpose |
+|---|---|
+| `POST /api/email-codes` | `{ email }`. 200 `{ expires_in, resend_in }`; 429 `{ retry_after }` when asked again within a minute; 503 when email codes are off or the email could not be sent. Limited to 20 an hour per IP address and 6 an hour per address. |
+| `POST /api/password/forgot` | `{ email }`. Always 200 with the same words, whether or not an active account uses the address; the code is sent only to an active account. 503 when codes are off. Limited like `/api/email-codes`. |
+| `POST /api/password/reset` | `{ email, code, password, password_confirmation }`. The password rules are checked first (a weak password does not use up a try on the code). A wrong, expired or dead code, and an email without an account, all get the same 422 on `code`. On success the password changes, `must_change_password` is cleared, **every** token of the account is deleted, and the code is used up. Works for admin, staff and association accounts. Limited to 20 an hour per IP address and 10 an hour per address. |
+
+**Switch.** `WEAVER_EMAIL_CODES=off` in `.env` turns all of this off for a rehearsal without internet: the application page shows no code box, applications are saved as "Email not confirmed" (the Applications tab shows a badge, and the approval window says it), and forgot-password answers 503 with a message to ask DTI-Mountain Province. Default is `on`. Mail settings and the mail account are in `docs/EMAIL-SETUP.md`.
+
 ## Known limits (say these out loud in the defense)
 
 - Authentication is by UID only. Cheap rewritable tags can copy a UID, so a clone scanned from one phone looks genuine. The suspicious rule is a heuristic, not proof.
 - The public response names the association (business) and its municipality only. Member names are never returned to the public (data minimisation, RA 10173). The old `weavers.proprietor` column is kept as an optional, unused column and is no longer collected.
 - Tag linking is self-service for staff and associations, so a UID's origin is no longer proven by DTI. The controls are the `issued_by` audit trail, revocation, municipality scoping and the admin summary of tags issued per role.
 - Staff scope follows the association's municipality, not the weaver's. A weaver in another town under a Sagada association is managed by Sagada staff.
-- Association applications: the email address is not verified (no email or OTP step), so the staff member who clicks Approve is the real control. Check the association against its registration before approving. The form still tells a visitor that an email "cannot be used", which lets someone test whether an address is already taken; the throttle (10 tries an hour per IP address) slows that down but does not stop it. A bot with many IP addresses could fill the Applications list with junk rows; staff reject them. The applicant is not told the result by message; they must look it up with the reference number or be told by staff.
+- Association applications: the email address is confirmed with a 6-digit code, which proves the applicant can read that mailbox, not that the association is real, so the staff member who clicks Approve is still the real control. Check the association against its registration before approving. With `WEAVER_EMAIL_CODES=off` the application is saved as "Email not confirmed". The code is checked before the "email cannot be used" answer, so only someone who can read the mailbox learns that an address already has an account.
+- Email codes need the internet and a working mail account on the server. A person who knows someone else's email can ask for codes for it and use up the 5 tries of a code (6 codes an hour per address); the owner can ask again after a minute, so this is a nuisance, not a way in. An account whose mailbox is lost is reset by an administrator in Users, as before. A bot with many IP addresses could fill the Applications list with junk rows; staff reject them. The applicant is not told the result by message; they must look it up with the reference number or be told by staff.

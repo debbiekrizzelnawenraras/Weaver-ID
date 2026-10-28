@@ -6,6 +6,9 @@
  * Tablets and phones: the menu is hidden, a button slides it in over the page, and a tap outside
  * the menu, the Escape key or choosing a page closes it again.
  *
+ * Wide tables: on a phone each row is shown as a small card (see weaver.css). For that, this script copies
+ * the name of each column into a data-label on every cell, and does it again when the page fills a table.
+ *
  * Nothing here reads or sends data, and nothing here touches the sign-in.
  */
 (function () {
@@ -114,5 +117,30 @@
     refresh();
   }
 
-  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', start); } else { start(); }
+  // The name of each column, copied onto the cells under it (the stylesheet shows it on a phone).
+  function labelTables() {
+    each(document.querySelectorAll('.table-responsive > table'), function (table) {
+      var names = [];
+      each(table.querySelectorAll('thead th'), function (th) { names.push(th.textContent.replace(/\s+/g, ' ').trim()); });
+      var body = table.tBodies[0];
+      if (!names.length || !body) { return; }
+
+      function label() {
+        each(body.rows, function (row) {
+          // A row of another length (the "nothing here yet" row) is left without names.
+          if (row.cells.length !== names.length) { return; }
+          each(row.cells, function (cell, i) {
+            if (names[i]) { cell.setAttribute('data-label', names[i]); }
+          });
+        });
+      }
+
+      table.classList.add('table-stack');
+      label();
+      if (window.MutationObserver) { new MutationObserver(label).observe(body, { childList: true }); }
+    });
+  }
+
+  function init() { start(); labelTables(); }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();

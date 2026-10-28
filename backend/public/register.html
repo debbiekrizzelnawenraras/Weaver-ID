@@ -73,8 +73,19 @@
 
         <div class="mb-3">
           <label for="email" class="form-label fs-7 fw-semibold">Email (your login)</label>
-          <input type="email" id="email" class="form-control" maxlength="255" autocomplete="email">
+          <div class="input-group">
+            <input type="email" id="email" class="form-control" maxlength="255" autocomplete="email">
+            <button type="button" class="btn btn-outline-secondary" id="sendCode">Send code</button>
+          </div>
           <div class="invalid-feedback" data-for="email"></div>
+        </div>
+
+        <!-- Appears after "Send code". Removed by the script when the server has email codes switched off. -->
+        <div class="mb-3 d-none" id="codeBlock">
+          <label for="email_code" class="form-label fs-7 fw-semibold">6-digit code from your email</label>
+          <input type="text" id="email_code" class="form-control" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" style="max-width:12rem;letter-spacing:.3em">
+          <div class="form-text" id="codeHelp" aria-live="polite"></div>
+          <div class="invalid-feedback" data-for="email_code"></div>
         </div>
 
         <div class="mb-2">
@@ -103,7 +114,10 @@
           <strong>Privacy notice.</strong>
           DTI-Mountain Province collects these details only to check your application and, if it is approved, to create your association's Weaver-ID account.
           They are seen only by DTI-Mountain Province staff of your municipality and by system administrators. Your password is stored only in scrambled form
-          and the stored copy is deleted once your application is decided. Weaver-ID does not send emails or text messages.
+          and the stored copy is deleted once your application is decided.
+          Weaver-ID uses your email address to send you a 6-digit code that confirms the address is yours, and later, if you forget your password,
+          a code to choose a new one. Each code is kept only in scrambled form and works once, for 10 minutes. Weaver-ID sends no other emails or text messages;
+          the result of your application is not sent to you.
         </div>
         <div class="form-check mb-3">
           <input class="form-check-input" type="checkbox" id="privacy_consent">
@@ -126,7 +140,7 @@
           <button type="button" class="btn btn-sm btn-outline-secondary" id="copyRef"><i class="bi bi-clipboard"></i> Copy reference</button>
         </div>
         <div class="alert alert-warning fs-7">
-          <strong>Write this number down.</strong> Weaver-ID does not send emails or text messages. To find out the result, come back to this page,
+          <strong>Write this number down.</strong> The result is not sent to you by email or text message. To find out the result, come back to this page,
           choose <em>Check your application</em> and enter this reference number with the email you applied with.
         </div>
         <p class="fs-7 text-muted">DTI-Mountain Province staff will review your application. Until it is approved you cannot sign in.</p>

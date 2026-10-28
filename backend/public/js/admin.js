@@ -573,7 +573,10 @@
         : '';
       return '<tr><td class="text-nowrap">' + when(x.created_at) + '<div class="text-muted fs-8"><code>' + esc(x.reference) + '</code></div></td>' +
         '<td class="fw-semibold">' + esc(x.association_name) + '<div class="text-muted fs-8 fw-normal">' + esc(x.municipality) + '</div></td>' +
-        '<td style="min-width:13rem">' + esc(x.contact_name) + '<div class="text-muted fs-8">' + esc(x.contact_phone) + '</div><div class="text-muted fs-8 text-break">' + esc(x.email) + '</div></td>' +
+        '<td style="min-width:13rem">' + esc(x.contact_name) + '<div class="text-muted fs-8">' + esc(x.contact_phone) + '</div><div class="text-muted fs-8 text-break">' + esc(x.email) + '</div>' +
+          (x.email_verified
+            ? '<span class="badge bg-success mt-1" title="The applicant typed the code that was emailed to this address.">Email confirmed</span>'
+            : '<span class="badge bg-warning text-dark mt-1" title="Nobody has shown that this mailbox is theirs. Check the address before approving.">Email not confirmed</span>') + '</td>' +
         '<td class="text-wrap" style="min-width:9rem">' + (x.registration_details ? esc(x.registration_details) : '<span class="text-muted">not given</span>') + '</td>' +
         '<td><span class="badge bg-' + st.cls + '">' + esc(st.label) + '</span>' + decided + conflicts + '</td>' +
         '<td class="text-end pe-3 text-nowrap">' + actions + '</td></tr>';
@@ -935,11 +938,11 @@
       openForm('Approve ' + x.association_name, 'Approve', [
         { name: 'a_name', label: 'Association', value: x.association_name + ' (' + x.municipality + ')', readonly: true, skip: true },
         { name: 'a_contact', label: 'Contact person', value: x.contact_name + ', ' + x.contact_phone, readonly: true, skip: true },
-        { name: 'a_email', label: 'Will sign in with', value: x.email, readonly: true, skip: true },
+        { name: 'a_email', label: 'Will sign in with', value: x.email + (x.email_verified ? ' (email confirmed)' : ' (email NOT confirmed)'), readonly: true, skip: true },
         { name: 'a_reg', label: 'Registration details they gave', value: x.registration_details || 'not given', readonly: true, skip: true }
       ], function () {
         return Weaver.post('/api/applications/' + x.id + '/approve', {});
-      }, 'Approving creates the association and the login right away, with the password the applicant chose. Check that this is a real association first. Weaver-ID sends no email, so tell them yourself; they can also look up the result with their reference number.');
+      }, 'Approving creates the association and the login right away, with the password the applicant chose. Check that this is a real association first. Weaver-ID does not email the result, so tell them yourself; they can also look up the result with their reference number.');
     },
     'reject-application': function (id) {
       var x = data.applications && data.applications.data ? byId(data.applications.data, id) : null;

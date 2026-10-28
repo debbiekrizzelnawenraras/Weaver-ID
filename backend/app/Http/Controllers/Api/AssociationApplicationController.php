@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Association;
 use App\Models\AssociationApplication;
 use App\Rules\StrongPassword;
+use App\Support\EmailCodes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -25,12 +26,18 @@ class AssociationApplicationController extends Controller
     /** The municipalities offered on the form. */
     public function municipalities(): JsonResponse
     {
-        return response()->json(['municipalities' => config('weaver.municipalities')]);
+        return response()->json([
+            'municipalities' => config('weaver.municipalities'),
+            // The form asks for an emailed code only while the server can send them.
+            'email_codes' => EmailCodes::enabled(),
+        ]);
     }
 
     /**
      * Send an application. The password is checked against the password rules and saved only as a
-     * hash. The decision comes later from staff; until then the applicant cannot sign in.
+     * hash. The email address must be confirmed with the 6-digit code that was emailed to it (unless
+     * email codes are switched off). The decision comes later from staff; until then the applicant
+     * cannot sign in.
      */
     public function store(Request $request): JsonResponse
     {
@@ -41,6 +48,8 @@ class AssociationApplicationController extends Controller
 
         $request->merge($this->tidy($request));
 
+        $codesOn = EmailCodes::enabled();
+
         $validated = $request->validate([
             'association_name' => ['required', 'string', 'min:3', 'max:255'],
             'municipality' => ['required', 'string', Rule::in(config('weaver.municipalities'))],
@@ -50,6 +59,7 @@ class AssociationApplicationController extends Controller
             'password' => ['required', 'string', 'confirmed', new StrongPassword($request->input('email'), $request->input('contact_name'))],
             'registration_details' => ['nullable', 'string', 'max:150'],
             'privacy_consent' => ['accepted'],
+            'email_code' => [Rule::requiredIf($codesOn), 'nullable', 'digits:6'],
         ], [
             'association_name.required' => 'Enter the name of the association.',
             'association_name.min' => 'The association name is too short.',
@@ -64,7 +74,18 @@ class AssociationApplicationController extends Controller
             'password.required' => 'Choose a password.',
             'password.confirmed' => 'The password and its confirmation do not match.',
             'privacy_consent.accepted' => 'You must agree to the privacy notice to apply.',
+            'email_code.required' => 'Press "Send code", then type the 6-digit code from your email.',
+            'email_code.digits' => 'The code has 6 digits.',
         ]);
+
+        // The code is checked before anything is said about the email being in use, so only a person
+        // who can read the mailbox ever learns whether the address already has an account.
+        if ($codesOn) {
+            $result = EmailCodes::check($validated['email'], EmailCodes::APPLICATION, $validated['email_code']);
+            if ($result !== 'ok') {
+                throw ValidationException::withMessages(['email_code' => EmailCodes::message($result)]);
+            }
+        }
 
         $errors = [];
         if (Association::nameTaken($validated['association_name'])) {
@@ -86,12 +107,18 @@ class AssociationApplicationController extends Controller
             'contact_name' => $validated['contact_name'],
             'contact_phone' => $validated['contact_phone'],
             'email' => $validated['email'],
+            'email_verified_at' => $codesOn ? now() : null,
             'password_hash' => Hash::make($validated['password']),
             'registration_details' => filled($validated['registration_details'] ?? null) ? $validated['registration_details'] : null,
             'status' => 'pending',
             'consented_at' => now(),
             'notice_version' => (string) config('weaver.application_notice_version'),
         ]);
+
+        // The code did its job; it cannot be used for a second application.
+        if ($codesOn) {
+            EmailCodes::forget($validated['email'], EmailCodes::APPLICATION);
+        }
 
         return response()->json($this->received($application->reference), 201);
     }

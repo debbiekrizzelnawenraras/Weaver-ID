@@ -72,6 +72,7 @@ class AssociationApplicationReviewController extends Controller
             $user->forceFill([
                 'name' => $fresh->contact_name,
                 'email' => $fresh->email,
+                'email_verified_at' => $fresh->email_verified_at,
                 'role' => 'association',
                 'association_id' => $association->id,
                 'municipality' => null,
@@ -196,6 +197,7 @@ class AssociationApplicationReviewController extends Controller
             'contact_name' => $application->contact_name,
             'contact_phone' => $application->contact_phone,
             'email' => $application->email,
+            'email_verified' => $application->email_verified_at !== null,
             'registration_details' => $application->registration_details,
             'status' => $application->status,
             'consented_at' => $application->consented_at,

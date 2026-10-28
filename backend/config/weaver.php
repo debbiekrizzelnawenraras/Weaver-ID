@@ -98,7 +98,26 @@ return [
     |
     */
 
-    'application_notice_version' => env('WEAVER_NOTICE_VERSION', '2026-10'),
+    'application_notice_version' => env('WEAVER_NOTICE_VERSION', '2026-10-24'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Email codes
+    |--------------------------------------------------------------------------
+    |
+    | A 6-digit code is emailed to confirm an association's email address when
+    | it applies, and to let anyone choose a new password. WEAVER_EMAIL_CODES=off
+    | switches both off, for rehearsals without internet: an application is then
+    | saved as "email not verified" and forgot-password is unavailable.
+    |
+    */
+
+    'email_codes' => [
+        'enabled' => ! in_array(strtolower((string) env('WEAVER_EMAIL_CODES', 'on')), ['off', 'false', '0', 'no'], true),
+        'ttl_minutes' => (int) env('WEAVER_EMAIL_CODE_MINUTES', 10),
+        'max_attempts' => 5,
+        'resend_seconds' => 60,
+    ],
 
     /*
     |--------------------------------------------------------------------------

@@ -51,6 +51,30 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($request->ip());
         });
 
+        // Each email costs the server a mail send and lands in someone's inbox, so a code may be asked
+        // for only a few times an hour for one address and a limited number of times from one place.
+        RateLimiter::for('email-codes', function (Request $request) {
+            return [
+                Limit::perHour(20)->by('ip|'.$request->ip()),
+                Limit::perHour(6)->by('email|'.strtolower(trim((string) $request->input('email')))),
+            ];
+        });
+
+        RateLimiter::for('password-forgot', function (Request $request) {
+            return [
+                Limit::perHour(20)->by('ip|'.$request->ip()),
+                Limit::perHour(6)->by('email|'.strtolower(trim((string) $request->input('email')))),
+            ];
+        });
+
+        // Typing the code is the part that can be guessed, so it is limited per address and per place.
+        RateLimiter::for('password-reset', function (Request $request) {
+            return [
+                Limit::perHour(20)->by('ip|'.$request->ip()),
+                Limit::perHour(10)->by('email|'.strtolower(trim((string) $request->input('email')))),
+            ];
+        });
+
         // Reports are public too, so they are limited harder than scans.
         RateLimiter::for('reports', function (Request $request) {
             return Limit::perHour(10)->by($request->ip());

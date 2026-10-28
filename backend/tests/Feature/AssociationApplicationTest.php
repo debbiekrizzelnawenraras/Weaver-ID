@@ -9,6 +9,10 @@ use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
+// These tests are about the form's own rules, so email codes are switched off here.
+// tests/Feature/EmailCodeApplicationTest.php runs the same form with the codes on.
+beforeEach(fn () => config(['weaver.email_codes.enabled' => false]));
+
 const APPL_PASSWORD = 'Tg7#kLm92xQv';
 
 function applPayload(array $overrides = []): array
