@@ -30,6 +30,10 @@ void main() {
     expect(parseTagCode('0316d40b087765617665722e69643a740011'), isNull);
   });
 
+  test('finds the record after an empty (NULL) TLV at the start', () {
+    expect(parseTagCode('00$_record'), '0011223344556677');
+  });
+
   test('returns null for a record of another type', () {
     expect(parseTagCode('0316d40b087765617665722e69643a75' '0011223344556677fe'), isNull);
   });

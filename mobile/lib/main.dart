@@ -37,9 +37,15 @@ String? parseTagCode(String hex) {
   // 03 16 = NDEF TLV of 22 bytes, D4 0B 08 = external record, type length 11,
   // payload length 8, then the type "weaver.id:t".
   const head = '0316D40B08' '7765617665722E69643A74';
-  if (clean.length < head.length + 16 || !clean.startsWith(head)) return null;
-  return clean.substring(head.length, head.length + 16);
+  // Look for the record anywhere in the memory read, not only at its start, so
+  // that a tag whose memory begins with an empty (NULL) TLV is still read.
+  final at = clean.indexOf(head);
+  if (at < 0 || clean.length < at + head.length + 16) return null;
+  return clean.substring(at + head.length, at + head.length + 16);
 }
+
+/// Hex of the external record type "weaver.id:t".
+const tagCodeTypeHex = '7765617665722E69643A74';
 
 class WeaverIdApp extends StatelessWidget {
   const WeaverIdApp({super.key});
@@ -290,6 +296,10 @@ class _ScanPageState extends State<ScanPage> {
 
   /// UID of the tag the shown result is about (needed to report it).
   String? _resultUid;
+
+  /// What happened when the tag code was read, shown under the result when it
+  /// was not read the usual way (helps to find a phone or tag problem).
+  String? _readInfo;
   final _uidController = TextEditingController();
 
   bool get _nfcPlatform =>
@@ -367,13 +377,59 @@ class _ScanPageState extends State<ScanPage> {
   /// none; the server decides whether that is a problem. Reading in the same
   /// session as the counter does not count a second tap.
   Future<String?> _readTagCode() async {
+    final notes = <String>[];
+    // 1. Two READ commands (pages 4..7 and 8..11).
     try {
       final first = await FlutterNfcKit.transceive('3004');
       final second = await FlutterNfcKit.transceive('3008');
-      return parseTagCode('$first$second');
-    } catch (_) {
-      return null;
+      final both = '$first$second';
+      final code = parseTagCode(both);
+      if (code != null) {
+        _readInfo = null;
+        return code;
+      }
+      notes.add('READ gave ${both.length ~/ 2} bytes: ${_shortHex(both)}');
+    } catch (e) {
+      notes.add('READ failed: ${_shortError(e)}');
     }
+    // 2. One FAST_READ of pages 4..11.
+    try {
+      final all = await FlutterNfcKit.transceive('3A040B');
+      final code = parseTagCode(all);
+      if (code != null) {
+        _readInfo = 'Tag code read with FAST_READ.';
+        return code;
+      }
+      notes.add('FAST_READ gave ${all.length ~/ 2} bytes: ${_shortHex(all)}');
+    } catch (e) {
+      notes.add('FAST_READ failed: ${_shortError(e)}');
+    }
+    // 3. The NDEF record itself, as other NFC apps read it.
+    try {
+      final records = await FlutterNfcKit.readNDEFRawRecords();
+      for (final r in records) {
+        final payload = r.payload.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toUpperCase();
+        if (r.type.toUpperCase() == tagCodeTypeHex && payload.length >= 16) {
+          _readInfo = 'Tag code read from the NDEF record.';
+          return payload.substring(0, 16);
+        }
+      }
+      notes.add('NDEF: ${records.length} record(s), none of type weaver.id:t');
+    } catch (e) {
+      notes.add('NDEF failed: ${_shortError(e)}');
+    }
+    _readInfo = 'Tag code not read. ${notes.join(' | ')}';
+    return null;
+  }
+
+  static String _shortHex(String hex) {
+    final clean = hex.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toUpperCase();
+    return clean.length > 24 ? '${clean.substring(0, 24)}...' : clean;
+  }
+
+  static String _shortError(Object e) {
+    final text = e.toString().split('\n').first;
+    return text.length > 60 ? '${text.substring(0, 60)}...' : text;
   }
 
   Future<void> _scanTag() async {
@@ -409,6 +465,7 @@ class _ScanPageState extends State<ScanPage> {
         iosAlertMessage: 'Hold your phone near the tag',
       );
       final uid = _normalizeUid(tag.id);
+      _readInfo = null;
       // Must happen while the tag is still connected.
       final counter = await _readCounter();
       final code = await _readTagCode();
@@ -458,6 +515,7 @@ class _ScanPageState extends State<ScanPage> {
       });
       return;
     }
+    _readInfo = null;
     await _verify(uid);
   }
 
@@ -555,6 +613,11 @@ class _ScanPageState extends State<ScanPage> {
                 serverUrl: _serverUrl,
                 onReport: _busy ? null : _openReport,
               ),
+            if (_result != null && _readInfo != null) ...[
+              const SizedBox(height: 8),
+              Text(_readInfo!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+            ],
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 8),
