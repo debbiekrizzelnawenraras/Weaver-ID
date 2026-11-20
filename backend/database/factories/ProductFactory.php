@@ -16,7 +16,7 @@ class ProductFactory extends Factory
         return [
             'association_id' => Association::factory(),
             'title' => fake()->randomElement(['Pinagpagan Pattern Blanket', 'Inabel Table Runner', 'Woven Tote Bag']),
-            'category' => fake()->randomElement(['Blanket / Textile', 'Home Decor', 'Bags & Accessories']),
+            'category' => fake()->randomElement(\App\Models\Product::CATEGORIES),
             'status' => 'active',
         ];
     }

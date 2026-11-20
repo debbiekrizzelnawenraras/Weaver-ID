@@ -181,7 +181,7 @@ it('stops staff editing a product outside their municipality', function () {
     Sanctum::actingAs($staff);
 
     $this->putJson("/api/staff/products/{$foreign->id}", [
-        'association_id' => $foreign->association_id, 'title' => 'x', 'category' => 'y', 'status' => 'active',
+        'association_id' => $foreign->association_id, 'title' => 'x', 'category' => 'Traditional Woven Fabric', 'status' => 'active',
     ])->assertForbidden();
 });
 
@@ -192,7 +192,7 @@ it('stops staff moving a product into a foreign association', function () {
     Sanctum::actingAs($staff);
 
     $this->putJson("/api/staff/products/{$own->id}", [
-        'association_id' => $foreign->id, 'title' => 'x', 'category' => 'y', 'status' => 'active',
+        'association_id' => $foreign->id, 'title' => 'x', 'category' => 'Traditional Woven Fabric', 'status' => 'active',
     ])->assertForbidden();
 });
 
@@ -204,7 +204,7 @@ it('does not move a product with a tag to another association', function () {
     Sanctum::actingAs($staff);
 
     $this->putJson("/api/staff/products/{$product->id}", [
-        'association_id' => $other->id, 'title' => 'x', 'category' => 'y', 'status' => 'active',
+        'association_id' => $other->id, 'title' => 'x', 'category' => 'Traditional Woven Fabric', 'status' => 'active',
     ])->assertUnprocessable()->assertJsonValidationErrors('association_id');
 });
 
@@ -236,7 +236,7 @@ it('lets staff deactivate a product of an inactive association but not reactivat
     $product = productIn($association);
     Sanctum::actingAs($staff);
 
-    $payload = ['association_id' => $association->id, 'title' => 'x', 'category' => 'y'];
+    $payload = ['association_id' => $association->id, 'title' => 'x', 'category' => 'Traditional Woven Fabric'];
 
     $this->putJson("/api/staff/products/{$product->id}", $payload + ['status' => 'inactive'])->assertOk();
     $this->putJson("/api/staff/products/{$product->id}", $payload + ['status' => 'active'])

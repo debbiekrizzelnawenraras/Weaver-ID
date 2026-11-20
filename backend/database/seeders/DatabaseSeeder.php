@@ -51,21 +51,21 @@ class DatabaseSeeder extends Seeder
         $product1 = Product::create([
             'association_id' => $association->id,
             'title' => 'Pinagpagan Pattern Blanket',
-            'category' => 'Blanket / Textile',
+            'category' => Product::FABRIC,
             'status' => 'active',
         ]);
 
         $product2 = Product::create([
             'association_id' => $association->id,
             'title' => 'Inabel Table Runner',
-            'category' => 'Home Decor',
+            'category' => Product::FABRIC,
             'status' => 'active',
         ]);
 
         Product::create([
             'association_id' => $association->id,
             'title' => 'Woven Tote Bag',
-            'category' => 'Bags & Accessories',
+            'category' => Product::FABRIC,
             'status' => 'active',
         ]);
 

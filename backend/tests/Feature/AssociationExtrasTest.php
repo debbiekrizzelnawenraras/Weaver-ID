@@ -72,7 +72,7 @@ it('lets an association edit and deactivate its own product', function () {
 
     $this->putJson("/api/association/products/{$product->id}", [
         'title' => 'Renamed Blanket',
-        'category' => 'Blanket',
+        'category' => 'Traditional Woven Fabric',
         'status' => 'inactive',
     ])->assertOk()->assertJsonPath('product.status', 'inactive');
 
@@ -86,7 +86,7 @@ it('stops an association editing another association product', function () {
 
     $this->putJson("/api/association/products/{$foreign->id}", [
         'title' => 'Hijacked',
-        'category' => 'Blanket',
+        'category' => 'Traditional Woven Fabric',
         'status' => 'active',
     ])->assertForbidden();
 
@@ -109,7 +109,7 @@ it('lets an association add a product, owned by the association itself', functio
     $user = User::factory()->association()->create();
     Sanctum::actingAs($user);
 
-    $id = $this->postJson('/api/association/products', ['title' => 'Inabel Runner', 'category' => 'Home Decor'])
+    $id = $this->postJson('/api/association/products', ['title' => 'Inabel Runner', 'category' => 'Traditional Woven Fabric'])
         ->assertCreated()
         ->json('product.id');
 

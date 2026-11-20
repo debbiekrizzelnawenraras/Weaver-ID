@@ -13,6 +13,17 @@ class Product extends Model
 {
     use HasFactory;
 
+    /**
+     * The two product categories named at the PIWPC forum (12 Nov 2026). Every product is one of them.
+     * Garment: a traditional garment with a prescribed design, used in rituals.
+     * Fabric: cloth woven by hand on a backstrap or floor loom, and items made mainly from it.
+     */
+    public const GARMENT = 'Indigenous Traditional Garment';
+
+    public const FABRIC = 'Traditional Woven Fabric';
+
+    public const CATEGORIES = [self::GARMENT, self::FABRIC];
+
     protected $fillable = [
         'association_id',
         'title',
@@ -21,7 +32,7 @@ class Product extends Model
         'photo_path',
     ];
 
-    protected $hidden = ['photo_path'];
+    protected $hidden = ['photo_path', 'category_before'];
 
     protected $appends = ['photo_url'];
 

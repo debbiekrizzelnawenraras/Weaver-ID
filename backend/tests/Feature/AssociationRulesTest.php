@@ -122,7 +122,7 @@ it('puts a product registered by staff under the chosen association', function (
     Sanctum::actingAs($staff);
 
     $response = $this->postJson('/api/staff/products', [
-        'association_id' => $second->id, 'title' => 'Blanket', 'category' => 'Textile',
+        'association_id' => $second->id, 'title' => 'Blanket', 'category' => 'Traditional Woven Fabric',
     ])->assertCreated()
         ->assertJsonPath('product.association.name', 'Second Weavers')
         ->assertJsonPath('product.association.id', $second->id);
@@ -140,7 +140,7 @@ it('does not let staff register a product for an association in another municipa
     $foreign = Association::factory()->create(['municipality' => 'Besao']);
     Sanctum::actingAs($staff);
 
-    $this->postJson('/api/staff/products', ['association_id' => $foreign->id, 'title' => 'x', 'category' => 'y'])
+    $this->postJson('/api/staff/products', ['association_id' => $foreign->id, 'title' => 'x', 'category' => 'Traditional Woven Fabric'])
         ->assertForbidden();
 
     expect(Product::count())->toBe(0);
@@ -151,7 +151,7 @@ it('refuses a product for an inactive association', function () {
     $closed = Association::factory()->create(['municipality' => 'Bontoc', 'status' => 'inactive']);
     Sanctum::actingAs($staff);
 
-    $this->postJson('/api/staff/products', ['association_id' => $closed->id, 'title' => 'x', 'category' => 'y'])
+    $this->postJson('/api/staff/products', ['association_id' => $closed->id, 'title' => 'x', 'category' => 'Traditional Woven Fabric'])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('association_id');
 });
@@ -162,7 +162,7 @@ it('does not let the administrator register associations or products', function 
 
     $this->postJson('/api/staff/associations', filing())->assertForbidden();
     $this->getJson('/api/staff/association-applications')->assertForbidden();
-    $this->postJson('/api/staff/products', ['association_id' => $association->id, 'title' => 'x', 'category' => 'y'])->assertForbidden();
+    $this->postJson('/api/staff/products', ['association_id' => $association->id, 'title' => 'x', 'category' => 'Traditional Woven Fabric'])->assertForbidden();
 
     // The administrator can still look.
     $this->getJson('/api/staff/associations')->assertOk();

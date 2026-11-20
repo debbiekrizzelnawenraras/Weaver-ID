@@ -47,7 +47,7 @@ class AssociationController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:255'],
+            'category' => ['required', Rule::in(Product::CATEGORIES)],
         ]);
 
         if ($user->association->status !== 'active') {
@@ -90,7 +90,7 @@ class AssociationController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:255'],
+            'category' => ['required', Rule::in(Product::CATEGORIES)],
             'status' => ['required', 'in:active,inactive'],
         ]);
 

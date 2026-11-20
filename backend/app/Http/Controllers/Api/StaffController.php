@@ -10,6 +10,7 @@ use App\Rules\StrongPassword;
 use App\Support\ProductPhoto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -143,7 +144,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'association_id' => ['required', 'integer', 'exists:associations,id'],
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:255'],
+            'category' => ['required', Rule::in(Product::CATEGORIES)],
         ]);
 
         $association = Association::manageableBy($request->user())->find($validated['association_id']);
@@ -183,7 +184,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'association_id' => ['required', 'integer', 'exists:associations,id'],
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:255'],
+            'category' => ['required', Rule::in(Product::CATEGORIES)],
             'status' => ['required', 'in:active,inactive'],
         ]);
 

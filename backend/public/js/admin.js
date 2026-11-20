@@ -179,15 +179,21 @@
   // sent to the server, and the dashboard tiles still count everything.
   // "Deactivated" means status 'inactive' for products, associations and users,
   // and 'revoked' or 'damaged' for NFC tags (a tag sent but not linked yet counts as active).
+  // The two product categories named at the PIWPC forum (12 Nov 2026), with a short hint for the form.
+  var CATEGORIES = [
+    ['Indigenous Traditional Garment', 'prescribed design, used in rituals'],
+    ['Traditional Woven Fabric', 'woven on a backstrap or loom, or made from it']
+  ];
+
   var FILTERS = {
     associations: { assoc: false, sorts: [['name', 'Name (A-Z)'], ['municipality', 'Municipality'], ['newest', 'Newest first']] },
-    products: { assoc: !isAssoc, sorts: [['name', 'Name (A-Z)'], ['association', 'Association'], ['newest', 'Newest first']] },
+    products: { assoc: !isAssoc, cat: true, sorts: [['name', 'Name (A-Z)'], ['association', 'Association'], ['newest', 'Newest first']] },
     nfc: { assoc: !isAssoc, sorts: [['newest', 'Newest first'], ['association', 'Association'], ['name', 'Product (A-Z)']] },
     users: { assoc: false, role: true, muni: true, sorts: [['name', 'Name (A-Z)'], ['newest', 'Newest first']] }
   };
   var listState = {};
   Object.keys(FILTERS).forEach(function (k) {
-    listState[k] = { status: 'active', assoc: '', role: '', muni: '', sort: FILTERS[k].sorts[0][0] };
+    listState[k] = { status: 'active', assoc: '', role: '', muni: '', cat: '', sort: FILTERS[k].sorts[0][0] };
   });
 
   function isActiveStatus(status) { return ['active', 'sent', 'in_stock'].indexOf(status || 'active') !== -1; }
@@ -198,7 +204,7 @@
       return { status: x.status, name: x.name, municipality: x.municipality };
     }
     if (list === 'products') {
-      return { status: x.status, assocId: x.association_id, assoc: productAssociation(x), name: x.title };
+      return { status: x.status, assocId: x.association_id, assoc: productAssociation(x), name: x.title, cat: x.category };
     }
     if (list === 'nfc') {
       var p = x.product || {};
@@ -223,6 +229,7 @@
       if (cfg.assoc && f.assoc && String(r.assocId) !== f.assoc) { return false; }
       if (cfg.role && f.role && r.role !== f.role) { return false; }
       if (cfg.muni && f.muni && r.muni !== f.muni) { return false; }
+      if (cfg.cat && f.cat && r.cat !== f.cat) { return false; }
       return true;
     });
     var key = f.sort;
@@ -253,6 +260,9 @@
     }
     if (cfg.role) {
       parts.push(selectHtml(list, 'role', 'Role', [['', 'All roles'], ['admin', 'Admin'], ['staff', 'Staff'], ['association', 'Association']], f.role));
+    }
+    if (cfg.cat) {
+      parts.push(selectHtml(list, 'cat', 'Category', [['', 'All categories']].concat(CATEGORIES.map(function (c) { return [c[0], c[0]]; })), f.cat));
     }
     if (cfg.muni) {
       var munis = {};
@@ -1085,7 +1095,7 @@
     'add-product': function () {
       var fields = [
         { name: 'title', label: 'Product name' },
-        { name: 'category', label: 'Category', placeholder: 'e.g. Blanket, Table runner' }
+        { name: 'category', label: 'Category', type: 'select', options: CATEGORIES.map(function (c) { return { value: c[0], label: c[0] + ' (' + c[1] + ')' }; }) }
       ];
       if (!isAssoc) {
         // Staff choose the association that owns the product.
