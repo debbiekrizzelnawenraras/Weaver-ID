@@ -1,5 +1,9 @@
 /*
- * Weaver-ID control panel (admin and staff).
+ * Weaver-ID control panel (admin, staff and association).
+ * Roles (panel directive, 19 Nov 2026): the administrator approves applications, manages
+ * accounts, reviews reports and fixes tags (reassign); staff register associations and
+ * products, link tags and run the tag inventory; associations add products and link the
+ * tags sent to them. The server enforces all of this; the page only hides what a role cannot do.
  * Needs js/api.js. Every value that came from the server goes through esc()
  * before it is placed into HTML.
  */
@@ -11,12 +15,13 @@
   if (!me) { return; }
   var isAdmin = me.role === 'admin';
   var isAssoc = me.role === 'association';
+  var isStaff = me.role === 'staff';
   var hasLogs = isAdmin || isAssoc;
-  var hasReports = !isAssoc;
-  var hasApps = !isAssoc;          // association applications: staff and admin decide them
+  var hasReports = isAdmin;        // only the administrator reviews reports
+  var hasApps = isAdmin;           // only the administrator decides association applications
+  var canEdit = !isAdmin;          // staff and associations register products and link tags
+  var hasInventory = !isAssoc;     // staff run it, the administrator only looks
   var API = {
-    weavers: isAssoc ? '/api/association/weavers?status=all' : '/api/staff/weavers',
-    weaver: isAssoc ? '/api/association/weavers' : '/api/staff/weavers',
     products: isAssoc ? '/api/association/products?status=all' : '/api/staff/products',
     product: isAssoc ? '/api/association/products' : '/api/staff/products',
     logs: isAssoc ? '/api/association/scan-logs' : '/api/admin/scan-logs',
@@ -25,16 +30,16 @@
   var esc = Weaver.esc;
   var READER_URL = window.WEAVER_READER_URL || 'http://127.0.0.1:8777';
 
-  var data = { associations: [], weavers: [], products: [], tags: [], users: [], summary: null, logs: null, reports: null, applications: null, municipalities: [], attention: null, attentionAt: null };
-  var state = { tab: 'dashboard', filter: '', logPage: 1, logResult: '', reportPage: 1, reportStatus: '', appPage: 1, appStatus: 'pending', staffMunicipality: '',
+  var data = { associations: [], products: [], inventory: null, invTags: null, tags: [], users: [], summary: null, logs: null, reports: null, applications: null, municipalities: [], attention: null, attentionAt: null };
+  var state = { tab: 'dashboard', filter: '', logPage: 1, logResult: '', reportPage: 1, reportStatus: '', appPage: 1, appStatus: 'pending', staffMunicipality: '', invPage: 1, invStatus: 'in_stock', invBatch: '',
     seen: { report: 0, scan: 0, application: 0 } };
 
   // How often the page asks what needs attention. window.WEAVER_POLL_MS exists for testing only.
   var POLL_MS = window.WEAVER_POLL_MS || 60000;
 
   var TITLES = {
-    dashboard: 'Dashboard', weavers: 'Members', associations: 'Associations', products: 'Products',
-    nfc: 'NFC Tags', logs: 'Scan Logs', reports: 'Reports', applications: 'Applications', users: 'Users'
+    dashboard: 'Dashboard', associations: 'Associations', products: 'Products',
+    nfc: 'NFC Tags', inventory: 'Tag Inventory', logs: 'Scan Logs', reports: 'Reports', applications: 'Applications', users: 'Users'
   };
 
   // Shrinks a chosen photo in the browser before it is uploaded: the longest
@@ -88,10 +93,24 @@
     setTimeout(function () { el.remove(); }, opts.ms || 4500);
   }
 
+  var TAG_STATUS = {
+    in_stock: { label: 'in stock', cls: 'light text-dark border' },
+    sent: { label: 'sent, not linked', cls: 'primary' },
+    damaged: { label: 'damaged or lost', cls: 'dark' }
+  };
+
   function badge(status) {
+    if (TAG_STATUS[status]) {
+      return '<span class="badge bg-' + TAG_STATUS[status].cls + '">' + esc(TAG_STATUS[status].label) + '</span>';
+    }
     var map = { active: 'success', inactive: 'secondary', revoked: 'danger',
       authenticated: 'success', unregistered: 'secondary', suspicious: 'danger' };
     return '<span class="badge bg-' + (map[status] || 'secondary') + '">' + esc(status) + '</span>';
+  }
+
+  // Tag status in tag lists: 'active' reads as 'linked' next to the inventory states.
+  function tagBadge(status) {
+    return status === 'active' ? '<span class="badge bg-success">linked</span>' : badge(status);
   }
 
   function securedBadge(t) {
@@ -102,7 +121,8 @@
   }
 
   var REASONS = {
-    tag_revoked: 'tag revoked', product_inactive: 'product inactive', weaver_inactive: 'member inactive',
+    tag_revoked: 'tag revoked', product_inactive: 'product inactive', association_inactive: 'association inactive',
+    weaver_inactive: 'member inactive (before members were removed)',
     many_devices: 'many devices', counter_rollback: 'possible copy (counter went back)',
     counter_missing: 'secured tag read without counter',
     counter_jump: 'counter jumped too far (not saved)',
@@ -141,22 +161,121 @@
     return list.filter(function (x) { return x.id === id; })[0] || null;
   }
 
+  // ------------------------------------------------------------ list filters
+  // Each list tab has its own dropdowns: status (Active only by default), and where it applies
+  // association and sort order. They only narrow what is already loaded: nothing is
+  // sent to the server, and the dashboard tiles still count everything.
+  // "Deactivated" means status 'inactive' for products, associations and users,
+  // and 'revoked' or 'damaged' for NFC tags (a tag sent but not linked yet counts as active).
+  var FILTERS = {
+    associations: { assoc: false, sorts: [['name', 'Name (A-Z)'], ['municipality', 'Municipality'], ['newest', 'Newest first']] },
+    products: { assoc: !isAssoc, sorts: [['name', 'Name (A-Z)'], ['association', 'Association'], ['newest', 'Newest first']] },
+    nfc: { assoc: !isAssoc, sorts: [['newest', 'Newest first'], ['association', 'Association'], ['name', 'Product (A-Z)']] },
+    users: { assoc: false, role: true, muni: true, sorts: [['name', 'Name (A-Z)'], ['newest', 'Newest first']] }
+  };
+  var listState = {};
+  Object.keys(FILTERS).forEach(function (k) {
+    listState[k] = { status: 'active', assoc: '', role: '', muni: '', sort: FILTERS[k].sorts[0][0] };
+  });
+
+  function isActiveStatus(status) { return ['active', 'sent', 'in_stock'].indexOf(status || 'active') !== -1; }
+
+  // What each list row is, for filtering and sorting.
+  function rowInfo(list, x) {
+    if (list === 'associations') {
+      return { status: x.status, name: x.name, municipality: x.municipality };
+    }
+    if (list === 'products') {
+      return { status: x.status, assocId: x.association_id, assoc: productAssociation(x), name: x.title };
+    }
+    if (list === 'nfc') {
+      var p = x.product || {};
+      return { status: x.status, assocId: x.association_id, assoc: x.association ? x.association.name : '', name: p.title || '' };
+    }
+    return { status: x.status, role: x.role, name: x.name, muni: userMunicipality(x) };
+  }
+
+  // Where a user works: staff by their municipality, association accounts by their association's.
+  function userMunicipality(u) {
+    if (u.role === 'staff') { return u.municipality || ''; }
+    if (u.role === 'association') { return u.association ? (u.association.municipality || '') : ''; }
+    return '';
+  }
+
+  function applyListFilters(list, items) {
+    var f = listState[list], cfg = FILTERS[list];
+    var shown = items.filter(function (x) {
+      var r = rowInfo(list, x);
+      if (f.status === 'active' && !isActiveStatus(r.status)) { return false; }
+      if (f.status === 'deactivated' && isActiveStatus(r.status)) { return false; }
+      if (cfg.assoc && f.assoc && String(r.assocId) !== f.assoc) { return false; }
+      if (cfg.role && f.role && r.role !== f.role) { return false; }
+      if (cfg.muni && f.muni && r.muni !== f.muni) { return false; }
+      return true;
+    });
+    var key = f.sort;
+    return shown.slice().sort(function (a, b) {
+      if (key === 'newest') { return (b.id || 0) - (a.id || 0); }
+      var ra = rowInfo(list, a), rb = rowInfo(list, b);
+      var va = String(ra[key] || '').toLowerCase(), vb = String(rb[key] || '').toLowerCase();
+      var c = va.localeCompare(vb);
+      return c !== 0 ? c : String(ra.name || '').toLowerCase().localeCompare(String(rb.name || '').toLowerCase());
+    });
+  }
+
+  function selectHtml(list, field, label, options, value) {
+    return '<label class="d-flex align-items-center gap-1 fs-8 text-muted mb-0">' + esc(label) +
+      '<select class="form-select form-select-sm" style="width:auto" data-list-filter="' + esc(list) + '" data-field="' + esc(field) + '">' +
+      options.map(function (o) {
+        return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(value) ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+      }).join('') + '</select></label>';
+  }
+
+  function renderListFilters(list, total, shown) {
+    var host = $('filters-' + list);
+    if (!host) { return; }
+    var f = listState[list], cfg = FILTERS[list];
+    var parts = [selectHtml(list, 'status', 'Show', [['active', 'Active only'], ['deactivated', 'Deactivated only'], ['all', 'All']], f.status)];
+    if (cfg.assoc) {
+      parts.push(selectHtml(list, 'assoc', 'Association', [['', 'All associations']].concat(data.associations.map(function (a) { return [String(a.id), a.name]; })), f.assoc));
+    }
+    if (cfg.role) {
+      parts.push(selectHtml(list, 'role', 'Role', [['', 'All roles'], ['admin', 'Admin'], ['staff', 'Staff'], ['association', 'Association']], f.role));
+    }
+    if (cfg.muni) {
+      var munis = {};
+      (data.users || []).forEach(function (u) { var m = userMunicipality(u); if (m) { munis[m] = true; } });
+      parts.push(selectHtml(list, 'muni', 'Municipality', [['', 'All municipalities']].concat(Object.keys(munis).sort().map(function (m) { return [m, m]; })), f.muni));
+    }
+    parts.push(selectHtml(list, 'sort', 'Sort by', cfg.sorts, f.sort));
+    var hidden = total - shown;
+    parts.push('<span class="text-muted fs-8 ms-auto">Showing ' + esc(shown) + ' of ' + esc(total) +
+      (hidden > 0 ? ' (' + esc(hidden) + ' hidden by the filters)' : '') + '</span>');
+    host.innerHTML = parts.join('');
+  }
+
+  function onListFilterChange(e) {
+    var sel = e.target.closest('[data-list-filter]');
+    if (!sel) { return; }
+    var list = sel.getAttribute('data-list-filter');
+    listState[list][sel.getAttribute('data-field')] = sel.value;
+    renderAll();
+  }
+
   // ------------------------------------------------------------------ loading
   function loadAll() {
     $('loadError').classList.add('d-none');
     var jobs = [
-      Weaver.get(API.weavers).then(function (r) {
-        data.weavers = (r.weavers || []).map(function (w) {
-          if (w.products_count === undefined) { w.products_count = (w.products || []).length; }
-          return w;
-        });
-      }),
       Weaver.get(API.products).then(function (r) { data.products = r.products || []; }),
       Weaver.get('/api/nfc-tags').then(function (r) { data.tags = r.tags || []; })
     ];
     if (!isAssoc) {
       jobs.push(Weaver.get('/api/staff/associations').then(function (r) { data.associations = r.associations || []; }));
     }
+    if (isStaff) {
+      jobs.push(Weaver.get('/api/staff/association-applications').then(function (r) { data.staffApps = r.applications || []; }).catch(function () { data.staffApps = []; }));
+    }
+    if (hasInventory) { jobs.push(loadInventory()); }
     if (hasLogs) { jobs.push(loadLogs()); }
     if (hasReports) { jobs.push(loadReports()); }
     if (hasApps) { jobs.push(loadApplications()); }
@@ -184,6 +303,16 @@
       box.textContent = Weaver.errorText(err);
       box.classList.remove('d-none');
     });
+  }
+
+  function loadInventory() {
+    var q = '?page=' + state.invPage + (state.invStatus ? '&status=' + encodeURIComponent(state.invStatus) : '') +
+      (state.invBatch ? '&batch_id=' + encodeURIComponent(state.invBatch) : '');
+    return Promise.all([
+      Weaver.get('/api/inventory').then(function (r) { data.inventory = r; }),
+      Weaver.get('/api/inventory/tags' + q).then(function (r) { data.invTags = r; }),
+      isAdmin ? Weaver.get('/api/admin/tag-assignments').then(function (r) { data.assignments = r; }) : null
+    ]);
   }
 
   function loadLogs() {
@@ -216,8 +345,8 @@
     renderAttention();
     renderBadges();
     renderDashboardExtras();
-    renderWeavers();
     if (!isAssoc) { renderAssociations(); }
+    if (hasInventory) { renderInventory(); }
     renderProducts();
     renderTags();
     if (hasLogs) { renderLogs(); }
@@ -238,22 +367,23 @@
   function renderTiles() {
     var s = data.summary, html;
     if (isAdmin && s) {
-      html = tile('bi-people-fill', 'icon-weavers', s.weavers.active, 'Active members', 'of ' + s.weavers.total + ' registered') +
+      html = tile('bi-building', 'icon-weavers', s.associations.active, 'Active associations', 'of ' + s.associations.total + ' registered') +
         tile('bi-box-seam-fill', 'icon-products', s.products.total, 'Products', s.products.with_active_tag + ' have an active tag') +
-        tile('bi-wifi', 'icon-nfc', s.tags.active, 'Active tags', s.tags.revoked + ' revoked') +
+        tile('bi-wifi', 'icon-nfc', s.tags.active, 'Linked tags', s.tags.in_stock + ' in stock, ' + s.tags.sent + ' sent, ' + s.tags.revoked + ' revoked') +
         tile('bi-check-circle-fill', 'icon-verifications', s.scans.total, 'Total scans', s.scans.suspicious + ' suspicious');
     } else if (isAssoc) {
       var act = data.tags.filter(function (t) { return t.status === 'active'; }).length;
-      var activeWeavers = data.weavers.filter(function (w) { return w.status === 'active'; }).length;
-      html = tile('bi-people-fill', 'icon-weavers', activeWeavers, 'Active members', 'of ' + data.weavers.length + ' members') +
+      var waiting = data.tags.filter(function (t) { return t.status === 'sent'; }).length;
+      html = tile('bi-archive', 'icon-weavers', waiting, 'Tags ready to link', 'sent to you by DTI') +
         tile('bi-box-seam-fill', 'icon-products', data.products.length, 'Products', data.products.filter(function (p) { return activeTagFor(p.id); }).length + ' have an active tag') +
-        tile('bi-wifi', 'icon-nfc', act, 'Active tags', (data.tags.length - act) + ' revoked') +
+        tile('bi-wifi', 'icon-nfc', act, 'Linked tags', data.tags.filter(function (t) { return t.status === 'revoked'; }).length + ' revoked') +
         tile('bi-check-circle-fill', 'icon-verifications', data.logs ? data.logs.total : 0, 'Scans of your tags', '');
     } else {
       var active = data.tags.filter(function (t) { return t.status === 'active'; }).length;
-      html = tile('bi-people-fill', 'icon-weavers', data.weavers.length, 'Members', 'in your scope') +
-        tile('bi-box-seam-fill', 'icon-products', data.products.length, 'Products', '') +
-        tile('bi-wifi', 'icon-nfc', active, 'Active tags', (data.tags.length - active) + ' revoked') +
+      var totals = data.inventory ? data.inventory.totals : null;
+      html = tile('bi-archive', 'icon-weavers', totals ? totals.in_stock : 0, 'Tags in stock', 'your Negosyo Center') +
+        tile('bi-box-seam-fill', 'icon-products', data.products.length, 'Products', 'in your municipality') +
+        tile('bi-wifi', 'icon-nfc', active, 'Linked tags', 'in your municipality') +
         tile('bi-building', 'icon-verifications', data.associations.length, 'Associations', '');
     }
     $('tiles').innerHTML = html;
@@ -342,6 +472,14 @@
           return '<code>' + esc(x.reference) + '</code> ' + esc(x.association_name) + ' <span class="text-muted">' + esc(x.municipality) + '</span>';
         }));
     }
+    var w = a.wrong_center_tags;
+    if (w && w.count > 0) {
+      blocks.push(attentionBlock(plural(w.count, 'tag') + ' scanned in at the wrong Negosyo Center', 'inventory', 'Open Tag Inventory', w.latest, w.count,
+        function (x) {
+          return '<code>' + esc(x.uid) + '</code> assigned to ' + esc(x.assigned_municipality) +
+            ' <span class="text-muted">tried at ' + esc(x.attempted_municipality) + '</span>';
+        }));
+    }
     var s = a.suspicious_scans;
     if (s && s.count > 0) {
       var hours = a.window_hours === 24 ? 'in the last 24 hours' : 'in the last ' + plural(a.window_hours, 'hour');
@@ -378,6 +516,7 @@
     var a = data.attention;
     setBadge('reportsBadge', a && a.new_reports ? a.new_reports.count : 0, 'new report');
     setBadge('appsBadge', a && a.pending_applications ? a.pending_applications.count : 0, 'application waiting for a decision');
+    setBadge('invBadge', a && a.wrong_center_tags ? a.wrong_center_tags.count : 0, 'tag at the wrong Negosyo Center');
   }
 
   // Opens a tab from the panel or a toast; reports and logs open already narrowed to what needs attention.
@@ -433,75 +572,189 @@
       .then(function () { polling = false; });
   }
 
-  function renderWeavers() {
-    var rows = data.weavers.filter(function (w) {
-      return matches([w.name, w.municipality, w.association ? w.association.name : '']);
-    }).map(function (w) {
-      return '<tr><td class="fw-semibold">' + esc(w.name) + '</td><td>' + esc(w.municipality) +
-        '</td>' + (isAssoc ? '' : '<td>' + esc(w.association ? w.association.name : '-') + '</td>') + '<td>' + esc(w.products_count) +
-        '</td><td>' + badge(w.status) + '</td><td class="text-end pe-3">' +
-        '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-weaver" data-id="' + esc(w.id) + '">' +
-        (w.status === 'active' ? 'Deactivate' : 'Activate') + '</button></td></tr>';
-    });
-    $('weaversBody').innerHTML = rows.length ? rows.join('') : empty(isAssoc ? 5 : 6, 'No members to show.');
-  }
-
   function renderAssociations() {
-    var cards = data.associations.filter(function (a) {
+    var list = applyListFilters('associations', data.associations).filter(function (a) {
       return matches([a.name, a.municipality]);
-    }).map(function (a) {
+    });
+    renderListFilters('associations', data.associations.length, list.length);
+    var cards = list.map(function (a) {
       return '<div class="col-12 col-md-6 col-xl-4"><div class="association-box"><div class="d-flex justify-content-between">' +
         '<h6 class="fw-bold mb-1">' + esc(a.name) + '</h6>' + badge(a.status || 'active') + '</div>' +
         '<div class="text-muted fs-7"><i class="bi bi-geo-alt"></i> ' + esc(a.municipality || '-') + '</div>' +
-        '<div class="text-muted fs-7"><i class="bi bi-people"></i> ' + esc(a.weavers_count) + ' member(s)</div></div></div>';
+        '<div class="text-muted fs-7"><i class="bi bi-box-seam"></i> ' + esc(a.products_count) + ' product(s)</div></div></div>';
     });
     $('associationsBody').innerHTML = cards.length ? cards.join('') :
       '<div class="col-12"><div class="dashboard-card text-muted text-center">No associations to show.</div></div>';
+    renderStaffApplications();
+  }
+
+  // Staff see what they (or the public page) filed in their municipality, and what the administrator decided.
+  function renderStaffApplications() {
+    var host = $('staffAppsBody');
+    if (!host) { return; }
+    var items = (data.staffApps || []).filter(function (x) { return x.status === 'pending' || x.status === 'rejected'; });
+    $('staffAppsCard').classList.toggle('d-none', !items.length);
+    host.innerHTML = items.map(function (x) {
+      var st = APPLICATION_STATUS[x.status] || { label: x.status, cls: 'secondary' };
+      return '<tr><td class="text-nowrap">' + when(x.created_at) + '<div class="text-muted fs-8"><code>' + esc(x.reference) + '</code></div></td>' +
+        '<td class="fw-semibold">' + esc(x.association_name) + '</td><td>' + esc(x.contact_name) + '</td>' +
+        '<td>' + esc(x.submitted_by || 'public page') + '</td>' +
+        '<td><span class="badge bg-' + st.cls + '">' + esc(st.label) + '</span>' +
+        (x.decision_note ? '<div class="fs-8 mt-1 text-wrap" style="max-width:16rem">' + esc(x.decision_note) + '</div>' : '') + '</td></tr>';
+    }).join('');
   }
 
   function renderProducts() {
-    var rows = data.products.filter(function (p) {
-      return matches([p.title, p.category, p.weaver ? p.weaver.name : '', productAssociation(p)]);
-    }).map(function (p) {
+    var list = applyListFilters('products', data.products).filter(function (p) {
+      return matches([p.title, p.category, productAssociation(p)]);
+    });
+    renderListFilters('products', data.products.length, list.length);
+    var rows = list.map(function (p) {
       var tag = activeTagFor(p.id);
       var thumb = p.photo_url
         ? '<img src="' + esc(p.photo_url) + '" alt="" title="' + esc(photoNote(p)) + '" width="36" height="36" class="rounded me-2 border" style="object-fit:cover">'
         : '<span class="d-inline-flex align-items-center justify-content-center rounded me-2 border text-muted" style="width:36px;height:36px;vertical-align:middle"><i class="bi bi-image"></i></span>';
-      return '<tr><td class="fw-semibold">' + thumb + esc(p.title) + '</td><td>' + esc(p.category) + '</td><td>' +
-        esc(p.weaver ? p.weaver.name : '-') + '</td>' +
+      return '<tr><td class="fw-semibold">' + thumb + esc(p.title) + '</td><td>' + esc(p.category) + '</td>' +
         (isAssoc ? '' : '<td>' + esc(productAssociation(p) || '-') + '</td>') + '<td>' +
         (tag ? '<code>' + esc(tag.uid) + '</code>' : '<span class="text-muted">none</span>') + '</td><td>' + badge(p.status) +
         '</td><td class="text-end pe-3" style="white-space:normal;min-width:200px">' +
-        // Administrators may remove a photo but not add one: the association or its staff photographs the product.
-        (isAdmin ? '' : '<button class="btn btn-sm btn-outline-primary py-0 me-1" data-action="photo-product" data-id="' +
-        esc(p.id) + '">' + (p.photo_url ? 'Change photo' : 'Add photo') + '</button>') +
+        // The administrator only looks: staff and the association register and photograph products.
+        (!canEdit ? '<span class="text-muted fs-8">view only</span>' :
+        '<button class="btn btn-sm btn-outline-primary py-0 me-1" data-action="photo-product" data-id="' +
+        esc(p.id) + '">' + (p.photo_url ? 'Change photo' : 'Add photo') + '</button>' +
         (p.photo_url ? '<button class="btn btn-sm btn-outline-danger py-0 me-1" data-action="remove-photo" data-id="' + esc(p.id) + '">Remove photo</button>' : '') +
         '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-product" data-id="' +
-        esc(p.id) + '">' + (p.status === 'active' ? 'Deactivate' : 'Activate') + '</button></td></tr>';
+        esc(p.id) + '">' + (p.status === 'active' ? 'Deactivate' : 'Activate') + '</button>') + '</td></tr>';
     });
-    $('productsBody').innerHTML = rows.length ? rows.join('') : empty(isAssoc ? 6 : 7, 'No products to show.');
+    $('productsBody').innerHTML = rows.length ? rows.join('') : empty(isAssoc ? 5 : 6, 'No products to show.');
+  }
+
+  // Tags that went out to an association. Tags still in a Negosyo Center's stock live in the Inventory tab (the server leaves them out of this list).
+  function outTags() {
+    return data.tags.filter(function (t) { return t.association_id; });
   }
 
   function renderTags() {
-    var rows = data.tags.filter(function (t) {
+    var all = outTags();
+    var list = applyListFilters('nfc', all).filter(function (t) {
       var p = t.product || {};
-      return matches([t.uid, p.title, p.weaver ? p.weaver.name : '', t.status]);
-    }).map(function (t) {
-      var p = t.product || {}, w = p.weaver || {}, a = w.association || {};
+      return matches([t.uid, p.title, t.association ? t.association.name : '', t.status]);
+    });
+    renderListFilters('nfc', all.length, list.length);
+    var rows = list.map(function (t) {
+      var p = t.product || {}, a = t.association || {};
       var actions = '';
-      if (t.status === 'active') {
+      if (t.status === 'active' && canEdit) {
         actions += '<button class="btn btn-sm btn-outline-primary py-0 me-1" data-action="secure-tag" data-id="' + esc(t.id) + '">' +
           (t.counter_enabled ? 'Re-secure' : 'Secure') + '</button>';
+      }
+      if (t.status === 'active') {
         actions += '<button class="btn btn-sm btn-outline-danger py-0 me-1" data-action="revoke-tag" data-id="' + esc(t.id) + '">Revoke</button>';
       }
-      if (isAdmin) {
+      if (isAdmin && (t.status === 'active' || t.status === 'revoked')) {
         actions += '<button class="btn btn-sm btn-outline-secondary py-0" data-action="reassign-tag" data-id="' + esc(t.id) + '">Reassign</button>';
       }
-      return '<tr><td><code>' + esc(t.uid) + '</code></td><td>' + esc(p.title || '-') + '</td><td>' + esc(w.name || '-') +
-        '</td><td>' + esc(a.name || '-') + '</td><td>' + when(t.issued_at || t.created_at) + '</td><td>' + badge(t.status) + securedBadge(t) +
+      if (t.status === 'sent' && canEdit) {
+        actions += '<button class="btn btn-sm btn-outline-success py-0" data-action="issue-tag" data-uid="' + esc(t.uid) + '">Link to a product</button>';
+      }
+      return '<tr><td><code>' + esc(t.uid) + '</code></td><td>' + esc(p.title || '-') + '</td><td>' +
+        (isAssoc ? when(t.sent_at) : esc(a.name || '-')) + '</td><td>' + (t.status === 'active' || t.status === 'revoked' ? when(t.issued_at) : '-') +
+        '</td><td>' + tagBadge(t.status) + securedBadge(t) +
         '</td><td class="text-end pe-3">' + actions + '</td></tr>';
     });
-    $('tagsBody').innerHTML = rows.length ? rows.join('') : empty(7, 'No tags to show.');
+    $('tagsBody').innerHTML = rows.length ? rows.join('') : empty(6, isAssoc ? 'No tags yet. DTI staff send tags to your association.' : 'No tags to show.');
+  }
+
+  // ---------------------------------------------------------------- inventory
+  function invCount(n) { return n ? esc(n) : '<span class="text-muted">0</span>'; }
+
+  function renderInventory() {
+    var inv = data.inventory;
+    if (!inv || !$('invTiles')) { return; }
+    var t = inv.totals;
+    var where = inv.municipality ? inv.municipality + ' Negosyo Center' : 'all Negosyo Centers';
+    if ($('invScope')) {
+      $('invScope').textContent = inv.municipality
+        ? 'The stock of the ' + where + '. You receive tags here, send them to associations in ' + inv.municipality + ', and each tag keeps a record of where it went.'
+        : 'Each Negosyo Center receives and keeps its own stock. This page shows every center; only staff change the inventory.';
+    }
+    $('invTiles').innerHTML =
+      tile('bi-archive', 'icon-weavers', t.in_stock, 'In stock', where) +
+      tile('bi-send', 'icon-products', t.sent, 'Sent, not linked', 'at associations') +
+      tile('bi-wifi', 'icon-nfc', t.active, 'Linked', t.revoked + ' revoked') +
+      tile('bi-x-octagon', 'icon-verifications', t.damaged, 'Damaged or lost', '');
+
+    $('invBatchesBody').innerHTML = inv.batches.length ? inv.batches.map(function (b) {
+      var c = b.counts;
+      return '<tr><td class="fw-semibold">' + esc(b.code) + (b.notes ? '<div class="text-muted fs-8 fw-normal text-wrap" style="max-width:16rem">' + esc(b.notes) + '</div>' : '') +
+        '</td><td>' + esc(b.municipality || '-') + '</td><td>' + esc(b.received_on || '-') + '</td><td>' + esc(b.supplier || '-') + '</td><td>' + esc(b.received_by || '-') +
+        '</td><td>' + invCount(c.in_stock) + '</td><td>' + invCount(c.sent) + '</td><td>' + invCount(c.active) +
+        '</td><td>' + invCount(c.revoked) + '</td><td>' + invCount(c.damaged) + '</td><td class="text-end pe-3">' +
+        (isStaff ? '<button class="btn btn-sm btn-outline-secondary py-0" data-action="add-to-batch" data-id="' + esc(b.id) + '">Add tags</button>' : '') +
+        '</td></tr>';
+    }).join('') : empty(11, 'No batches yet.' + (isStaff ? ' Use Receive tags.' : ''));
+
+    if ($('invMuniBody')) {
+      var munis = inv.municipalities || [];
+      $('invMuniCard').classList.toggle('d-none', !!inv.municipality);
+      $('invMuniBody').innerHTML = munis.length ? munis.map(function (m) {
+        var c = m.counts;
+        return '<tr><td class="fw-semibold">' + esc(m.municipality) + '</td><td>' + esc(m.batches) + '</td><td>' + invCount(c.in_stock) +
+          '</td><td>' + invCount(c.sent) + '</td><td>' + invCount(c.active) + '</td><td>' + invCount(c.revoked) + '</td><td>' + invCount(c.damaged) + '</td></tr>';
+      }).join('') : empty(7, 'No Negosyo Center has received tags yet.');
+    }
+
+    renderAssignments();
+
+    $('invAssocBody').innerHTML = inv.associations.length ? inv.associations.map(function (a) {
+      var c = a.counts;
+      return '<tr><td class="fw-semibold">' + esc(a.name) + '</td><td>' + esc(a.municipality || '-') + '</td><td>' + invCount(c.sent) +
+        '</td><td>' + invCount(c.active) + '</td><td>' + invCount(c.revoked) + '</td><td>' + invCount(c.damaged) + '</td></tr>';
+    }).join('') : empty(6, 'No associations to show.');
+
+    var batchSel = $('invBatch');
+    batchSel.innerHTML = '<option value="">All batches</option>' + inv.batches.map(function (b) {
+      return '<option value="' + esc(b.id) + '"' + (String(b.id) === String(state.invBatch) ? ' selected' : '') + '>' + esc(b.code) + '</option>';
+    }).join('');
+
+    var page = data.invTags, items = page && page.data ? page.data : [];
+    var rows = items.filter(function (x) {
+      return matches([x.uid, x.status, x.batch ? x.batch.code : '', x.association ? x.association.name : '', x.product ? x.product.title : '']);
+    }).map(function (x) {
+      var acts = '';
+      if (isStaff && x.status === 'sent') {
+        acts += '<button class="btn btn-sm btn-outline-secondary py-0 me-1" data-action="return-tag" data-id="' + esc(x.id) + '">Back to stock</button>';
+      }
+      if (isStaff && (x.status === 'in_stock' || x.status === 'sent' || x.status === 'revoked')) {
+        acts += '<button class="btn btn-sm btn-outline-danger py-0" data-action="damage-tag" data-id="' + esc(x.id) + '">Damaged or lost</button>';
+      }
+      return '<tr><td><code>' + esc(x.uid) + '</code></td><td>' + esc(x.batch ? x.batch.code : '-') + '</td><td>' + tagBadge(x.status) +
+        '</td><td>' + esc(x.association ? x.association.name : '-') + '</td><td>' +
+        (x.sent_at ? esc(x.sender ? x.sender.name : '-') + '<div class="text-muted fs-8">' + when(x.sent_at) + '</div>' : '-') +
+        '</td><td>' + esc(x.product ? x.product.title : '-') + '</td><td class="text-end pe-3">' + acts + '</td></tr>';
+    });
+    $('invTagsBody').innerHTML = rows.length ? rows.join('') : empty(7, 'No tags match.');
+    $('invPageInfo').textContent = page ? 'Page ' + page.current_page + ' of ' + page.last_page + ' (' + page.total + ' tags)' : '';
+    $('invPrev').disabled = !page || page.current_page <= 1;
+    $('invNext').disabled = !page || page.current_page >= page.last_page;
+  }
+
+  // Admin only: the delivery lists (which tags go to which Negosyo Center) and the wrong-center alerts.
+  function renderAssignments() {
+    var as = data.assignments;
+    if (!as || !$('assignBody')) { return; }
+    $('assignBody').innerHTML = as.municipalities.length ? as.municipalities.map(function (m) {
+      return '<tr><td class="fw-semibold">' + esc(m.municipality) + '</td><td>' + invCount(m.assigned) + '</td><td>' + invCount(m.received) +
+        '</td><td>' + (m.waiting ? '<span class="badge bg-warning text-dark">' + esc(m.waiting) + '</span>' : invCount(0)) + '</td></tr>';
+    }).join('') : empty(4, 'No delivery lists yet. Use Assign tags to a center before the boxes ship.');
+    $('alertCard').classList.toggle('d-none', !as.alerts.length);
+    $('alertCount').textContent = as.open_alerts;
+    $('alertBody').innerHTML = as.alerts.map(function (x) {
+      return '<tr><td class="text-nowrap">' + when(x.created_at) + '</td><td><code>' + esc(x.uid) + '</code></td><td>' + esc(x.assigned_municipality) +
+        '</td><td class="fw-semibold text-danger">' + esc(x.attempted_municipality) + '<div class="text-muted fs-8 fw-normal">' + esc(x.attempted_by || '-') + '</div></td>' +
+        '<td class="text-end pe-3 text-nowrap"><button class="btn btn-sm btn-outline-primary py-0 me-1" data-action="move-alert" data-id="' + esc(x.id) + '">Move to ' + esc(x.attempted_municipality) + '</button>' +
+        '<button class="btn btn-sm btn-outline-secondary py-0" data-action="dismiss-alert" data-id="' + esc(x.id) + '">Dismiss</button></td></tr>';
+    }).join('');
   }
 
   function renderLogs() {
@@ -572,9 +825,10 @@
           '<button class="btn btn-sm btn-outline-danger py-0" data-action="reject-application" data-id="' + esc(x.id) + '">Reject</button>'
         : '';
       return '<tr><td class="text-nowrap">' + when(x.created_at) + '<div class="text-muted fs-8"><code>' + esc(x.reference) + '</code></div></td>' +
-        '<td class="fw-semibold">' + esc(x.association_name) + '<div class="text-muted fs-8 fw-normal">' + esc(x.municipality) + '</div></td>' +
+        '<td class="fw-semibold">' + esc(x.association_name) + '<div class="text-muted fs-8 fw-normal">' + esc(x.municipality) + '</div>' +
+          (x.submitted_by ? '<span class="badge bg-info text-dark mt-1" title="Filed by staff on the association\'s behalf. Its password is temporary.">Filed by ' + esc(x.submitted_by) + '</span>' : '') + '</td>' +
         '<td style="min-width:13rem">' + esc(x.contact_name) + '<div class="text-muted fs-8">' + esc(x.contact_phone) + '</div><div class="text-muted fs-8 text-break">' + esc(x.email) + '</div>' +
-          (x.email_verified
+          (x.submitted_by ? '' : x.email_verified
             ? '<span class="badge bg-success mt-1" title="The applicant typed the code that was emailed to this address.">Email confirmed</span>'
             : '<span class="badge bg-warning text-dark mt-1" title="Nobody has shown that this mailbox is theirs. Check the address before approving.">Email not confirmed</span>') + '</td>' +
         '<td class="text-wrap" style="min-width:9rem">' + (x.registration_details ? esc(x.registration_details) : '<span class="text-muted">not given</span>') + '</td>' +
@@ -587,20 +841,53 @@
     $('applicationNext').disabled = !r || r.current_page >= r.last_page;
   }
 
+  // Users are grouped: administrators first, then staff by municipality, then association
+  // accounts by municipality and association, each group with a header and a count.
+  var USER_GROUPS = [['admin', 'Administrators'], ['staff', 'Staff (Negosyo Centers)'], ['association', 'Association accounts']];
+
+  function userRow(u) {
+    var scope = u.role === 'staff' ? (u.municipality || '-') : (u.role === 'association' ? (u.association ? u.association.name : '-') : 'Whole province');
+    var self = u.id === me.id;
+    return '<tr><td class="fw-semibold ps-4">' + esc(u.name) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.role) +
+      '</td><td>' + esc(scope) + '</td><td>' + badge(u.status) +
+      (u.must_change_password ? ' <span class="badge bg-warning text-dark" title="This account still has its temporary password.">password not changed yet</span>' : '') +
+      '</td><td class="text-end pe-3">' +
+      (self ? '<span class="text-muted fs-8">you (use the key button)</span>' :
+        '<button class="btn btn-sm btn-outline-secondary py-0 me-1" data-action="reset-user-password" data-id="' + esc(u.id) + '">Reset password</button>' +
+        '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-user" data-id="' + esc(u.id) + '">' +
+        (u.status === 'active' ? 'Deactivate' : 'Activate') + '</button>') + '</td></tr>';
+  }
+
+  function groupHeader(text, count, sub) {
+    return '<tr class="' + (sub ? 'table-light' : 'table-secondary') + '"><td colspan="6" class="fw-semibold ' + (sub ? 'ps-3 fs-8' : '') + '">' +
+      esc(text) + ' <span class="badge bg-light text-dark border ms-1">' + esc(count) + '</span></td></tr>';
+  }
+
   function renderUsers() {
-    var rows = data.users.filter(function (u) {
-      return matches([u.name, u.email, u.role, u.municipality || '', u.association ? u.association.name : '']);
-    }).map(function (u) {
-      var scope = u.role === 'staff' ? (u.municipality || '-') : (u.role === 'association' ? (u.association ? u.association.name : '-') : 'All');
-      var self = u.id === me.id;
-      return '<tr><td class="fw-semibold">' + esc(u.name) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.role) +
-        '</td><td>' + esc(scope) + '</td><td>' + badge(u.status) +
-        (u.must_change_password ? ' <span class="badge bg-warning text-dark" title="This account still has the password an administrator chose.">password not changed yet</span>' : '') +
-        '</td><td class="text-end pe-3">' +
-        (self ? '<span class="text-muted fs-8">you (use the key button)</span>' :
-          '<button class="btn btn-sm btn-outline-secondary py-0 me-1" data-action="reset-user-password" data-id="' + esc(u.id) + '">Reset password</button>' +
-          '<button class="btn btn-sm btn-outline-secondary py-0" data-action="toggle-user" data-id="' + esc(u.id) + '">' +
-          (u.status === 'active' ? 'Deactivate' : 'Activate') + '</button>') + '</td></tr>';
+    var list = applyListFilters('users', data.users).filter(function (u) {
+      return matches([u.name, u.email, u.role, u.municipality || '', u.association ? u.association.name : '', userMunicipality(u)]);
+    });
+    renderListFilters('users', data.users.length, list.length);
+    var rows = [];
+    USER_GROUPS.forEach(function (g) {
+      var inGroup = list.filter(function (u) { return u.role === g[0]; });
+      if (!inGroup.length) { return; }
+      rows.push(groupHeader(g[1], inGroup.length, false));
+      if (g[0] === 'admin') { inGroup.forEach(function (u) { rows.push(userRow(u)); }); return; }
+      var byMuni = {};
+      inGroup.forEach(function (u) { var m = userMunicipality(u) || 'No municipality'; (byMuni[m] = byMuni[m] || []).push(u); });
+      Object.keys(byMuni).sort().forEach(function (m) {
+        var members = byMuni[m];
+        if (g[0] === 'association') {
+          // Keep the accounts of one association together.
+          members = members.slice().sort(function (a, b) {
+            var na = a.association ? a.association.name : '', nb = b.association ? b.association.name : '';
+            return na.localeCompare(nb);
+          });
+        }
+        rows.push(groupHeader(m, members.length, true));
+        members.forEach(function (u) { rows.push(userRow(u)); });
+      });
     });
     $('usersBody').innerHTML = rows.length ? rows.join('') : empty(6, 'No users to show.');
   }
@@ -633,8 +920,15 @@
         '"><label class="form-check-label fs-7" for="' + id + '">' + esc(f.label) + '</label></div>';
     }
     if (f.type === 'textarea') {
-      return '<div class="mb-3">' + label + '<textarea class="form-control" id="' + id + '" name="' + esc(f.name) + '" rows="' +
-        esc(f.rows || 3) + '"' + (f.readonly ? ' readonly' : '') + '>' + esc(f.value || '') + '</textarea></div>';
+      var area = '<textarea class="form-control" id="' + id + '" name="' + esc(f.name) + '" rows="' +
+        esc(f.rows || 3) + '"' + (f.readonly ? ' readonly' : '') + (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + '>' + esc(f.value || '') + '</textarea>';
+      if (f.reader) {
+        // One UID per line: each read from the reader adds a line.
+        return '<div class="mb-3">' + label + area +
+          '<div class="d-flex gap-2 align-items-center mt-2"><button type="button" class="btn btn-outline-success btn-sm" data-action="read-uid" data-target="' + id + '"><i class="bi bi-wifi"></i> Read a tag and add it</button>' +
+          '<span id="readerMsg" class="form-text mt-0"></span></div></div>';
+      }
+      return '<div class="mb-3">' + label + area + '</div>';
     }
     if (f.type === 'select') {
       var opts = (f.options || []).map(function (o) {
@@ -653,7 +947,7 @@
     }
     if (f.reader) {
       return '<div class="mb-3">' + label + '<div class="input-group">' + input +
-        '<button type="button" class="btn btn-outline-success" data-action="read-uid"><i class="bi bi-wifi"></i> Read from reader</button></div>' +
+        '<button type="button" class="btn btn-outline-success" data-action="read-uid" data-target="' + id + '"><i class="bi bi-wifi"></i> Read from reader</button></div>' +
         '<div id="readerMsg" class="form-text"></div></div>';
     }
     return '<div class="mb-3">' + label + input + (f.meter ? '<div id="meter_' + esc(f.name) + '" class="mt-2"></div>' : '') + '</div>';
@@ -690,6 +984,9 @@
       if (f.type === 'checkbox') { out[f.name] = el.checked; return; }
       var v = el.value.trim();
       out[f.name] = (f.int && v !== '') ? parseInt(v, 10) : v;
+      if (f.uids) {
+        out[f.name] = v.split(/[\r\n,;]+/).map(function (x) { return x.trim(); }).filter(function (x) { return x !== ''; });
+      }
     });
     return out;
   }
@@ -713,24 +1010,8 @@
   function assocOptions() {
     return data.associations.map(function (a) { return { value: a.id, label: a.name + (a.municipality ? ' (' + a.municipality + ')' : '') }; });
   }
-  function activeWeaverOptions() {
-    return data.weavers.filter(function (w) { return w.status === 'active'; })
-      .map(function (w) { return { value: w.id, label: w.name }; });
-  }
-  // Active members of one association only (staff and admin pick the association first).
-  function memberOptionsFor(associationId) {
-    return data.weavers.filter(function (w) { return w.status === 'active' && String(w.association_id) === String(associationId); })
-      .map(function (w) { return { value: w.id, label: w.name }; });
-  }
-  function fillMemberSelect(associationId) {
-    var sel = $('f_weaver_id');
-    var opts = associationId ? memberOptionsFor(associationId) : [];
-    sel.innerHTML = '<option value="">' + (!associationId ? 'Select an association first' : (opts.length ? 'Select...' : 'This association has no active members')) + '</option>' +
-      opts.map(function (o) { return '<option value="' + esc(o.value) + '">' + esc(o.label) + '</option>'; }).join('');
-    sel.disabled = !opts.length;
-  }
   function productAssociation(p) {
-    return p.weaver && p.weaver.association ? p.weaver.association.name : '';
+    return p.association ? p.association.name : (isAssoc && state.association ? state.association.name : '');
   }
   function photoNote(p) {
     var e = p.latest_photo_event;
@@ -777,42 +1058,35 @@
   }
 
   var actions = {
-    'add-weaver': function () {
-      var fields = [
-        { name: 'name', label: 'Member name (weaver, sewer or workshop)' },
-        { name: 'municipality', label: 'Municipality', value: state.staffMunicipality }
-      ];
-      if (!isAssoc) {
-        fields.unshift({ name: 'association_id', label: 'Association', type: 'select', options: assocOptions(), int: true });
-      }
-      openForm('Add member', 'Save', fields, function (v) { return Weaver.post(API.weaver, v); });
-    },
     'add-association': function () {
-      openForm('Add association', 'Save', [
-        { name: 'name', label: 'Association name' },
-        { name: 'municipality', label: 'Municipality', value: isAdmin ? '' : state.staffMunicipality, readonly: !isAdmin }
-      ], function (v) { return Weaver.post('/api/staff/associations', v); });
+      openForm('Add association', 'Send for approval', [
+        { name: 'association_name', label: 'Association name' },
+        { name: 'municipality', label: 'Municipality', value: state.staffMunicipality, readonly: true, skip: true },
+        { name: 'contact_name', label: 'Contact person' },
+        { name: 'contact_phone', label: 'Mobile number', placeholder: 'e.g. 09171234567' },
+        { name: 'email', label: 'Email of the association (used to sign in)', type: 'email' },
+        { name: 'password', label: 'Temporary password (12+ characters)', type: 'password', meter: true, watch: ['contact_name', 'email'],
+          context: function () { return { email: $('f_email').value, name: $('f_contact_name').value }; } },
+        { name: 'registration_details', label: 'Registration details (optional)', placeholder: 'e.g. DTI / CDA / SEC number' },
+        { name: 'privacy_consent', label: 'The association has read and agreed to the privacy notice', type: 'checkbox' }
+      ], function (v) { return Weaver.post('/api/staff/associations', v); },
+      'This sends an application to the administrator, the same as the public registration page. The association and its login exist only after the administrator approves. Give the temporary password to the association: it must change it at the first sign-in.');
     },
     'add-product': function () {
       var fields = [
-        { name: 'weaver_id', label: 'Member', type: 'select', options: activeWeaverOptions(), int: true },
         { name: 'title', label: 'Product name' },
         { name: 'category', label: 'Category', placeholder: 'e.g. Blanket, Table runner' }
       ];
       if (!isAssoc) {
-        // Staff and admin choose the association first, then a member of that association.
-        fields.unshift({ name: 'association_id', label: 'Association', type: 'select', options: assocOptions(), skip: true });
-        fields[1].options = [];
+        // Staff choose the association that owns the product.
+        fields.unshift({ name: 'association_id', label: 'Association', type: 'select', options: assocOptions().filter(function (o) {
+          var a = byId(data.associations, o.value); return !a || (a.status || 'active') === 'active';
+        }), int: true });
       }
       openForm('Add product', 'Save', fields, function (v) { return Weaver.post(API.product, v); });
-      if (!isAssoc) {
-        fillMemberSelect('');
-        $('f_association_id').addEventListener('change', function () { fillMemberSelect(this.value); });
-      }
     },
     // Product photo: pick an image, upload it, refresh the list.
     'photo-product': function (id) {
-      if (isAdmin) { toast('Administrators can remove a photo but not add one.', 'danger'); return; }
       var input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/jpeg,image/png,image/webp';
@@ -843,13 +1117,14 @@
       var next = p.status === 'active' ? 'inactive' : 'active';
       confirmThen((next === 'inactive' ? 'Deactivate ' : 'Activate ') + p.title + '?', function () {
         var body = { title: p.title, category: p.category, status: next };
-        if (!isAssoc) { body.weaver_id = p.weaver_id; }
+        if (!isAssoc) { body.association_id = p.association_id; }
         run(put(API.product + '/' + p.id, body));
       });
     },
-    'issue-tag': function () {
+    'issue-tag': function (id, el) {
+      var waiting = data.tags.filter(function (t) { return t.status === 'sent'; }).length;
       openForm('Link a tag to a product', 'Link tag', [
-        { name: 'uid', label: 'Tag UID', placeholder: 'e.g. 04E3CA79410289', reader: true },
+        { name: 'uid', label: 'Tag UID', placeholder: 'e.g. 04E3CA79410289', reader: true, value: el && el.getAttribute('data-uid') || '' },
         { name: 'product_id', label: 'Product', type: 'select', options: activeProductOptions(0), int: true }
       ], function (v) {
         return Weaver.post('/api/nfc-tags', v).then(function (res) {
@@ -864,6 +1139,9 @@
           });
         });
       },
+      (isAssoc
+        ? 'Only tags DTI sent to your association can be linked (' + plural(waiting, 'tag') + ' ready). '
+        : 'The tag must be in the inventory: from the stock, or sent to the product\'s association. ') +
       'Place the tag on the reader and click "Read from reader", or type the UID. After linking, keep the tag on the reader: it is secured automatically (write password and read counter).');
     },
     'secure-tag': function (id) {
@@ -875,9 +1153,9 @@
         run(secureTag(t).then(function () { return { message: 'NFC tag secured.' }; }));
       });
     },
-    'read-uid': function () {
-      var msg = $('readerMsg'), field = $('f_uid');
-      var btn = document.querySelector('[data-action="read-uid"]');
+    'read-uid': function (id, el) {
+      var msg = $('readerMsg'), field = $((el && el.getAttribute('data-target')) || 'f_uid');
+      var btn = el || document.querySelector('[data-action="read-uid"]');
       msg.className = 'form-text';
       msg.textContent = 'Place the tag on the reader (waiting up to 15 seconds)...';
       btn.disabled = true;
@@ -885,8 +1163,20 @@
         return res.json().then(function (d) { return { ok: res.ok, d: d }; });
       }).then(function (r) {
         if (!r.ok) { throw new Error(r.d.error || 'Reader error.'); }
-        field.value = r.d.uid;
         msg.className = 'form-text text-success';
+        if (field.tagName === 'TEXTAREA') {
+          var lines = field.value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+          if (lines.indexOf(r.d.uid) !== -1) {
+            msg.className = 'form-text text-warning';
+            msg.textContent = r.d.uid + ' is already in the list.';
+          } else {
+            lines.push(r.d.uid);
+            field.value = lines.join('\n');
+            msg.textContent = 'Added ' + r.d.uid + ' (' + plural(lines.length, 'tag') + ' in the list). Place the next tag and read again.';
+          }
+          return;
+        }
+        field.value = r.d.uid;
         msg.textContent = 'Tag read: ' + r.d.uid + '. Now choose the product.';
       }).catch(function (err) {
         msg.className = 'form-text text-danger';
@@ -913,7 +1203,80 @@
         var body = { product_id: v.product_id };
         if (v.reactivate) { body.reactivate = true; }
         return Weaver.patch('/api/admin/nfc-tags/' + t.id + '/reassign', body);
-      }, 'Use this to fix a mistake. Every change is recorded in the audit trail.');
+      }, 'Use this to fix a mistake. The tag moves to the association of the new product. Every change is recorded in the audit trail.');
+    },
+    'assign-tags': function () {
+      var munis = (data.municipalities || []).map(function (m) { return { value: m, label: m }; });
+      openForm('Assign tags to a Negosyo Center', 'Assign', [
+        { name: 'municipality', label: 'Negosyo Center (municipality)', type: 'select', options: munis },
+        { name: 'delivery_ref', label: 'Delivery reference (optional)', placeholder: 'e.g. DL-2026-11-01' },
+        { name: 'uids', label: 'Tags in this box, one UID per line', type: 'textarea', rows: 6, reader: true, uids: true }
+      ], function (v) { return Weaver.post('/api/admin/tag-assignments', v); },
+      'Read each tag as you pack the box. If another Negosyo Center tries to receive one of these tags, it is refused and you get an alert here.');
+    },
+    'move-alert': function (id) {
+      var x = byId((data.assignments || {}).alerts || [], id);
+      if (!x) { return; }
+      confirmThen('Move ' + x.uid + ' to the ' + x.attempted_municipality + ' list? That center can then receive it.', function () {
+        run(Weaver.post('/api/admin/tag-alerts/' + x.id + '/move', {}));
+      });
+    },
+    'dismiss-alert': function (id) {
+      var x = byId((data.assignments || {}).alerts || [], id);
+      if (!x) { return; }
+      confirmThen('Dismiss the alert for ' + x.uid + '? It stays on the ' + x.assigned_municipality + ' list.', function () {
+        run(Weaver.post('/api/admin/tag-alerts/' + x.id + '/dismiss', {}));
+      });
+    },
+    'receive-batch': function () {
+      openForm('Receive tags into the stock', 'Receive', [
+        { name: 'code', label: 'Batch code (from the box or delivery receipt)', placeholder: 'e.g. DTI-2026-11-A' },
+        { name: 'received_on', label: 'Date received', type: 'date', value: new Date().toISOString().slice(0, 10) },
+        { name: 'supplier', label: 'Supplier (optional)' },
+        { name: 'notes', label: 'Notes (optional)', type: 'textarea', rows: 2 },
+        { name: 'uids', label: 'Tag UIDs, one per line', type: 'textarea', rows: 6, reader: true, uids: true, placeholder: '04E3CA79410289' }
+      ], function (v) {
+        if (!v.supplier) { delete v.supplier; }
+        if (!v.notes) { delete v.notes; }
+        return Weaver.post('/api/inventory/batches', v);
+      }, 'Read each tag on the reader (or paste the UIDs). Every tag is recorded as in stock, with you as the person who received it.');
+    },
+    'add-to-batch': function (id) {
+      var b = data.inventory ? byId(data.inventory.batches, id) : null;
+      if (!b) { return; }
+      openForm('Add tags to batch ' + b.code, 'Add', [
+        { name: 'uids', label: 'Tag UIDs, one per line', type: 'textarea', rows: 6, reader: true, uids: true }
+      ], function (v) { return Weaver.post('/api/inventory/batches/' + b.id + '/tags', v); });
+    },
+    'send-tags': function () {
+      var stock = (data.invTags && data.invTags.data ? data.invTags.data : []).filter(function (t) { return t.status === 'in_stock'; });
+      openForm('Send tags to an association', 'Send', [
+        { name: 'association_id', label: 'Association', type: 'select', options: assocOptions(), int: true },
+        { name: 'pick', label: 'Fill the list with this many tags from the stock (optional)', type: 'number', skip: true, placeholder: 'e.g. 10' },
+        { name: 'uids', label: 'Tags being sent, one UID per line', type: 'textarea', rows: 6, reader: true, uids: true }
+      ], function (v) { return Weaver.post('/api/inventory/send', { association_id: v.association_id, uids: v.uids }); },
+      'Read each tag as you pack it, so the record matches what leaves the office. Only tags in stock can be sent.', function () {
+        $('f_pick').addEventListener('change', function () {
+          var n = Math.max(0, parseInt(this.value, 10) || 0);
+          $('f_uids').value = stock.slice(0, n).map(function (t) { return t.uid; }).join('\n');
+          if (n > stock.length) { toast('Only ' + stock.length + ' tags in stock are listed on this page.', 'warning'); }
+        });
+      });
+    },
+    'return-tag': function (id) {
+      var t = data.invTags ? byId(data.invTags.data, id) : null;
+      if (!t) { return; }
+      confirmThen('Take tag ' + t.uid + ' back from ' + (t.association ? t.association.name : 'the association') + ' into the stock?', function () {
+        run(Weaver.post('/api/inventory/tags/' + t.id + '/return', {}));
+      });
+    },
+    'damage-tag': function (id) {
+      var t = data.invTags ? byId(data.invTags.data, id) : null;
+      if (!t) { return; }
+      openForm('Mark tag ' + t.uid + ' damaged or lost', 'Mark damaged or lost', [
+        { name: 'note', label: 'What happened (optional)', type: 'textarea', rows: 2 }
+      ], function (v) { return Weaver.post('/api/inventory/tags/' + t.id + '/damaged', v.note ? { note: v.note } : {}); },
+      'The tag can never be linked after this. It stays in the records.');
     },
     'review-report': function (id) {
       var x = data.reports && data.reports.data ? byId(data.reports.data, id) : null;
@@ -938,7 +1301,7 @@
       openForm('Approve ' + x.association_name, 'Approve', [
         { name: 'a_name', label: 'Association', value: x.association_name + ' (' + x.municipality + ')', readonly: true, skip: true },
         { name: 'a_contact', label: 'Contact person', value: x.contact_name + ', ' + x.contact_phone, readonly: true, skip: true },
-        { name: 'a_email', label: 'Will sign in with', value: x.email + (x.email_verified ? ' (email confirmed)' : ' (email NOT confirmed)'), readonly: true, skip: true },
+        { name: 'a_email', label: 'Will sign in with', value: x.email + (x.submitted_by ? ' (filed by ' + x.submitted_by + ', temporary password)' : x.email_verified ? ' (email confirmed)' : ' (email NOT confirmed)'), readonly: true, skip: true },
         { name: 'a_reg', label: 'Registration details they gave', value: x.registration_details || 'not given', readonly: true, skip: true }
       ], function () {
         return Weaver.post('/api/applications/' + x.id + '/approve', {});
@@ -1030,19 +1393,6 @@
     });
   }
 
-  // toggle-weaver needs the full record, so it is finished here with put().
-  actions['toggle-weaver'] = function (id) {
-    var w = byId(data.weavers, id);
-    if (!w) { return; }
-    var next = w.status === 'active' ? 'inactive' : 'active';
-    confirmThen((next === 'inactive' ? 'Deactivate ' : 'Activate ') + w.name + '?' +
-      (next === 'inactive' ? ' Its tags will scan as suspicious.' : ''), function () {
-      var body = { name: w.name, municipality: w.municipality, status: next };
-      if (!isAssoc) { body.association_id = w.association_id; }
-      run(put(API.weaver + '/' + w.id, body));
-    });
-  };
-
   // -------------------------------------------------------------------- start
   function setMeName(text) {
     var el = $('meName');
@@ -1057,6 +1407,9 @@
     $('panelName').textContent = isAdmin ? 'Admin Control Panel' : (isAssoc ? 'Association Portal' : 'Staff Control Panel');
     if (!isAdmin) {
       Array.prototype.forEach.call(document.querySelectorAll('.admin-only'), function (el) { el.remove(); });
+    }
+    if (!isStaff) {
+      Array.prototype.forEach.call(document.querySelectorAll('.staff-only'), function (el) { el.remove(); });
     }
     if (!hasLogs) {
       Array.prototype.forEach.call(document.querySelectorAll('.logs-ui'), function (el) { el.remove(); });
@@ -1076,6 +1429,8 @@
     $('refreshBtn').addEventListener('click', function () { loadAll(); });
     $('formEl').addEventListener('submit', onFormSubmit);
 
+    document.addEventListener('change', onListFilterChange);
+
     $('searchInput').addEventListener('input', function () {
       state.filter = this.value.trim().toLowerCase();
       renderAll();
@@ -1087,7 +1442,7 @@
       var el = e.target.closest('[data-action]');
       if (!el) { return; }
       var fn = actions[el.getAttribute('data-action')];
-      if (fn) { fn(el.hasAttribute('data-id') ? parseInt(el.getAttribute('data-id'), 10) : undefined); }
+      if (fn) { fn(el.hasAttribute('data-id') ? parseInt(el.getAttribute('data-id'), 10) : undefined, el); }
     });
 
     if (hasLogs) {
@@ -1097,6 +1452,19 @@
       });
       $('logPrev').addEventListener('click', function () { state.logPage--; loadLogs().then(renderLogs); });
       $('logNext').addEventListener('click', function () { state.logPage++; loadLogs().then(renderLogs); });
+    }
+
+    if (hasInventory) {
+      $('invStatus').addEventListener('change', function () {
+        state.invStatus = this.value; state.invPage = 1;
+        loadInventory().then(renderInventory);
+      });
+      $('invBatch').addEventListener('change', function () {
+        state.invBatch = this.value; state.invPage = 1;
+        loadInventory().then(renderInventory);
+      });
+      $('invPrev').addEventListener('click', function () { state.invPage--; loadInventory().then(renderInventory); });
+      $('invNext').addEventListener('click', function () { state.invPage++; loadInventory().then(renderInventory); });
     }
 
     if (hasReports) {

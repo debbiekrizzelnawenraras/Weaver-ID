@@ -2,7 +2,7 @@
 
 use App\Models\NfcTag;
 use App\Models\Product;
-use App\Models\Weaver;
+use App\Models\Association;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -15,8 +15,8 @@ it('authenticates an active registered tag and returns the product profile', fun
         ->assertOk()
         ->assertJsonPath('result', 'authenticated')
         ->assertJsonPath('product.title', $product->title)
-        ->assertJsonPath('association.name', $product->weaver->association->name)
-        ->assertJsonPath('association.municipality', $product->weaver->association->municipality)
+        ->assertJsonPath('association.name', $product->association->name)
+        ->assertJsonPath('association.municipality', $product->association->municipality)
         ->assertJsonMissingPath('weaver');
 
     $this->assertDatabaseHas('scan_logs', [
@@ -80,9 +80,9 @@ it('flags a tag whose product is inactive as suspicious', function () {
         ->assertJsonPath('result', 'suspicious');
 });
 
-it('flags a tag whose weaver is inactive as suspicious', function () {
-    $weaver = Weaver::factory()->inactive()->create();
-    $product = Product::factory()->create(['weaver_id' => $weaver->id]);
+it('flags a tag whose association is inactive as suspicious', function () {
+    $association = Association::factory()->create(['status' => 'inactive']);
+    $product = Product::factory()->create(['association_id' => $association->id]);
     $tag = NfcTag::factory()->create(['product_id' => $product->id]);
 
     $this->postJson('/api/verify', ['uid' => $tag->uid])
@@ -150,13 +150,13 @@ it('rate limits the verify endpoint per IP address', function () {
     $this->postJson('/api/verify', ['uid' => '04AABBCCDDEEFF'])->assertStatus(429);
 });
 
-it('never exposes member names in the public response', function () {
-    $tag = NfcTag::factory()->create();
-    $tag->product->weaver->update(['name' => 'Secret Member Name', 'proprietor' => 'Secret Owner']);
+it('never exposes staff or inventory details in the public response', function () {
+    $staff = \App\Models\User::factory()->staff()->create(['name' => 'Secret Staff Name']);
+    $tag = NfcTag::factory()->create(['issued_by' => $staff->id, 'sent_by' => $staff->id]);
 
     $body = $this->postJson('/api/verify', ['uid' => $tag->uid])->assertOk()->getContent();
 
-    expect($body)->not->toContain('Secret Member Name')->not->toContain('Secret Owner');
+    expect($body)->not->toContain('Secret Staff Name')->not->toContain('sent_by')->not->toContain('tag_batch');
 });
 
 it('seeds demo tags that show all three outcomes on a fresh database', function () {
@@ -165,4 +165,6 @@ it('seeds demo tags that show all three outcomes on a fresh database', function 
     $this->postJson('/api/verify', ['uid' => '04DE0000000001'])->assertJsonPath('result', 'authenticated');
     $this->postJson('/api/verify', ['uid' => '04DE0000000002'])->assertJsonPath('result', 'suspicious');
     $this->postJson('/api/verify', ['uid' => '04DE0000000003'])->assertJsonPath('result', 'unregistered');
+    // A tag in the inventory but not linked yet is not a registered product.
+    $this->postJson('/api/verify', ['uid' => '04DE0000000011'])->assertJsonPath('result', 'unregistered');
 });

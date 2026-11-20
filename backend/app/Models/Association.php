@@ -57,8 +57,14 @@ class Association extends Model
         return $this->hasMany(User::class);
     }
 
-    public function weavers(): HasMany
+    public function products(): HasMany
     {
-        return $this->hasMany(Weaver::class);
+        return $this->hasMany(Product::class);
+    }
+
+    /** Tags sent to this association, linked or not. */
+    public function nfcTags(): HasMany
+    {
+        return $this->hasMany(NfcTag::class);
     }
 }

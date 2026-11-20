@@ -35,7 +35,7 @@ class VerifyController extends Controller
 
         $counter = isset($validated['counter']) ? (int) $validated['counter'] : null;
 
-        $tag = NfcTag::with('product.weaver.association')
+        $tag = NfcTag::with('product.association')
             ->where('uid', $validated['uid'])
             ->first();
 
@@ -74,18 +74,17 @@ class VerifyController extends Controller
         // Product details are only shown for authenticated tags.
         if ($result === ScanResult::Authenticated) {
             $product = $tag->product;
-            $weaver = $product->weaver;
 
             $payload['product'] = [
                 'title' => $product->title,
                 'category' => $product->category,
                 'photo_url' => $product->photo_url,
             ];
-            // Public shows the business only. Member names are private.
-            $association = $weaver->association;
+            // Public shows the business only.
+            $association = $product->association;
             $payload['association'] = [
                 'name' => $association->name,
-                'municipality' => $association->municipality ?? $weaver->municipality,
+                'municipality' => $association->municipality,
             ];
         }
 
@@ -111,8 +110,8 @@ class VerifyController extends Controller
             return [ScanResult::Suspicious, 'product_inactive'];
         }
 
-        if ($product->weaver->status !== 'active') {
-            return [ScanResult::Suspicious, 'weaver_inactive'];
+        if ($product->association->status !== 'active') {
+            return [ScanResult::Suspicious, 'association_inactive'];
         }
 
         if ($reason = $this->codeProblem($tag, $code)) {

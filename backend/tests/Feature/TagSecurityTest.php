@@ -172,8 +172,8 @@ it('refuses to derive a password without a key', function () {
     TagSecurity::credentials('04AABBCCDDEEFF');
 })->throws(RuntimeException::class);
 
-it('gives the write password to a user who manages the tag', function () {
-    Sanctum::actingAs(User::factory()->admin()->create());
+it('gives the write password to staff who manage the tag', function () {
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secure-key")
@@ -193,6 +193,14 @@ it('does not give the password to someone outside the tag scope', function () {
     expect(NfcTagEvent::count())->toBe(0);
 });
 
+it('does not give the write password to the administrator, who does not secure tags', function () {
+    $tag = NfcTag::factory()->create();
+    Sanctum::actingAs(User::factory()->admin()->create());
+
+    $this->postJson("/api/nfc-tags/{$tag->id}/secure-key")->assertForbidden();
+    $this->postJson("/api/nfc-tags/{$tag->id}/secured", ['counter' => 1])->assertForbidden();
+});
+
 it('does not give the password without a login', function () {
     $tag = NfcTag::factory()->create();
 
@@ -200,7 +208,7 @@ it('does not give the password without a login', function () {
 });
 
 it('does not give a password for a revoked tag', function () {
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->revoked()->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secure-key")->assertStatus(422);
@@ -208,7 +216,7 @@ it('does not give a password for a revoked tag', function () {
 
 it('says so when the server has no tag key', function () {
     config(['weaver.tag_key' => null]);
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secure-key")->assertStatus(503);
@@ -217,7 +225,7 @@ it('says so when the server has no tag key', function () {
 // ------------------------------------------------------------ marking a tag as secured
 
 it('marks a tag as secured and stores the counter the desk read', function () {
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secured", ['counter' => 7])
@@ -231,7 +239,7 @@ it('marks a tag as secured and stores the counter the desk read', function () {
 });
 
 it('lets the desk secure a tag again to reset a wrong counter', function () {
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->secured(900)->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secured", ['counter' => 12])->assertOk();
@@ -240,7 +248,7 @@ it('lets the desk secure a tag again to reset a wrong counter', function () {
 });
 
 it('requires a valid counter when marking a tag as secured', function () {
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secured")->assertStatus(422);
@@ -361,7 +369,7 @@ it('still reports the counter problem for a tag with a correct code', function (
 });
 
 it('gives the tag code to the tag desk with the password', function () {
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secure-key")
@@ -370,7 +378,7 @@ it('gives the tag code to the tag desk with the password', function () {
 });
 
 it('turns the tag code requirement on only when the desk says it wrote the code', function () {
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(User::factory()->staff()->create());
     $tag = NfcTag::factory()->create();
 
     $this->postJson("/api/nfc-tags/{$tag->id}/secured", ['counter' => 7])

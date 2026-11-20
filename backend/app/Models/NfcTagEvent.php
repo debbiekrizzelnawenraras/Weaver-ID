@@ -13,6 +13,8 @@ class NfcTagEvent extends Model
         'action',
         'from_product_id',
         'to_product_id',
+        'association_id',
+        'note',
     ];
 
     public function nfcTag(): BelongsTo

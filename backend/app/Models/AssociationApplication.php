@@ -24,6 +24,7 @@ class AssociationApplication extends Model
         'status',
         'consented_at',
         'notice_version',
+        'submitted_by',
         'decision_note',
         'decided_by',
         'decided_at',
@@ -46,7 +47,7 @@ class AssociationApplication extends Model
     }
 
     /**
-     * Applications this user may decide: admin all, staff those for their own municipality
+     * Applications this user may see: admin all (and only admin decides), staff those for their own municipality
      * (compared without regard to capitals). Anyone else none.
      */
     public function scopeManageableBy(Builder $query, User $user): Builder
@@ -100,5 +101,11 @@ class AssociationApplication extends Model
     public function decider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'decided_by');
+    }
+
+    /** The staff member who filed this on the association's behalf (null when it applied itself). */
+    public function submitter(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
     }
 }

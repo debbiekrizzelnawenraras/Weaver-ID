@@ -37,6 +37,12 @@ class AdminTagController extends Controller
             'product_id.unique' => 'That product already has an active tag. Revoke it first.',
         ]);
 
+        if (! in_array($nfcTag->status, ['active', 'revoked'], true)) {
+            throw ValidationException::withMessages([
+                'product_id' => 'This tag has not been linked yet. Staff or the association link it at the tag desk.',
+            ]);
+        }
+
         $reactivate = $request->boolean('reactivate');
         $wasRevoked = $nfcTag->status === 'revoked';
 
@@ -52,19 +58,21 @@ class AdminTagController extends Controller
             ]);
         }
 
-        $product = Product::with('weaver')->findOrFail($validated['product_id']);
+        $product = Product::with('association')->findOrFail($validated['product_id']);
 
-        if ($product->weaver->status !== 'active') {
+        if ($product->association->status !== 'active') {
             throw ValidationException::withMessages([
-                'product_id' => 'The weaver for this product is inactive.',
+                'product_id' => 'The association of this product is inactive.',
             ]);
         }
 
         $fromProductId = $nfcTag->product_id;
 
         DB::transaction(function () use ($nfcTag, $product, $request, $fromProductId, $wasRevoked) {
+            // The tag follows its product to the product's association.
             $nfcTag->update([
                 'product_id' => $product->id,
+                'association_id' => $product->association_id,
                 'status' => 'active',
             ]);
 
@@ -73,12 +81,13 @@ class AdminTagController extends Controller
                 'action' => $wasRevoked ? 'reactivated' : 'reassigned',
                 'from_product_id' => $fromProductId,
                 'to_product_id' => $product->id,
+                'association_id' => $product->association_id,
             ]);
         });
 
         return response()->json([
             'message' => $wasRevoked ? 'NFC tag reactivated and reassigned.' : 'NFC tag reassigned.',
-            'tag' => $nfcTag->fresh()->load('product.weaver.association'),
+            'tag' => $nfcTag->fresh()->load('product', 'association', 'batch:id,code'),
         ]);
     }
 }

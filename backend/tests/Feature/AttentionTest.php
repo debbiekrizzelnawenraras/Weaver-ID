@@ -7,7 +7,6 @@ use App\Models\Product;
 use App\Models\ScanLog;
 use App\Models\SuspiciousReport;
 use App\Models\User;
-use App\Models\Weaver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -18,8 +17,7 @@ uses(RefreshDatabase::class);
 function attnTag(string $municipality = 'Bontoc', ?Association $association = null): NfcTag
 {
     $association ??= Association::factory()->create(['municipality' => $municipality]);
-    $weaver = Weaver::factory()->create(['association_id' => $association->id]);
-    $product = Product::factory()->create(['weaver_id' => $weaver->id, 'title' => 'Wrap skirt '.$association->id]);
+    $product = Product::factory()->create(['association_id' => $association->id, 'title' => 'Wrap skirt '.$association->id]);
 
     return NfcTag::factory()->create(['product_id' => $product->id]);
 }
@@ -202,18 +200,14 @@ it('still counts a report whose tag was deleted, for admin', function () {
 
 // ---- staff ------------------------------------------------------------------
 
-it('limits staff to the new reports of their own municipality', function () {
+it('gives staff no report numbers, because only the administrator reviews reports', function () {
     attnReport(attnTag('Bontoc'));
-    attnReport(attnTag('Bontoc'));
-    attnReport(attnTag('Sagada'));
-    attnReport(attnTag('Bontoc'), 'dismissed');
 
     Sanctum::actingAs(User::factory()->staff()->create(['municipality' => 'Bontoc']));
 
     $this->getJson('/api/attention')
         ->assertOk()
-        ->assertJsonPath('new_reports.count', 2)
-        ->assertJsonCount(2, 'new_reports.latest');
+        ->assertJsonPath('new_reports', null);
 });
 
 it('gives staff no scan numbers, because staff have no scan log to open', function () {
@@ -225,17 +219,6 @@ it('gives staff no scan numbers, because staff have no scan log to open', functi
     $this->getJson('/api/attention')
         ->assertOk()
         ->assertJsonPath('suspicious_scans', null);
-});
-
-it('shows staff without a municipality nothing', function () {
-    attnReport(attnTag('Bontoc'));
-
-    Sanctum::actingAs(User::factory()->staff()->create(['municipality' => null]));
-
-    $this->getJson('/api/attention')
-        ->assertOk()
-        ->assertJsonPath('new_reports.count', 0)
-        ->assertJsonCount(0, 'new_reports.latest');
 });
 
 // ---- association ------------------------------------------------------------
@@ -323,24 +306,12 @@ it('counts waiting applications for admin, whatever the age, and ignores decided
         ->assertJsonCount(3, 'pending_applications.latest');
 });
 
-it('limits staff to the waiting applications of their own municipality', function () {
+it('gives staff no application numbers, because only the administrator approves', function () {
     attnApplication('Sagada');
-    attnApplication('sagada');
-    attnApplication('Bontoc');
 
     Sanctum::actingAs(User::factory()->staff()->create(['municipality' => 'Sagada']));
 
-    $this->getJson('/api/attention')
-        ->assertOk()
-        ->assertJsonPath('pending_applications.count', 2);
-});
-
-it('shows staff without a municipality no applications', function () {
-    attnApplication('Sagada');
-
-    Sanctum::actingAs(User::factory()->staff()->create(['municipality' => null]));
-
-    $this->getJson('/api/attention')->assertOk()->assertJsonPath('pending_applications.count', 0);
+    $this->getJson('/api/attention')->assertOk()->assertJsonPath('pending_applications', null);
 });
 
 it('gives an association no application numbers, and never exposes the applicant details', function () {

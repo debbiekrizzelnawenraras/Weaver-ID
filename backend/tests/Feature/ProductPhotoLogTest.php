@@ -5,7 +5,6 @@ use App\Models\NfcTag;
 use App\Models\Product;
 use App\Models\ProductPhotoEvent;
 use App\Models\User;
-use App\Models\Weaver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -25,9 +24,7 @@ function logJpeg(string $name): UploadedFile
 
 function logProductIn(Association $association): Product
 {
-    $weaver = Weaver::factory()->create(['association_id' => $association->id]);
-
-    return Product::factory()->create(['weaver_id' => $weaver->id]);
+    return Product::factory()->create(['association_id' => $association->id]);
 }
 
 it('records who added, changed and removed a photo, and when', function () {
@@ -69,19 +66,17 @@ it('does not let an administrator add or change a photo', function () {
     expect(Storage::disk('local')->allFiles('product-photos'))->toBe([]);
 });
 
-it('lets an administrator remove a photo and records it', function () {
+it('does not let an administrator remove a photo either', function () {
     $admin = User::factory()->admin()->create();
     $product = logProductIn(Association::factory()->create());
     Storage::disk('local')->put('product-photos/22222222-2222-4222-8222-222222222222.jpg', 'x');
     $product->update(['photo_path' => '22222222-2222-4222-8222-222222222222.jpg']);
     Sanctum::actingAs($admin);
 
-    $this->deleteJson("/api/staff/products/{$product->id}/photo")->assertOk()
-        ->assertJsonPath('product.photo_url', null)
-        ->assertJsonPath('product.latest_photo_event.action', 'removed');
+    $this->deleteJson("/api/staff/products/{$product->id}/photo")->assertForbidden();
 
-    Storage::disk('local')->assertMissing('product-photos/22222222-2222-4222-8222-222222222222.jpg');
-    expect(ProductPhotoEvent::first()->user_id)->toBe($admin->id);
+    Storage::disk('local')->assertExists('product-photos/22222222-2222-4222-8222-222222222222.jpg');
+    expect(ProductPhotoEvent::count())->toBe(0);
 });
 
 it('does not log a removal when the product had no photo', function () {

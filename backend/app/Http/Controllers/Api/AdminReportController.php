@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\NfcTag;
 use App\Models\Product;
 use App\Models\ScanLog;
-use App\Models\Weaver;
+use App\Models\Association;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,9 +33,9 @@ class AdminReportController extends Controller
             ->pluck('total', 'role');
 
         return response()->json([
-            'weavers' => [
-                'total' => Weaver::count(),
-                'active' => Weaver::where('status', 'active')->count(),
+            'associations' => [
+                'total' => Association::count(),
+                'active' => Association::where('status', 'active')->count(),
             ],
             'products' => [
                 'total' => Product::count(),
@@ -45,6 +45,9 @@ class AdminReportController extends Controller
             'tags' => [
                 'active' => NfcTag::where('status', 'active')->count(),
                 'revoked' => NfcTag::where('status', 'revoked')->count(),
+                'in_stock' => NfcTag::where('status', 'in_stock')->count(),
+                'sent' => NfcTag::where('status', 'sent')->count(),
+                'damaged' => NfcTag::where('status', 'damaged')->count(),
                 'issued_by_role' => [
                     'admin' => (int) ($tagsByIssuer['admin'] ?? 0),
                     'staff' => (int) ($tagsByIssuer['staff'] ?? 0),

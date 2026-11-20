@@ -14,6 +14,10 @@ class NfcTag extends Model
 
     protected $fillable = [
         'uid',
+        'tag_batch_id',
+        'association_id',
+        'sent_by',
+        'sent_at',
         'product_id',
         'status',
         'counter_enabled',
@@ -24,23 +28,37 @@ class NfcTag extends Model
         'issued_at',
     ];
 
+    /** Inventory states, in the order a tag normally moves through them. */
+    public const STATUSES = ['in_stock', 'sent', 'active', 'revoked', 'damaged'];
+
     /**
-     * Tags on products this user may manage. Tags not linked to any
-     * product are visible to admin only.
+     * Tags this user may see. Admin: all. Staff: their own Negosyo Center's stock (tags of
+     * batches received in their municipality, not sent yet) plus tags sent to associations
+     * in their municipality. Association: only tags sent to it.
      */
     public function scopeManageableBy(Builder $query, User $user): Builder
     {
-        if ($user->role === 'admin') {
-            return $query;
-        }
-
-        return $query->whereHas('product', fn (Builder $q) => $q->manageableBy($user));
+        return match ($user->role) {
+            'admin' => $query,
+            'staff' => filled($user->municipality)
+                ? $query->where(fn (Builder $q) => $q
+                    ->where(fn (Builder $stock) => $stock
+                        ->whereNull('association_id')
+                        ->whereHas('batch', fn (Builder $b) => $b->where('municipality', $user->municipality)))
+                    ->orWhereHas('association', fn (Builder $a) => $a->manageableBy($user)))
+                : $query->whereRaw('1 = 0'),
+            'association' => $user->association_id
+                ? $query->where('association_id', $user->association_id)
+                : $query->whereRaw('1 = 0'),
+            default => $query->whereRaw('1 = 0'),
+        };
     }
 
     protected function casts(): array
     {
         return [
             'issued_at' => 'datetime',
+            'sent_at' => 'datetime',
             'secured_at' => 'datetime',
             'counter_enabled' => 'boolean',
             'code_enabled' => 'boolean',
@@ -63,6 +81,22 @@ class NfcTag extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(TagBatch::class, 'tag_batch_id');
+    }
+
+    /** The association the tag was sent to. */
+    public function association(): BelongsTo
+    {
+        return $this->belongsTo(Association::class);
+    }
+
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sent_by');
     }
 
     public function issuer(): BelongsTo

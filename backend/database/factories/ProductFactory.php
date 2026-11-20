@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Product;
-use App\Models\Weaver;
+use App\Models\Association;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -14,7 +14,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'weaver_id' => Weaver::factory(),
+            'association_id' => Association::factory(),
             'title' => fake()->randomElement(['Pinagpagan Pattern Blanket', 'Inabel Table Runner', 'Woven Tote Bag']),
             'category' => fake()->randomElement(['Blanket / Textile', 'Home Decor', 'Bags & Accessories']),
             'status' => 'active',

@@ -5,17 +5,14 @@ use App\Models\NfcTag;
 use App\Models\Product;
 use App\Models\ScanLog;
 use App\Models\User;
-use App\Models\Weaver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
-function assocProduct(Association $association, array $weaverState = [], array $productState = []): Product
+function assocProduct(Association $association, array $productState = []): Product
 {
-    $weaver = Weaver::factory()->create(array_merge(['association_id' => $association->id], $weaverState));
-
-    return Product::factory()->create(array_merge(['weaver_id' => $weaver->id], $productState));
+    return Product::factory()->create(array_merge(['association_id' => $association->id], $productState));
 }
 
 function scanOf(?NfcTag $tag, string $result, string $uid = '04AABBCCDDEEFF'): ScanLog
@@ -96,16 +93,27 @@ it('stops an association editing another association product', function () {
     $this->assertDatabaseMissing('products', ['id' => $foreign->id, 'title' => 'Hijacked']);
 });
 
-it('refuses to reactivate a product whose weaver is inactive', function () {
+it('lets an association reactivate its own product', function () {
     $user = User::factory()->association()->create();
-    $product = assocProduct($user->association, ['status' => 'inactive'], ['status' => 'inactive']);
+    $product = assocProduct($user->association, ['status' => 'inactive']);
     Sanctum::actingAs($user);
 
     $this->putJson("/api/association/products/{$product->id}", [
         'title' => $product->title,
         'category' => $product->category,
         'status' => 'active',
-    ])->assertUnprocessable()->assertJsonValidationErrors('status');
+    ])->assertOk()->assertJsonPath('product.status', 'active');
+});
+
+it('lets an association add a product, owned by the association itself', function () {
+    $user = User::factory()->association()->create();
+    Sanctum::actingAs($user);
+
+    $id = $this->postJson('/api/association/products', ['title' => 'Inabel Runner', 'category' => 'Home Decor'])
+        ->assertCreated()
+        ->json('product.id');
+
+    expect(Product::findOrFail($id)->association_id)->toBe($user->association_id);
 });
 
 it('rejects an invalid product status', function () {
@@ -132,27 +140,11 @@ it('returns the association with the signed-in association user', function () {
         ->assertJsonPath('association.name', $user->association->name);
 });
 
-it('lets an association add and edit a member without any second name', function () {
-    $user = User::factory()->association()->create();
-    Sanctum::actingAs($user);
+it('has no member routes any more', function () {
+    Sanctum::actingAs(User::factory()->association()->create());
+    $this->getJson('/api/association/weavers')->assertNotFound();
+    $this->postJson('/api/association/weavers', ['name' => 'Sample Member', 'municipality' => 'Sagada'])->assertNotFound();
 
-    $id = $this->postJson('/api/association/weavers', ['name' => 'Sample Member', 'municipality' => 'Sagada'])
-        ->assertCreated()
-        ->json('weaver.id');
-
-    $this->assertDatabaseHas('weavers', ['id' => $id, 'proprietor' => null]);
-
-    $this->putJson("/api/association/weavers/{$id}", [
-        'name' => 'Sample Member B', 'municipality' => 'Sagada', 'status' => 'inactive',
-    ])->assertOk()->assertJsonPath('weaver.status', 'inactive');
-});
-
-it('lets staff add a member without any second name', function () {
-    $staff = User::factory()->staff()->create(['municipality' => 'Sagada']);
-    $association = Association::factory()->create(['municipality' => 'Sagada']);
-    Sanctum::actingAs($staff);
-
-    $this->postJson('/api/staff/weavers', [
-        'association_id' => $association->id, 'name' => 'Sample Member', 'municipality' => 'Sagada',
-    ])->assertCreated();
+    Sanctum::actingAs(User::factory()->staff()->create(['municipality' => 'Sagada']));
+    $this->getJson('/api/staff/weavers')->assertNotFound();
 });

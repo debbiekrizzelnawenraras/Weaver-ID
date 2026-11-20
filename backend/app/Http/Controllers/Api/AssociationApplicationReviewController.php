@@ -13,7 +13,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Staff (their own municipality) and admin (all) decide association applications.
+ * Only the administrator decides association applications, whether the association applied
+ * on the public page or staff filed it on its behalf.
  * Approving creates the association and its sign-in account; rejecting needs a reason the
  * applicant can read. Neither touches tags, members or products.
  */
@@ -30,7 +31,7 @@ class AssociationApplicationReviewController extends Controller
         ]);
 
         $applications = AssociationApplication::manageableBy($request->user())
-            ->with('decider:id,name')
+            ->with('decider:id,name', 'submitter:id,name')
             ->when($validated['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
             ->latest('id')
             ->paginate(25);
@@ -77,8 +78,9 @@ class AssociationApplicationReviewController extends Controller
                 'association_id' => $association->id,
                 'municipality' => null,
                 'status' => 'active',
-                // The applicant chose this password themselves, so there is nothing to replace.
-                'must_change_password' => false,
+                // An applicant who chose the password keeps it. A starting password typed by staff
+                // must be replaced at the first sign-in, like any account someone else set up.
+                'must_change_password' => $fresh->submitted_by !== null,
             ]);
             // Store the hash exactly as it was made at application time. A normal assignment would
             // hash it a second time and the applicant could never sign in.
@@ -103,7 +105,7 @@ class AssociationApplicationReviewController extends Controller
 
         return response()->json([
             'message' => 'Approved. The association and its account were created.',
-            'application' => $this->present($result->load('decider:id,name')),
+            'application' => $this->present($result->load('decider:id,name', 'submitter:id,name')),
         ]);
     }
 
@@ -148,7 +150,7 @@ class AssociationApplicationReviewController extends Controller
 
         return response()->json([
             'message' => 'Application rejected. The applicant can read your reason.',
-            'application' => $this->present($done->load('decider:id,name')),
+            'application' => $this->present($done->load('decider:id,name', 'submitter:id,name')),
         ]);
     }
 
@@ -205,6 +207,7 @@ class AssociationApplicationReviewController extends Controller
             'decision_note' => $application->decision_note,
             'decided_at' => $application->decided_at,
             'decided_by' => $application->decider?->name,
+            'submitted_by' => $application->submitter?->name,
             'conflict' => $application->status === 'pending' ? array_values($this->conflict($application)) : [],
             'created_at' => $application->created_at,
         ];

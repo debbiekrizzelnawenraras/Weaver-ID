@@ -30,11 +30,11 @@
 
         <nav class="sidebar-nav mt-3" id="sideNav">
           <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-          <a class="nav-link" data-tab="weavers"><i class="bi bi-people"></i> Members</a>
           <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
           <a class="nav-link apps-ui" data-tab="applications"><i class="bi bi-person-plus"></i> Applications <span class="badge rounded-pill bg-danger ms-auto d-none" id="appsBadge"></span></a>
           <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Products</a>
           <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
+          <a class="nav-link" data-tab="inventory"><i class="bi bi-archive"></i> Tag Inventory <span class="badge rounded-pill bg-danger ms-auto d-none" id="invBadge"></span></a>
           <a class="nav-link logs-ui" data-tab="logs"><i class="bi bi-journal-check"></i> Scan Logs</a>
           <a class="nav-link reports-ui" data-tab="reports"><i class="bi bi-flag"></i> Reports <span class="badge rounded-pill bg-danger ms-auto d-none" id="reportsBadge"></span></a>
           <a class="nav-link admin-only" data-tab="users"><i class="bi bi-person-gear"></i> Users</a>
@@ -92,29 +92,26 @@
         </div>
       </div>
 
-      <!-- WEAVERS -->
-      <div id="view-weavers" class="tab-view d-none">
-        <div class="dashboard-card p-0">
-          <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
-            <h6 class="fw-bold mb-0">Members</h6>
-            <button class="btn btn-dti btn-sm" data-action="add-weaver"><i class="bi bi-plus-lg"></i> Add member</button>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-              <thead class="table-light"><tr><th>Member</th><th>Municipality</th><th>Association</th><th>Products</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
-              <tbody id="weaversBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
       <!-- ASSOCIATIONS -->
       <div id="view-associations" class="tab-view d-none">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h6 class="fw-bold mb-0">Associations and cooperatives</h6>
-          <button class="btn btn-dti btn-sm" data-action="add-association"><i class="bi bi-plus-lg"></i> Add association</button>
+          <button class="btn btn-dti btn-sm staff-only" data-action="add-association"><i class="bi bi-plus-lg"></i> Add association</button>
         </div>
+        <div id="filters-associations" class="dashboard-card py-2 mb-3 d-flex flex-wrap align-items-center gap-2"></div>
         <div class="row g-3" id="associationsBody"></div>
+        <div id="staffAppsCard" class="dashboard-card p-0 mt-3 d-none staff-only">
+          <div class="p-3 border-bottom">
+            <h6 class="fw-bold mb-0">Waiting for the administrator</h6>
+            <small class="text-muted">Associations filed in your municipality that are not approved yet, and any the administrator rejected.</small>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>Filed</th><th>Association</th><th>Contact</th><th>Filed by</th><th>Status</th></tr></thead>
+              <tbody id="staffAppsBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- APPLICATIONS TO REGISTER AN ASSOCIATION -->
@@ -123,7 +120,7 @@
           <div class="p-3 d-flex justify-content-between align-items-center border-bottom gap-2 flex-wrap">
             <div>
               <h6 class="fw-bold mb-0">Association applications</h6>
-              <small class="text-muted">Sent from the public page. Approving creates the association and its login. Nothing exists until you approve.</small>
+              <small class="text-muted">Sent from the public page. Only the administrator decides. Approving creates the association and its login; nothing exists until then.</small>
             </div>
             <select id="applicationFilter" class="form-select form-select-sm" style="width:auto">
               <option value="">All statuses</option>
@@ -153,11 +150,12 @@
         <div class="dashboard-card p-0">
           <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
             <h6 class="fw-bold mb-0">Cataloged products</h6>
-            <button class="btn btn-dti btn-sm" data-action="add-product"><i class="bi bi-plus-lg"></i> Add product</button>
+            <button class="btn btn-dti btn-sm staff-only" data-action="add-product"><i class="bi bi-plus-lg"></i> Add product</button>
           </div>
+          <div id="filters-products" class="px-3 py-2 border-bottom d-flex flex-wrap align-items-center gap-2"></div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-              <thead class="table-light"><tr><th>Product</th><th>Category</th><th>Member</th><th>Association</th><th>Tag</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
+              <thead class="table-light"><tr><th>Product</th><th>Category</th><th>Association</th><th>Tag</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
               <tbody id="productsBody"></tbody>
             </table>
           </div>
@@ -169,13 +167,109 @@
         <div class="dashboard-card p-0">
           <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
             <h6 class="fw-bold mb-0">NFC tags</h6>
-            <button class="btn btn-dti btn-sm" data-action="issue-tag"><i class="bi bi-plus-lg"></i> Link a tag</button>
+            <button class="btn btn-dti btn-sm staff-only" data-action="issue-tag"><i class="bi bi-plus-lg"></i> Link a tag</button>
+          </div>
+          <div id="filters-nfc" class="px-3 py-2 border-bottom d-flex flex-wrap align-items-center gap-2"></div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>Tag UID</th><th>Product</th><th>Association</th><th>Linked on</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
+              <tbody id="tagsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NFC TAG INVENTORY -->
+      <div id="view-inventory" class="tab-view d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+          <div>
+            <h6 class="fw-bold mb-0">NFC tag inventory</h6>
+            <small class="text-muted" id="invScope">Each Negosyo Center receives and keeps its own stock.</small>
+          </div>
+          <div class="d-flex gap-2 admin-only">
+            <button class="btn btn-dti btn-sm" data-action="assign-tags"><i class="bi bi-truck"></i> Assign tags to a center</button>
+          </div>
+          <div class="d-flex gap-2 staff-only">
+            <button class="btn btn-dti btn-sm" data-action="receive-batch"><i class="bi bi-box-arrow-in-down"></i> Receive tags</button>
+            <button class="btn btn-outline-primary btn-sm" data-action="send-tags"><i class="bi bi-send"></i> Send to an association</button>
+          </div>
+        </div>
+        <div class="row g-3 mb-3" id="invTiles"></div>
+        <div id="alertCard" class="dashboard-card p-0 mb-3 d-none admin-only border border-danger">
+          <div class="p-3 border-bottom"><h6 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Tags at the wrong Negosyo Center <span id="alertCount" class="badge bg-danger ms-1"></span></h6>
+            <small class="text-muted">A center tried to receive these tags, but they are on another center's list. The system refused them. Move each tag to the center that has it, or dismiss the alert if the box was sent on.</small></div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>When</th><th>Tag</th><th>Assigned to</th><th>Tried at</th><th class="text-end pe-3">Action</th></tr></thead>
+              <tbody id="alertBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="dashboard-card p-0 mb-3 admin-only">
+          <div class="p-3 border-bottom"><h6 class="fw-bold mb-0">Delivery lists</h6>
+            <small class="text-muted">Tags you assigned to each center, and how many that center has scanned in.</small></div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>Negosyo Center</th><th>Assigned</th><th>Received</th><th>Not received yet</th></tr></thead>
+              <tbody id="assignBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="invMuniCard" class="dashboard-card p-0 mb-3 d-none">
+          <div class="p-3 border-bottom"><h6 class="fw-bold mb-0">Stock at each Negosyo Center</h6>
+            <small class="text-muted">The answer when someone asks how many tags a center has.</small></div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>Municipality</th><th>Batches</th><th>In stock</th><th>Sent, not linked</th><th>Linked</th><th>Revoked</th><th>Damaged or lost</th></tr></thead>
+              <tbody id="invMuniBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="dashboard-card p-0 mb-3">
+          <div class="p-3 border-bottom"><h6 class="fw-bold mb-0">Batches received</h6></div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>Batch</th><th>Municipality</th><th>Received</th><th>Supplier</th><th>Received by</th><th>In stock</th><th>Sent</th><th>Linked</th><th>Revoked</th><th>Damaged or lost</th><th class="text-end pe-3">Action</th></tr></thead>
+              <tbody id="invBatchesBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="dashboard-card p-0 mb-3">
+          <div class="p-3 border-bottom"><h6 class="fw-bold mb-0">Tags at each association</h6></div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
+              <thead class="table-light"><tr><th>Association</th><th>Municipality</th><th>Sent, not linked yet</th><th>Linked</th><th>Revoked</th><th>Damaged or lost</th></tr></thead>
+              <tbody id="invAssocBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="dashboard-card p-0">
+          <div class="p-3 d-flex justify-content-between align-items-center border-bottom gap-2 flex-wrap">
+            <h6 class="fw-bold mb-0">Every tag</h6>
+            <div class="d-flex gap-2 flex-wrap">
+              <select id="invStatus" class="form-select form-select-sm" style="width:auto">
+                <option value="">All statuses</option>
+                <option value="in_stock" selected>In stock</option>
+                <option value="sent">Sent, not linked yet</option>
+                <option value="active">Linked</option>
+                <option value="revoked">Revoked</option>
+                <option value="damaged">Damaged or lost</option>
+              </select>
+              <select id="invBatch" class="form-select form-select-sm" style="width:auto"><option value="">All batches</option></select>
+            </div>
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
-              <thead class="table-light"><tr><th>Tag UID</th><th>Product</th><th>Member</th><th>Association</th><th>Linked on</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
-              <tbody id="tagsBody"></tbody>
+              <thead class="table-light"><tr><th>Tag UID</th><th>Batch</th><th>Status</th><th>Sent to</th><th>Sent by / on</th><th>Product</th><th class="text-end pe-3">Action</th></tr></thead>
+              <tbody id="invTagsBody"></tbody>
             </table>
+          </div>
+          <div class="p-3 d-flex justify-content-between align-items-center border-top fs-7">
+            <span id="invPageInfo" class="text-muted"></span>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary" id="invPrev">Previous</button>
+              <button class="btn btn-outline-secondary" id="invNext">Next</button>
+            </div>
           </div>
         </div>
       </div>
@@ -248,6 +342,7 @@
             <h6 class="fw-bold mb-0">User accounts</h6>
             <button class="btn btn-dti btn-sm" data-action="add-user"><i class="bi bi-plus-lg"></i> Add user</button>
           </div>
+          <div id="filters-users" class="px-3 py-2 border-bottom d-flex flex-wrap align-items-center gap-2"></div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 fs-7 text-nowrap">
               <thead class="table-light"><tr><th>Name</th><th>Email</th><th>Role</th><th>Scope</th><th>Status</th><th class="text-end pe-3">Action</th></tr></thead>
@@ -283,6 +378,6 @@
   <script src="js/api.js"></script>
   <script src="js/password-policy.js"></script>
   <script src="js/account.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=7"></script>
 </body>
 </html>

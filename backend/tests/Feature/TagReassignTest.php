@@ -3,7 +3,7 @@
 use App\Models\NfcTag;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\Weaver;
+use App\Models\Association;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
@@ -53,14 +53,14 @@ it('rejects a product that already has an active tag', function () {
         ->assertJsonValidationErrors('product_id');
 });
 
-it('rejects an inactive product, an inactive weaver and the same product', function () {
+it('rejects an inactive product, an inactive association and the same product', function () {
     Sanctum::actingAs(User::factory()->admin()->create());
     $tag = NfcTag::factory()->create();
 
     $inactiveProduct = Product::factory()->inactive()->create();
-    $inactiveWeaver = Product::factory()->create(['weaver_id' => Weaver::factory()->inactive()->create()->id]);
+    $inactiveAssociation = Product::factory()->create(['association_id' => Association::factory()->create(['status' => 'inactive'])->id]);
 
-    foreach ([$inactiveProduct->id, $inactiveWeaver->id, $tag->product_id] as $productId) {
+    foreach ([$inactiveProduct->id, $inactiveAssociation->id, $tag->product_id] as $productId) {
         $this->patchJson("/api/admin/nfc-tags/{$tag->id}/reassign", ['product_id' => $productId])
             ->assertStatus(422)
             ->assertJsonValidationErrors('product_id');
@@ -101,12 +101,23 @@ it('reactivates a revoked tag when asked and logs it', function () {
     $this->postJson('/api/verify', ['uid' => $tag->uid])->assertJsonPath('result', 'authenticated');
 });
 
-it('can link a tag that has no product yet', function () {
+it('does not link a tag from the stock, because linking is staff work', function () {
     Sanctum::actingAs(User::factory()->admin()->create());
     $tag = NfcTag::factory()->unlinked()->create();
     $target = Product::factory()->create();
 
     $this->patchJson("/api/admin/nfc-tags/{$tag->id}/reassign", ['product_id' => $target->id])
-        ->assertOk()
-        ->assertJsonPath('tag.product_id', $target->id);
+        ->assertUnprocessable();
+
+    expect($tag->fresh()->status)->toBe('in_stock');
+});
+
+it('moves the tag to the association of its new product', function () {
+    Sanctum::actingAs(User::factory()->admin()->create());
+    $tag = NfcTag::factory()->create();
+    $target = Product::factory()->create(['association_id' => Association::factory()->create()->id]);
+
+    $this->patchJson("/api/admin/nfc-tags/{$tag->id}/reassign", ['product_id' => $target->id])->assertOk();
+
+    expect($tag->fresh()->association_id)->toBe($target->association_id);
 });

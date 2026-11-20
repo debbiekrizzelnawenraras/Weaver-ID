@@ -6,38 +6,13 @@ use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ScanLog;
-use App\Models\Weaver;
 use App\Support\ProductPhoto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class AssociationController extends Controller
 {
-    public function weavers(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if (!$user->association_id) {
-            return response()->json([
-                'message' => 'Association account is not linked to an association.',
-            ], 403);
-        }
-
-        $status = $this->statusFilter($request);
-
-        $weavers = $user->association
-            ->weavers()
-            ->with('products')
-            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
-            ->get();
-
-        return response()->json([
-            'weavers' => $weavers,
-        ]);
-    }
-
     public function products(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -50,11 +25,9 @@ class AssociationController extends Controller
 
         $status = $this->statusFilter($request);
 
-        $products = Product::whereHas('weaver', function ($query) use ($user) {
-            $query->where('association_id', $user->association_id);
-        })
+        $products = Product::where('association_id', $user->association_id)
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
-            ->with('weaver', 'latestPhotoEvent.user')
+            ->with('latestPhotoEvent.user')
             ->get();
 
         return response()->json([
@@ -62,67 +35,6 @@ class AssociationController extends Controller
         ]);
     }
 
-    public function storeWeaver(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if (!$user->association_id) {
-            return response()->json([
-                'message' => 'Association account is not linked to an association.',
-            ], 403);
-        }
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'municipality' => ['required', 'string', 'max:255'],
-        ]);
-
-        $weaver = Weaver::create([
-            'association_id' => $user->association_id,
-            'name' => $validated['name'],
-            'municipality' => $validated['municipality'],
-            'status' => 'active',
-        ]);
-
-        return response()->json([
-            'message' => 'Weaver created successfully.',
-            'weaver' => $weaver,
-        ], 201);
-    }
-    
-    public function updateWeaver(Request $request, Weaver $weaver): JsonResponse
-    {
-        $user = $request->user();
-
-        if (!$user->association_id) {
-            return response()->json([
-                'message' => 'Association account is not linked to an association.',
-            ], 403);
-        }
-
-        if ($weaver->association_id !== $user->association_id) {
-            return response()->json([
-                'message' => 'You are not authorized to modify this weaver.',
-            ], 403);
-        }
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'municipality' => ['required', 'string', 'max:255'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
-        $weaver->update([
-            'name' => $validated['name'],
-            'municipality' => $validated['municipality'],
-            'status' => $validated['status'],
-        ]);
-
-        return response()->json([
-            'message' => 'Weaver updated successfully.',
-            'weaver' => $weaver->fresh(),
-        ]);
-    }
     public function storeProduct(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -134,29 +46,18 @@ class AssociationController extends Controller
         }
 
         $validated = $request->validate([
-            'weaver_id' => ['required', 'integer', 'exists:weavers,id'],
             'title' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:255'],
         ]);
 
-        $weaver = Weaver::where('id', $validated['weaver_id'])
-            ->where('association_id', $user->association_id)
-            ->first();
-
-        if (!$weaver) {
+        if ($user->association->status !== 'active') {
             return response()->json([
-                'message' => 'The selected weaver does not belong to your association.',
+                'message' => 'Your association is inactive.',
             ], 403);
         }
 
-        if ($weaver->status !== 'active') {
-            throw ValidationException::withMessages([
-                'weaver_id' => 'The selected weaver is inactive.',
-            ]);
-        }
-
         $product = Product::create([
-            'weaver_id' => $weaver->id,
+            'association_id' => $user->association_id,
             'title' => $validated['title'],
             'category' => $validated['category'],
             'status' => 'active',
@@ -164,14 +65,12 @@ class AssociationController extends Controller
 
         return response()->json([
             'message' => 'Product created successfully.',
-            'product' => $product->load('weaver'),
+            'product' => $product,
         ], 201);
     }
 
     /**
      * Edit a product of this association, including deactivating or reactivating it.
-     * The weaver cannot be changed here; a product of an inactive weaver can be
-     * edited or deactivated but not reactivated.
      */
     public function updateProduct(Request $request, Product $product): JsonResponse
     {
@@ -183,9 +82,7 @@ class AssociationController extends Controller
             ], 403);
         }
 
-        $product->loadMissing('weaver');
-
-        if ((int) $product->weaver->association_id !== (int) $user->association_id) {
+        if ((int) $product->association_id !== (int) $user->association_id) {
             return response()->json([
                 'message' => 'You are not authorized to modify this product.',
             ], 403);
@@ -197,17 +94,11 @@ class AssociationController extends Controller
             'status' => ['required', 'in:active,inactive'],
         ]);
 
-        if ($validated['status'] === 'active' && $product->weaver->status !== 'active') {
-            throw ValidationException::withMessages([
-                'status' => 'The weaver of this product is inactive.',
-            ]);
-        }
-
         $product->update($validated);
 
         return response()->json([
             'message' => 'Product updated successfully.',
-            'product' => $product->fresh()->load('weaver'),
+            'product' => $product->fresh(),
         ]);
     }
 
@@ -230,7 +121,7 @@ class AssociationController extends Controller
             'result' => ['nullable', Rule::enum(ScanResult::class)],
         ]);
 
-        $logs = ScanLog::whereHas('nfcTag.product.weaver', function ($query) use ($user) {
+        $logs = ScanLog::whereHas('nfcTag', function ($query) use ($user) {
             $query->where('association_id', $user->association_id);
         })
             ->with('nfcTag.product')
@@ -254,7 +145,7 @@ class AssociationController extends Controller
 
         return response()->json([
             'message' => 'Product photo saved.',
-            'product' => ProductPhoto::replace($product, $request->file('photo'), $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
+            'product' => ProductPhoto::replace($product, $request->file('photo'), $request->user())->load('association', 'latestPhotoEvent.user'),
         ]);
     }
 
@@ -266,7 +157,7 @@ class AssociationController extends Controller
 
         return response()->json([
             'message' => 'Product photo removed.',
-            'product' => ProductPhoto::remove($product, $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
+            'product' => ProductPhoto::remove($product, $request->user())->load('association', 'latestPhotoEvent.user'),
         ]);
     }
 
@@ -281,9 +172,7 @@ class AssociationController extends Controller
             ], 403);
         }
 
-        $product->loadMissing('weaver');
-
-        if ((int) $product->weaver->association_id !== (int) $user->association_id) {
+        if ((int) $product->association_id !== (int) $user->association_id) {
             return response()->json([
                 'message' => 'You are not authorized to modify this product.',
             ], 403);

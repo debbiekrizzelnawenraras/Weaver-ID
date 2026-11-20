@@ -14,7 +14,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'weaver_id',
+        'association_id',
         'title',
         'category',
         'status',
@@ -31,15 +31,15 @@ class Product extends Model
         return $this->photo_path ? '/api/product-photos/'.$this->photo_path : null;
     }
 
-    /** Products of weavers this user may manage. */
+    /** Products of associations this user may manage. */
     public function scopeManageableBy(Builder $query, User $user): Builder
     {
-        return $query->whereHas('weaver', fn (Builder $q) => $q->manageableBy($user));
+        return $query->whereHas('association', fn (Builder $q) => $q->manageableBy($user));
     }
 
-    public function weaver(): BelongsTo
+    public function association(): BelongsTo
     {
-        return $this->belongsTo(Weaver::class);
+        return $this->belongsTo(Association::class);
     }
 
     public function photoEvents(): HasMany

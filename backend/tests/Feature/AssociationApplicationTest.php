@@ -56,6 +56,12 @@ function applStaff(string $municipality = 'Sagada'): User
     return User::factory()->staff()->create(['municipality' => $municipality]);
 }
 
+/** Only the administrator decides applications. */
+function applAdmin(): User
+{
+    return User::factory()->admin()->create();
+}
+
 // ---- public: the form's choices ---------------------------------------------
 
 it('lists the municipalities without a login', function () {
@@ -266,7 +272,7 @@ it('limits status checks to ten a minute for each address', function () {
     $this->postJson('/api/association-applications/status', ['reference' => 'AP-X', 'email' => 'a@example.test'])->assertTooManyRequests();
 });
 
-// ---- staff and admin: who sees what -----------------------------------------
+// ---- admin only: who sees what -----------------------------------------
 
 it('keeps the applications away from guests and association accounts', function () {
     $application = applCreate();
@@ -279,31 +285,32 @@ it('keeps the applications away from guests and association accounts', function 
     $this->postJson("/api/applications/{$application->id}/reject", ['note' => 'No reason at all'])->assertForbidden();
 });
 
-it('shows admin every application and staff only their municipality, whatever the capitals', function () {
+it('shows admin every application, from every municipality', function () {
     applCreate(['municipality' => 'Sagada']);
     applCreate(['municipality' => 'Sagada']);
     applCreate(['municipality' => 'Bontoc']);
 
-    Sanctum::actingAs(User::factory()->admin()->create());
+    Sanctum::actingAs(applAdmin());
     $this->getJson('/api/applications')->assertOk()->assertJsonCount(3, 'data');
-
-    Sanctum::actingAs(applStaff('sagada'));
-    $this->getJson('/api/applications')->assertOk()->assertJsonCount(2, 'data');
 });
 
-it('shows staff without a municipality nothing', function () {
-    applCreate();
+it('keeps the applications away from staff, even in the same municipality', function () {
+    $application = applCreate(['municipality' => 'Sagada']);
 
-    Sanctum::actingAs(User::factory()->staff()->create(['municipality' => null]));
+    Sanctum::actingAs(applStaff('Sagada'));
+    $this->getJson('/api/applications')->assertForbidden();
+    $this->postJson("/api/applications/{$application->id}/approve")->assertForbidden();
+    $this->postJson("/api/applications/{$application->id}/reject", ['note' => 'No reason at all'])->assertForbidden();
 
-    $this->getJson('/api/applications')->assertOk()->assertJsonCount(0, 'data');
+    expect($application->refresh()->status)->toBe('pending')
+        ->and(Association::count())->toBe(0);
 });
 
 it('filters by status and gives the reviewer the contact details but never the password hash', function () {
     applCreate(['contact_phone' => '09181112222', 'email' => 'reviewme@example.test']);
     applCreate(['status' => 'rejected', 'decision_note' => 'Duplicate.', 'password_hash' => null]);
 
-    Sanctum::actingAs(applStaff());
+    Sanctum::actingAs(applAdmin());
 
     $response = $this->getJson('/api/applications?status=pending')->assertOk()->assertJsonCount(1, 'data');
     $this->getJson('/api/applications?status=rejected')->assertOk()->assertJsonCount(1, 'data');
@@ -326,7 +333,7 @@ it('warns the reviewer when a pending application now clashes with an existing n
     expect($conflict)->toHaveCount(2);
 });
 
-// ---- staff and admin: approving ---------------------------------------------
+// ---- admin only: approving ---------------------------------------------
 
 it('approves: creates the association and an account that signs in with the applicant password', function () {
     $application = applCreate([
@@ -334,7 +341,7 @@ it('approves: creates the association and an account that signs in with the appl
         'contact_name' => 'Maria Dulnuan',
         'email' => 'maria.dulnuan@example.test',
     ]);
-    $staff = applStaff();
+    $staff = applAdmin();
     Sanctum::actingAs($staff);
 
     $this->postJson("/api/applications/{$application->id}/approve")
@@ -378,23 +385,13 @@ it('stores the applicant hash as it was made, even if the server hashing cost ch
 
     $application = applCreate(['password_hash' => $hash, 'email' => 'old.cost@example.test']);
 
-    Sanctum::actingAs(applStaff());
+    Sanctum::actingAs(applAdmin());
     $this->postJson("/api/applications/{$application->id}/approve")->assertOk();
 
     expect(User::where('email', 'old.cost@example.test')->firstOrFail()->getAttributes()['password'])->toBe($hash);
 
     app('auth')->forgetGuards();
     $this->withHeader('Authorization', '')->postJson('/api/login', ['email' => 'old.cost@example.test', 'password' => APPL_PASSWORD])->assertOk();
-});
-
-it('stops staff approving an application from another municipality', function () {
-    $application = applCreate(['municipality' => 'Bontoc']);
-
-    Sanctum::actingAs(applStaff('Sagada'));
-    $this->postJson("/api/applications/{$application->id}/approve")->assertForbidden();
-
-    expect($application->refresh()->status)->toBe('pending')
-        ->and(Association::count())->toBe(0);
 });
 
 it('lets admin approve an application from any municipality', function () {
@@ -408,7 +405,7 @@ it('lets admin approve an application from any municipality', function () {
 
 it('does not decide the same application twice', function () {
     $application = applCreate();
-    Sanctum::actingAs(applStaff());
+    Sanctum::actingAs(applAdmin());
 
     $this->postJson("/api/applications/{$application->id}/approve")->assertOk();
     $this->postJson("/api/applications/{$application->id}/approve")->assertUnprocessable();
@@ -422,7 +419,7 @@ it('stops an approval when the name was registered after the applicant applied',
     $application = applCreate(['association_name' => "Rose Ann's Loom"]);
     Association::factory()->create(['name' => 'Rose Anns Loom']);
 
-    Sanctum::actingAs(applStaff());
+    Sanctum::actingAs(applAdmin());
     $before = User::count();
     $this->postJson("/api/applications/{$application->id}/approve")
         ->assertUnprocessable()
@@ -436,7 +433,7 @@ it('stops an approval when the email now belongs to an account', function () {
     $application = applCreate(['email' => 'late@example.test']);
     User::factory()->staff()->create(['email' => 'Late@Example.test']);
 
-    Sanctum::actingAs(applStaff());
+    Sanctum::actingAs(applAdmin());
     $this->postJson("/api/applications/{$application->id}/approve")
         ->assertUnprocessable()
         ->assertJsonValidationErrors('email');
@@ -447,7 +444,7 @@ it('stops an approval when the email now belongs to an account', function () {
 
 it('creates nothing when the account cannot be saved', function () {
     $application = applCreate();
-    Sanctum::actingAs(applStaff());
+    Sanctum::actingAs(applAdmin());
     User::creating(fn () => throw new RuntimeException('simulated failure'));
 
     $this->postJson("/api/applications/{$application->id}/approve")->assertServerError();
@@ -459,11 +456,11 @@ it('creates nothing when the account cannot be saved', function () {
         ->and($application->password_hash)->not->toBeNull();
 });
 
-// ---- staff and admin: rejecting ---------------------------------------------
+// ---- admin only: rejecting ---------------------------------------------
 
 it('rejects with a reason the applicant can read, and deletes the saved password hash', function () {
     $application = applCreate(['email' => 'nope@example.test']);
-    $staff = applStaff();
+    $staff = applAdmin();
     Sanctum::actingAs($staff);
 
     $this->postJson("/api/applications/{$application->id}/reject", ['note' => 'We could not confirm your registration number.'])
@@ -485,7 +482,7 @@ it('rejects with a reason the applicant can read, and deletes the saved password
 
 it('needs a reason to reject', function (array $body) {
     $application = applCreate();
-    Sanctum::actingAs(applStaff());
+    Sanctum::actingAs(applAdmin());
 
     $this->postJson("/api/applications/{$application->id}/reject", $body)
         ->assertUnprocessable()
@@ -499,11 +496,3 @@ it('needs a reason to reject', function (array $body) {
     'too long' => [['note' => str_repeat('x', 501)]],
 ]);
 
-it('stops staff rejecting an application from another municipality', function () {
-    $application = applCreate(['municipality' => 'Bontoc']);
-
-    Sanctum::actingAs(applStaff('Sagada'));
-    $this->postJson("/api/applications/{$application->id}/reject", ['note' => 'Not in our municipality.'])->assertForbidden();
-
-    expect($application->refresh()->status)->toBe('pending');
-});

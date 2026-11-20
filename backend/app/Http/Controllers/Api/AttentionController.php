@@ -20,12 +20,13 @@ class AttentionController extends Controller
      * the Reports badge and the 60-second refresh. Every number is limited to what the
      * signed-in user may already see in the tabs, and nothing here is new data:
      *
-     *  - new_reports: reports still waiting for a first review (admin: all, staff: their
-     *    municipality). Not time-limited, because a report stays open until someone reviews it.
-     *    null for association accounts, who have no Reports tab.
-     *  - pending_applications: association applications waiting for a decision (admin: all, staff:
-     *    their municipality), however old. null for association accounts.
-     *  - suspicious_scans: scans flagged suspicious within the last weaver.attention_hours
+     *  - new_reports: reports still waiting for a first review. Admin only, because only the
+     *    administrator reviews reports. Not time-limited: a report stays open until reviewed.
+     *  - pending_applications: association applications waiting for a decision, however old.
+     *    Admin only, because only the administrator approves applications.
+     *  - wrong_center_tags: open alerts of tags a Negosyo Center tried to receive although the
+ *    administrator assigned them to another center. Admin only.
+ *  - suspicious_scans: scans flagged suspicious within the last weaver.attention_hours
      *    (admin: all, association: scans of their own tags). null for staff, who have no
      *    Scan Logs tab, so a count they cannot open would be a dead end.
      */
@@ -42,7 +43,7 @@ class AttentionController extends Controller
         }
 
         $reports = null;
-        if (in_array($user->role, ['admin', 'staff'], true)) {
+        if ($user->role === 'admin') {
             $new = SuspiciousReport::manageableBy($user)->where('status', 'new');
 
             $reports = [
@@ -61,7 +62,7 @@ class AttentionController extends Controller
         }
 
         $applications = null;
-        if (in_array($user->role, ['admin', 'staff'], true)) {
+        if ($user->role === 'admin') {
             $waiting = AssociationApplication::manageableBy($user)->pending();
 
             $applications = [
@@ -96,12 +97,23 @@ class AttentionController extends Controller
             ];
         }
 
+        // Tags a Negosyo Center tried to receive although they are on another center's list. Admin only.
+        $wrongCenter = null;
+        if ($user->role === 'admin') {
+            $open = \App\Models\TagAlert::where('status', 'open');
+            $wrongCenter = [
+                'count' => (clone $open)->count(),
+                'latest' => (clone $open)->latest('id')->limit(self::LATEST)->get(['id', 'uid', 'assigned_municipality', 'attempted_municipality', 'created_at']),
+            ];
+        }
+
         return response()->json([
             'window_hours' => $hours,
             'since' => $since,
             'new_reports' => $reports,
             'pending_applications' => $applications,
             'suspicious_scans' => $scans,
+            'wrong_center_tags' => $wrongCenter,
         ]);
     }
 }

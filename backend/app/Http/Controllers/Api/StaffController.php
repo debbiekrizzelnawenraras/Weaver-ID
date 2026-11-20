@@ -4,25 +4,29 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Association;
+use App\Models\AssociationApplication;
 use App\Models\Product;
+use App\Rules\StrongPassword;
 use App\Support\ProductPhoto;
-use App\Models\Weaver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Staff (and admin) management of associations, weavers and products.
+ * Associations and products.
  *
- * Staff are limited to associations in their own municipality; admin sees
- * everything. Out-of-scope records return 403, an inactive weaver returns 422.
+ * Staff file associations (as applications the administrator approves) and register products in their own municipality. Admin may
+ * only list them (the write routes are staff-only), because the administrator
+ * approves applications and manages accounts but does not register records.
+ * Out-of-scope records return 403, an inactive association returns 422.
  */
 class StaffController extends Controller
 {
     public function associations(Request $request): JsonResponse
     {
         $associations = Association::manageableBy($request->user())
-            ->withCount('weavers')
+            ->withCount('products')
             ->orderBy('name')
             ->get();
 
@@ -31,118 +35,102 @@ class StaffController extends Controller
         ]);
     }
 
+    /**
+     * Staff file an association on its behalf. This no longer creates the association: it makes
+     * the same pending application the public form makes, and only the administrator approves it.
+     * Staff set a temporary password that the association must change at its first sign-in.
+     */
     public function storeAssociation(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'municipality' => ['required', 'string', 'max:255'],
+        if (blank($user->municipality)) {
+            return $this->forbidden('Your account has no municipality, so you cannot file associations.');
+        }
+
+        $request->merge([
+            'association_name' => trim(preg_replace('/\s+/u', ' ', (string) $request->input('association_name'))),
+            'contact_name' => trim(preg_replace('/\s+/u', ' ', (string) $request->input('contact_name'))),
+            'contact_phone' => preg_replace('/[\s-]+/', '', (string) $request->input('contact_phone')),
+            'email' => mb_strtolower(trim((string) $request->input('email'))),
         ]);
 
-        if ($user->role === 'staff' && strcasecmp($validated['municipality'], (string) $user->municipality) !== 0) {
-            return $this->forbidden('You can only register associations in your own municipality.');
+        $validated = $request->validate([
+            'association_name' => ['required', 'string', 'min:3', 'max:255'],
+            'contact_name' => ['required', 'string', 'min:3', 'max:255'],
+            'contact_phone' => ['required', 'string', 'regex:/^09\d{9}$/'],
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string', new StrongPassword($request->input('email'), $request->input('contact_name'))],
+            'registration_details' => ['nullable', 'string', 'max:150'],
+            'privacy_consent' => ['accepted'],
+        ], [
+            'contact_phone.regex' => 'Enter a mobile number such as 0917 123 4567.',
+            'privacy_consent.accepted' => 'The association must agree to the privacy notice before you file it.',
+        ]);
+
+        $errors = [];
+        if (Association::nameTaken($validated['association_name'])) {
+            $errors['association_name'] = 'An association with this name is already registered.';
+        } elseif (AssociationApplication::pendingNameTaken($validated['association_name'])) {
+            $errors['association_name'] = 'An application for this association is already waiting for review.';
+        }
+        if (AssociationApplication::accountEmailTaken($validated['email']) || AssociationApplication::pendingEmailTaken($validated['email'])) {
+            $errors['email'] = 'This email address is already used by an account or a pending application.';
+        }
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
         }
 
-        // One association name for the whole province, whichever municipality or user registered it.
-        $name = trim(preg_replace('/\s+/u', ' ', $validated['name']));
-
-        if (Association::nameTaken($name)) {
-            throw ValidationException::withMessages([
-                'name' => 'An association with this name is already registered.',
-            ]);
-        }
-
-        $association = Association::create([
-            'name' => $name,
+        $application = AssociationApplication::create([
+            'reference' => AssociationApplication::newReference(),
+            'association_name' => $validated['association_name'],
             // Staff are matched by exact municipality, so store their canonical spelling.
-            'municipality' => $user->role === 'staff' ? $user->municipality : $validated['municipality'],
-            'status' => 'active',
+            'municipality' => $user->municipality,
+            'contact_name' => $validated['contact_name'],
+            'contact_phone' => $validated['contact_phone'],
+            'email' => $validated['email'],
+            'email_verified_at' => null,
+            'password_hash' => Hash::make($validated['password']),
+            'registration_details' => filled($validated['registration_details'] ?? null) ? $validated['registration_details'] : null,
+            'status' => 'pending',
+            'consented_at' => now(),
+            'notice_version' => (string) config('weaver.application_notice_version'),
+            'submitted_by' => $user->id,
         ]);
 
         return response()->json([
-            'message' => 'Association created successfully.',
-            'association' => $association,
+            'message' => 'Sent to the administrator for approval. Reference '.$application->reference.'.',
+            'application' => $application->only(['id', 'reference', 'association_name', 'municipality', 'status']),
         ], 201);
     }
 
-    public function weavers(Request $request): JsonResponse
+    /** Applications in the staff member's municipality, read only, so staff can see what is still waiting. */
+    public function applications(Request $request): JsonResponse
     {
-        $weavers = Weaver::manageableBy($request->user())
-            ->with('association')
-            ->withCount('products')
-            ->get();
+        $applications = AssociationApplication::manageableBy($request->user())
+            ->with('submitter:id,name')
+            ->latest('id')
+            ->limit(100)
+            ->get()
+            ->map(fn (AssociationApplication $a) => [
+                'id' => $a->id,
+                'reference' => $a->reference,
+                'association_name' => $a->association_name,
+                'municipality' => $a->municipality,
+                'contact_name' => $a->contact_name,
+                'status' => $a->status,
+                'decision_note' => $a->decision_note,
+                'submitted_by' => $a->submitter?->name,
+                'created_at' => $a->created_at,
+            ]);
 
-        return response()->json([
-            'weavers' => $weavers,
-        ]);
-    }
-
-    public function storeWeaver(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'association_id' => ['required', 'integer', 'exists:associations,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'municipality' => ['required', 'string', 'max:255'],
-        ]);
-
-        $association = Association::manageableBy($request->user())->find($validated['association_id']);
-
-        if (! $association) {
-            return $this->forbidden('You cannot manage this association.');
-        }
-
-        $weaver = Weaver::create([
-            'association_id' => $association->id,
-            'name' => $validated['name'],
-            'municipality' => $validated['municipality'],
-            'status' => 'active',
-        ]);
-
-        return response()->json([
-            'message' => 'Weaver created successfully.',
-            'weaver' => $weaver->load('association'),
-        ], 201);
-    }
-
-    public function updateWeaver(Request $request, Weaver $weaver): JsonResponse
-    {
-        $user = $request->user();
-
-        if (! Weaver::manageableBy($user)->whereKey($weaver->id)->exists()) {
-            return $this->forbidden('You cannot manage this weaver.');
-        }
-
-        $validated = $request->validate([
-            'association_id' => ['required', 'integer', 'exists:associations,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'municipality' => ['required', 'string', 'max:255'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
-        $association = Association::manageableBy($user)->find($validated['association_id']);
-
-        if (! $association) {
-            return $this->forbidden('You cannot manage this association.');
-        }
-
-        $weaver->update([
-            'association_id' => $association->id,
-            'name' => $validated['name'],
-            'municipality' => $validated['municipality'],
-            'status' => $validated['status'],
-        ]);
-
-        return response()->json([
-            'message' => 'Weaver updated successfully.',
-            'weaver' => $weaver->fresh()->load('association'),
-        ]);
+        return response()->json(['applications' => $applications]);
     }
 
     public function products(Request $request): JsonResponse
     {
         $products = Product::manageableBy($request->user())
-            ->with('weaver.association', 'latestPhotoEvent.user')
+            ->with('association', 'latestPhotoEvent.user')
             ->get();
 
         return response()->json([
@@ -153,36 +141,34 @@ class StaffController extends Controller
     public function storeProduct(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'weaver_id' => ['required', 'integer', 'exists:weavers,id'],
+            'association_id' => ['required', 'integer', 'exists:associations,id'],
             'title' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:255'],
         ]);
 
-        $weaver = Weaver::manageableBy($request->user())->find($validated['weaver_id']);
+        $association = Association::manageableBy($request->user())->find($validated['association_id']);
 
-        if (! $weaver) {
-            return $this->forbidden('You cannot manage this weaver.');
+        if (! $association) {
+            return $this->forbidden('You cannot manage this association.');
         }
 
-        if ($weaver->status !== 'active') {
+        if ($association->status !== 'active') {
             throw ValidationException::withMessages([
-                'weaver_id' => 'The selected weaver is inactive.',
+                'association_id' => 'The selected association is inactive.',
             ]);
         }
 
         $product = Product::create([
-            'weaver_id' => $weaver->id,
+            'association_id' => $association->id,
             'title' => $validated['title'],
             'category' => $validated['category'],
             'status' => 'active',
         ]);
 
-        $product->load('weaver.association');
-
         return response()->json([
             // Names the association so the user can see where the product was registered.
-            'message' => 'Product created for '.$product->weaver->association->name.' (member: '.$product->weaver->name.').',
-            'product' => $product,
+            'message' => 'Product created for '.$association->name.'.',
+            'product' => $product->load('association'),
         ], 201);
     }
 
@@ -195,30 +181,37 @@ class StaffController extends Controller
         }
 
         $validated = $request->validate([
-            'weaver_id' => ['required', 'integer', 'exists:weavers,id'],
+            'association_id' => ['required', 'integer', 'exists:associations,id'],
             'title' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:255'],
             'status' => ['required', 'in:active,inactive'],
         ]);
 
-        $weaver = Weaver::manageableBy($user)->find($validated['weaver_id']);
+        $association = Association::manageableBy($user)->find($validated['association_id']);
 
-        if (! $weaver) {
-            return $this->forbidden('You cannot manage this weaver.');
+        if (! $association) {
+            return $this->forbidden('You cannot manage this association.');
         }
 
-        // An inactive weaver may not receive products or have products reactivated,
-        // but its existing products can still be edited or deactivated.
-        $movingOrActivating = $weaver->id !== $product->weaver_id || $validated['status'] === 'active';
+        $moving = $association->id !== $product->association_id;
 
-        if ($weaver->status !== 'active' && $movingOrActivating) {
+        // A product with a tag stays with the association its tag was sent to.
+        if ($moving && $product->nfcTags()->exists()) {
             throw ValidationException::withMessages([
-                'weaver_id' => 'The selected weaver is inactive.',
+                'association_id' => 'This product has a tag, so it cannot move to another association. Ask the administrator to reassign the tag first.',
+            ]);
+        }
+
+        // An inactive association may not receive products or have products reactivated,
+        // but its existing products can still be edited or deactivated.
+        if ($association->status !== 'active' && ($moving || $validated['status'] === 'active')) {
+            throw ValidationException::withMessages([
+                'association_id' => 'The selected association is inactive.',
             ]);
         }
 
         $product->update([
-            'weaver_id' => $weaver->id,
+            'association_id' => $association->id,
             'title' => $validated['title'],
             'category' => $validated['category'],
             'status' => $validated['status'],
@@ -226,17 +219,12 @@ class StaffController extends Controller
 
         return response()->json([
             'message' => 'Product updated successfully.',
-            'product' => $product->fresh()->load('weaver.association'),
+            'product' => $product->fresh()->load('association'),
         ]);
     }
 
     public function uploadProductPhoto(Request $request, Product $product): JsonResponse
     {
-        // The association (or the municipal staff helping it) photographs the real product.
-        if ($request->user()->role === 'admin') {
-            return $this->forbidden('Administrators can remove a photo but not add one. The association or its municipal staff adds the photo.');
-        }
-
         if (! Product::manageableBy($request->user())->whereKey($product->id)->exists()) {
             return $this->forbidden('You cannot manage this product.');
         }
@@ -245,7 +233,7 @@ class StaffController extends Controller
 
         return response()->json([
             'message' => 'Product photo saved.',
-            'product' => ProductPhoto::replace($product, $request->file('photo'), $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
+            'product' => ProductPhoto::replace($product, $request->file('photo'), $request->user())->load('association', 'latestPhotoEvent.user'),
         ]);
     }
 
@@ -257,7 +245,7 @@ class StaffController extends Controller
 
         return response()->json([
             'message' => 'Product photo removed.',
-            'product' => ProductPhoto::remove($product, $request->user())->load('weaver.association', 'latestPhotoEvent.user'),
+            'product' => ProductPhoto::remove($product, $request->user())->load('association', 'latestPhotoEvent.user'),
         ]);
     }
 

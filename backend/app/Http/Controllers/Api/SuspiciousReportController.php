@@ -82,7 +82,7 @@ class SuspiciousReportController extends Controller
     }
 
     /**
-     * Reports for staff (their municipality) and admin (all), newest first, 25 per page.
+     * Reports for the administrator, newest first, 25 per page.
      * Optional ?status=new|under_review|verified|dismissed|referred.
      */
     public function index(Request $request): JsonResponse
@@ -92,7 +92,7 @@ class SuspiciousReportController extends Controller
         ]);
 
         $reports = SuspiciousReport::manageableBy($request->user())
-            ->with(['nfcTag.product.weaver.association', 'reviewer:id,name'])
+            ->with(['nfcTag.product.association', 'reviewer:id,name'])
             ->when($validated['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
             ->latest('id')
             ->paginate(25);
@@ -131,7 +131,7 @@ class SuspiciousReportController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        $report->load(['nfcTag.product.weaver.association', 'reviewer:id,name']);
+        $report->load(['nfcTag.product.association', 'reviewer:id,name']);
 
         return response()->json($this->present($report, SuspiciousReport::where('uid', $report->uid)->count()));
     }
@@ -139,7 +139,7 @@ class SuspiciousReportController extends Controller
     private function present(SuspiciousReport $report, int $sameTagReports): array
     {
         $product = $report->nfcTag?->product;
-        $association = $product?->weaver?->association;
+        $association = $product?->association;
 
         return [
             'id' => $report->id,

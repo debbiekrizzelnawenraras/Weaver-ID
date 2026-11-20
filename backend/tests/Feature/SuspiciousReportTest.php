@@ -5,7 +5,6 @@ use App\Models\NfcTag;
 use App\Models\Product;
 use App\Models\SuspiciousReport;
 use App\Models\User;
-use App\Models\Weaver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
@@ -21,8 +20,7 @@ function reportFlaggedTag(): NfcTag
 function reportTagIn(string $municipality): NfcTag
 {
     $association = Association::factory()->create(['municipality' => $municipality]);
-    $weaver = Weaver::factory()->create(['association_id' => $association->id]);
-    $product = Product::factory()->create(['weaver_id' => $weaver->id]);
+    $product = Product::factory()->create(['association_id' => $association->id]);
 
     return NfcTag::factory()->revoked()->create(['product_id' => $product->id]);
 }
@@ -292,7 +290,7 @@ it('rate limits the public report endpoint per IP address', function () {
 
 // ---- review on the dashboards ---------------------------------------------------------
 
-it('shows admin every report and staff only reports of their municipality', function () {
+it('shows admin every report, and staff none', function () {
     $bontoc = reportTagIn('Bontoc');
     $sagada = reportTagIn('Sagada');
     reportScan($bontoc);
@@ -302,15 +300,15 @@ it('shows admin every report and staff only reports of their municipality', func
 
     Sanctum::actingAs(User::factory()->admin()->create());
     $this->getJson('/api/reports')->assertOk()->assertJsonCount(2, 'data');
-
-    Sanctum::actingAs(User::factory()->staff()->create(['municipality' => 'Bontoc']));
     $this->getJson('/api/reports')
-        ->assertOk()
-        ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.uid', $bontoc->uid)
-        ->assertJsonPath('data.0.association.municipality', 'Bontoc')
-        ->assertJsonPath('data.0.flag_reason', 'tag_revoked')
-        ->assertJsonPath('data.0.same_tag_reports', 1);
+        ->assertJsonPath('data.1.uid', $bontoc->uid)
+        ->assertJsonPath('data.1.association.municipality', 'Bontoc')
+        ->assertJsonPath('data.1.flag_reason', 'tag_revoked')
+        ->assertJsonPath('data.1.same_tag_reports', 1);
+
+    // Only the administrator reviews reports.
+    Sanctum::actingAs(User::factory()->staff()->create(['municipality' => 'Bontoc']));
+    $this->getJson('/api/reports')->assertForbidden();
 });
 
 it('counts the reports made about the same tag', function () {
@@ -348,13 +346,13 @@ it('keeps reports away from the public and from association users', function () 
     $this->getJson('/api/reports')->assertForbidden();
 });
 
-it('lets staff review a report in their municipality and records who did it', function () {
+it('lets the administrator review a report and records who did it', function () {
     $tag = reportTagIn('Bontoc');
     reportScan($tag);
     $this->postJson('/api/reports', reportPayload($tag))->assertCreated();
     $report = SuspiciousReport::firstOrFail();
 
-    $staff = User::factory()->staff()->create(['municipality' => 'Bontoc']);
+    $staff = User::factory()->admin()->create();
     Sanctum::actingAs($staff);
 
     $this->patchJson("/api/reports/{$report->id}", ['status' => 'under_review', 'review_note' => 'Asked the stall owner.'])
@@ -385,8 +383,8 @@ it('does not revoke or change the tag when a report is marked verified or referr
     expect($tag->fresh()->status)->toBe('active');
 });
 
-it('stops staff from reviewing a report outside their municipality', function () {
-    $tag = reportTagIn('Sagada');
+it('stops staff from reviewing a report, even in their own municipality', function () {
+    $tag = reportTagIn('Bontoc');
     reportScan($tag);
     $this->postJson('/api/reports', reportPayload($tag))->assertCreated();
     $report = SuspiciousReport::firstOrFail();

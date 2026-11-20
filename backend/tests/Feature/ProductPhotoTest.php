@@ -4,7 +4,6 @@ use App\Models\Association;
 use App\Models\NfcTag;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\Weaver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -33,9 +32,7 @@ function photoJpeg(string $name): UploadedFile
 
 function photoProductIn(Association $association): Product
 {
-    $weaver = Weaver::factory()->create(['association_id' => $association->id]);
-
-    return Product::factory()->create(['weaver_id' => $weaver->id]);
+    return Product::factory()->create(['association_id' => $association->id]);
 }
 
 it('lets an association user upload a photo for its own product', function () {

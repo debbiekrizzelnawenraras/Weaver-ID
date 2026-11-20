@@ -6,24 +6,34 @@ use App\Http\Controllers\Controller;
 use App\Models\NfcTag;
 use App\Models\NfcTagEvent;
 use App\Models\Product;
+use App\Models\User;
 use App\Support\TagSecurity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Tag management for admin, staff and association users.
+ * Linking, securing and revoking tags.
  *
- * Every query is limited to what the signed-in user may manage:
- * admin everything, staff their municipality, association its own products.
+ * Staff and association users link and secure tags; admin only lists and revokes
+ * them (see routes/api.php). A tag must already be in the inventory: staff may link
+ * a tag from the staff member's own Negosyo Center stock or one sent to the product's association, and an
+ * association may link only tags sent to it.
  */
 class NfcTagController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        // Tags still in a Negosyo Center's stock are listed by the Inventory tab, page by page, so this
+        // list leaves them out unless ?include=stock is asked for. With hundreds of tags in stock, the
+        // NFC Tags page no longer downloads them only to hide them.
+        $withStock = $request->query('include') === 'stock';
+
         $tags = NfcTag::manageableBy($request->user())
-            ->with('product.weaver.association')
+            ->when(! $withStock, fn ($q) => $q->whereNotNull('association_id'))
+            ->with('product', 'association', 'batch:id,code')
             ->latest('id')
             ->get();
 
@@ -33,10 +43,11 @@ class NfcTagController extends Controller
     }
 
     /**
-     * Issue a tag: register its UID and link it to a registered product.
+     * Link a tag from the inventory to a registered product.
      */
     public function store(Request $request): JsonResponse
     {
+        $user = $request->user();
         $uid = $request->input('uid');
 
         if (is_string($uid)) {
@@ -44,12 +55,7 @@ class NfcTagController extends Controller
         }
 
         $validated = $request->validate([
-            'uid' => [
-                'required',
-                'string',
-                'regex:/^[0-9A-F]{8,20}$/',
-                Rule::unique('nfc_tags', 'uid'),
-            ],
+            'uid' => ['required', 'string', 'regex:/^[0-9A-F]{8,20}$/'],
             'product_id' => [
                 'required',
                 'integer',
@@ -57,13 +63,12 @@ class NfcTagController extends Controller
                 Rule::unique('nfc_tags', 'product_id')->where('status', 'active'),
             ],
         ], [
-            'uid.unique' => 'This tag UID is already registered.',
             'product_id.unique' => 'This product already has an active tag. Revoke it first to issue a replacement.',
             'product_id.exists' => 'The selected product does not exist or is inactive.',
         ]);
 
-        $product = Product::manageableBy($request->user())
-            ->with('weaver')
+        $product = Product::manageableBy($user)
+            ->with('association')
             ->find($validated['product_id']);
 
         if (! $product) {
@@ -72,24 +77,69 @@ class NfcTagController extends Controller
             ], 403);
         }
 
-        if ($product->weaver->status !== 'active') {
+        if ($product->association->status !== 'active') {
             throw ValidationException::withMessages([
-                'product_id' => 'The weaver for this product is inactive.',
+                'product_id' => 'The association of this product is inactive.',
             ]);
         }
 
-        $tag = NfcTag::create([
-            'uid' => $validated['uid'],
-            'product_id' => $product->id,
-            'status' => 'active',
-            'issued_by' => $request->user()->id,
-            'issued_at' => now(),
-        ]);
+        $tag = DB::transaction(function () use ($validated, $product, $user) {
+            $tag = NfcTag::where('uid', $validated['uid'])->lockForUpdate()->first();
+
+            if ($problem = $this->linkProblem($tag, $product, $user)) {
+                throw ValidationException::withMessages(['uid' => $problem]);
+            }
+
+            $fromStock = $tag->status === 'in_stock';
+
+            $tag->update([
+                'product_id' => $product->id,
+                'association_id' => $product->association_id,
+                'status' => 'active',
+                'issued_by' => $user->id,
+                'issued_at' => now(),
+            ] + ($fromStock ? ['sent_by' => $user->id, 'sent_at' => now()] : []));
+
+            $tag->events()->create([
+                'user_id' => $user->id,
+                'action' => 'linked',
+                'to_product_id' => $product->id,
+                'association_id' => $product->association_id,
+                'note' => $fromStock ? 'Linked straight from the Negosyo Center stock.' : null,
+            ]);
+
+            return $tag;
+        });
 
         return response()->json([
             'message' => 'NFC tag issued successfully.',
-            'tag' => $tag->load('product.weaver.association'),
+            'tag' => $tag->fresh()->load('product', 'association', 'batch:id,code'),
         ], 201);
+    }
+
+    /** Why this tag cannot be linked to this product by this user, or null when it can. */
+    private function linkProblem(?NfcTag $tag, Product $product, User $user): ?string
+    {
+        if (! $tag) {
+            return 'This tag is not in the inventory. Staff must receive it into stock first.';
+        }
+
+        return match ($tag->status) {
+            'active' => 'This tag UID is already registered.',
+            'revoked' => 'This tag was revoked. Only the administrator can reactivate it.',
+            'damaged' => 'This tag was marked damaged or lost and cannot be used.',
+            'in_stock' => $user->role !== 'staff'
+                ? 'This tag was not sent to your association. Ask DTI staff to send it first.'
+                : ($tag->batch?->municipality === $user->municipality
+                    ? null
+                    : 'This tag is in the stock of another Negosyo Center, not yours.'),
+            'sent' => (int) $tag->association_id === (int) $product->association_id
+                ? null
+                : ($user->role === 'association'
+                    ? 'This tag was not sent to your association.'
+                    : 'This tag was sent to another association, not to the association of this product.'),
+            default => 'This tag cannot be linked.',
+        };
     }
 
     public function revoke(Request $request, NfcTag $nfcTag): JsonResponse
@@ -104,13 +154,27 @@ class NfcTagController extends Controller
             ], 403);
         }
 
-        $nfcTag->update([
-            'status' => 'revoked',
-        ]);
+        if (! in_array($nfcTag->status, ['active', 'revoked'], true)) {
+            return response()->json([
+                'message' => 'Only a linked tag can be revoked. Use the inventory to mark an unused tag damaged or lost.',
+            ], 422);
+        }
+
+        if ($nfcTag->status === 'active') {
+            DB::transaction(function () use ($nfcTag, $request) {
+                $nfcTag->update(['status' => 'revoked']);
+
+                $nfcTag->events()->create([
+                    'user_id' => $request->user()->id,
+                    'action' => 'revoked',
+                    'from_product_id' => $nfcTag->product_id,
+                ]);
+            });
+        }
 
         return response()->json([
             'message' => 'NFC tag revoked.',
-            'tag' => $nfcTag->fresh()->load('product.weaver.association'),
+            'tag' => $nfcTag->fresh()->load('product', 'association', 'batch:id,code'),
         ]);
     }
 
@@ -178,7 +242,7 @@ class NfcTagController extends Controller
 
         return response()->json([
             'message' => 'NFC tag secured.',
-            'tag' => $nfcTag->fresh()->load('product.weaver.association'),
+            'tag' => $nfcTag->fresh()->load('product', 'association', 'batch:id,code'),
         ]);
     }
 }
