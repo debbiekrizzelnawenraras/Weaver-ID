@@ -41,6 +41,9 @@
     dashboard: 'Dashboard', associations: 'Associations', products: 'Products',
     nfc: 'NFC Tags', inventory: 'Tag Inventory', logs: 'Scan Logs', reports: 'Reports', applications: 'Applications', users: 'Users'
   };
+  // On the Administrator and staff dashboards the linked-tags page sits next to
+  // Tag Inventory, so it is called Linked Tags there; associations keep NFC Tags.
+  if (!isAssoc) { TITLES.nfc = 'Linked Tags'; }
 
   // Shrinks a chosen photo in the browser before it is uploaded: the longest
   // side becomes at most 1000 px and the file is saved as JPEG, which usually
@@ -1427,6 +1430,11 @@
     if (!hasApps) {
       Array.prototype.forEach.call(document.querySelectorAll('.apps-ui'), function (el) { el.remove(); });
     }
+    // A sidebar heading whose links were all removed for this role goes too.
+    Array.prototype.forEach.call(document.querySelectorAll('#sideNav .nav-section'), function (el) {
+      var next = el.nextElementSibling;
+      if (!next || next.classList.contains('nav-section')) { el.remove(); }
+    });
 
     $('sideNav').addEventListener('click', function (e) {
       var a = e.target.closest('[data-tab]');

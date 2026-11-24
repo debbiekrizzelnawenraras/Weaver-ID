@@ -6,7 +6,7 @@
   <title>Weaver-ID | Control Panel</title>
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-  <link href="css/weaver.css?v=4" rel="stylesheet">
+  <link href="css/weaver.css?v=5" rel="stylesheet">
   <script src="js/layout.js"></script>
 </head>
 <body data-roles="admin,staff">
@@ -30,13 +30,17 @@
 
         <nav class="sidebar-nav mt-3" id="sideNav">
           <a class="nav-link active" data-tab="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+          <div class="nav-section" role="presentation">Records</div>
           <a class="nav-link" data-tab="associations"><i class="bi bi-building"></i> Associations</a>
           <a class="nav-link apps-ui" data-tab="applications"><i class="bi bi-person-plus"></i> Applications <span class="badge rounded-pill bg-danger ms-auto d-none" id="appsBadge"></span></a>
           <a class="nav-link" data-tab="products"><i class="bi bi-box-seam"></i> Products</a>
-          <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> NFC Tags</a>
+          <div class="nav-section" role="presentation">NFC Tags</div>
           <a class="nav-link" data-tab="inventory"><i class="bi bi-archive"></i> Tag Inventory <span class="badge rounded-pill bg-danger ms-auto d-none" id="invBadge"></span></a>
+          <a class="nav-link" data-tab="nfc"><i class="bi bi-wifi"></i> Linked Tags</a>
+          <div class="nav-section" role="presentation">Monitoring</div>
           <a class="nav-link logs-ui" data-tab="logs"><i class="bi bi-journal-check"></i> Scan Logs</a>
           <a class="nav-link reports-ui" data-tab="reports"><i class="bi bi-flag"></i> Reports <span class="badge rounded-pill bg-danger ms-auto d-none" id="reportsBadge"></span></a>
+          <div class="nav-section" role="presentation">Accounts</div>
           <a class="nav-link admin-only" data-tab="users"><i class="bi bi-person-gear"></i> Users</a>
         </nav>
       </div>
@@ -378,6 +382,6 @@
   <script src="js/api.js"></script>
   <script src="js/password-policy.js"></script>
   <script src="js/account.js"></script>
-  <script src="js/admin.js?v=9"></script>
+  <script src="js/admin.js?v=10"></script>
 </body>
 </html>

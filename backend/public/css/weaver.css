@@ -268,6 +268,10 @@ body {
   width: 3px; height: 1.4rem; transform: translateY(-50%);
   background: var(--wid-gold); border-radius: 0 3px 3px 0;
 }
+.sidebar-nav .nav-section {
+  margin: 1rem 1.75rem .3rem; color: #7a857f;
+  font-size: .7rem; font-weight: 650; letter-spacing: .08em; text-transform: uppercase;
+}
 .sidebar-nav .nav-link:focus-visible { outline: 2px solid var(--wid-forest); outline-offset: -2px; box-shadow: none; }
 
 .sidebar-foot { padding: .9rem 1rem; border-top: 1px solid var(--wid-line); display: flex; align-items: center; gap: .5rem; }
@@ -292,6 +296,7 @@ body {
   html.menu-folded .sidebar-brand { padding-left: 0; padding-right: 0; justify-content: center; }
   html.menu-folded .sidebar-brand .vr,
   html.menu-folded .sidebar-brand .brand-text { display: none; }
+  html.menu-folded .sidebar-nav .nav-section { height: 0; margin: .5rem .9rem; overflow: hidden; border-top: 1px solid var(--wid-line); }
   html.menu-folded .sidebar-nav .nav-link { font-size: 0; justify-content: center; gap: 0; margin-left: .6rem; margin-right: .6rem; padding: .8rem 0; }
   html.menu-folded .sidebar-nav .nav-link .bi { font-size: 1.2rem; }
   html.menu-folded .sidebar-nav .nav-link .badge { position: absolute; top: .1rem; right: .2rem; margin: 0 !important; font-size: .65rem; }
