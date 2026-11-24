@@ -99,7 +99,16 @@
     damaged: { label: 'damaged or lost', cls: 'dark' }
   };
 
+  // Scan results use the same words as the mobile app. The stored values stay
+  // authenticated / unregistered / suspicious; only the label changes.
+  var RESULT_LABEL = { authenticated: 'Genuine', unregistered: 'Not registered', suspicious: 'Suspicious' };
+  function resultLabel(result) { return RESULT_LABEL[result] || result; }
+
   function badge(status) {
+    if (RESULT_LABEL[status]) {
+      var rc = { authenticated: 'success', unregistered: 'secondary', suspicious: 'danger' }[status];
+      return '<span class="badge bg-' + rc + '">' + esc(RESULT_LABEL[status]) + '</span>';
+    }
     if (TAG_STATUS[status]) {
       return '<span class="badge bg-' + TAG_STATUS[status].cls + '">' + esc(TAG_STATUS[status].label) + '</span>';
     }
@@ -396,7 +405,7 @@
     var rows = [['authenticated', '#2e7d32'], ['unregistered', '#78909c'], ['suspicious', '#c62828']];
     $('scanBars').innerHTML = rows.map(function (r) {
       var n = s.scans[r[0]];
-      return '<div class="mb-2"><div class="d-flex justify-content-between fs-8"><span class="text-capitalize">' + esc(r[0]) +
+      return '<div class="mb-2"><div class="d-flex justify-content-between fs-8"><span>' + esc(resultLabel(r[0])) +
         '</span><span>' + esc(n) + '</span></div><div class="bar-track"><div class="bar-fill" style="width:' +
         Math.round((n / total) * 100) + '%;background:' + r[1] + '"></div></div></div>';
     }).join('');
@@ -417,7 +426,7 @@
       var icon = l.result === 'authenticated' ? 'bi-check-lg' : (l.result === 'suspicious' ? 'bi-exclamation-lg' : 'bi-question-lg');
       return '<div class="d-flex align-items-center justify-content-between p-1"><div class="d-flex align-items-center gap-3">' +
         '<div class="scan-status-icon bg-' + cls + '-subtle text-' + cls + '"><i class="bi ' + icon + '"></i></div><div>' +
-        '<div class="fw-bold fs-7 text-capitalize">' + esc(l.result) + '</div>' +
+        '<div class="fw-bold fs-7">' + esc(resultLabel(l.result)) + '</div>' +
         '<div class="text-muted fs-8">' + esc(l.uid) + ' | ' + esc(product) + '</div></div></div>' +
         '<span class="text-muted fs-8">' + when(l.created_at) + '</span></div>';
     }).join('<hr class="my-1">') : '<div class="text-muted fs-7">No scans yet.</div>';
