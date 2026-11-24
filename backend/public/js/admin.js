@@ -841,14 +841,16 @@
     $('applicationNext').disabled = !r || r.current_page >= r.last_page;
   }
 
-  // Users are grouped: administrators first, then staff by municipality, then association
-  // accounts by municipality and association, each group with a header and a count.
+  // Users are grouped by role (administrators, staff, association accounts), each with a header
+  // and a count. Inside a group, rows are ordered by municipality; each row already shows it.
   var USER_GROUPS = [['admin', 'Administrators'], ['staff', 'Staff (Negosyo Centers)'], ['association', 'Association accounts']];
 
   function userRow(u) {
-    var scope = u.role === 'staff' ? (u.municipality || '-') : (u.role === 'association' ? (u.association ? u.association.name : '-') : 'Whole province');
+    var scope = u.role === 'staff' ? (u.municipality || '-') : (u.role === 'association'
+      ? (u.association ? u.association.name + (u.association.municipality ? ' (' + u.association.municipality + ')' : '') : '-')
+      : 'Whole province');
     var self = u.id === me.id;
-    return '<tr><td class="fw-semibold ps-4">' + esc(u.name) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.role) +
+    return '<tr><td class="fw-semibold">' + esc(u.name) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.role) +
       '</td><td>' + esc(scope) + '</td><td>' + badge(u.status) +
       (u.must_change_password ? ' <span class="badge bg-warning text-dark" title="This account still has its temporary password.">password not changed yet</span>' : '') +
       '</td><td class="text-end pe-3">' +
@@ -858,8 +860,8 @@
         (u.status === 'active' ? 'Deactivate' : 'Activate') + '</button>') + '</td></tr>';
   }
 
-  function groupHeader(text, count, sub) {
-    return '<tr class="' + (sub ? 'table-light' : 'table-secondary') + '"><td colspan="6" class="fw-semibold ' + (sub ? 'ps-3 fs-8' : '') + '">' +
+  function groupHeader(text, count) {
+    return '<tr class="table-secondary"><td colspan="6" class="fw-semibold">' +
       esc(text) + ' <span class="badge bg-light text-dark border ms-1">' + esc(count) + '</span></td></tr>';
   }
 
@@ -872,22 +874,18 @@
     USER_GROUPS.forEach(function (g) {
       var inGroup = list.filter(function (u) { return u.role === g[0]; });
       if (!inGroup.length) { return; }
-      rows.push(groupHeader(g[1], inGroup.length, false));
-      if (g[0] === 'admin') { inGroup.forEach(function (u) { rows.push(userRow(u)); }); return; }
-      var byMuni = {};
-      inGroup.forEach(function (u) { var m = userMunicipality(u) || 'No municipality'; (byMuni[m] = byMuni[m] || []).push(u); });
-      Object.keys(byMuni).sort().forEach(function (m) {
-        var members = byMuni[m];
-        if (g[0] === 'association') {
-          // Keep the accounts of one association together.
-          members = members.slice().sort(function (a, b) {
-            var na = a.association ? a.association.name : '', nb = b.association ? b.association.name : '';
-            return na.localeCompare(nb);
-          });
-        }
-        rows.push(groupHeader(m, members.length, true));
-        members.forEach(function (u) { rows.push(userRow(u)); });
-      });
+      rows.push(groupHeader(g[1], inGroup.length));
+      if (g[0] !== 'admin') {
+        // Same municipality together, then association, then the order the Sort by filter chose.
+        inGroup = inGroup.map(function (u, i) { return [u, i]; }).sort(function (x, y) {
+          var c = userMunicipality(x[0]).localeCompare(userMunicipality(y[0]));
+          if (c === 0 && g[0] === 'association') {
+            c = (x[0].association ? x[0].association.name : '').localeCompare(y[0].association ? y[0].association.name : '');
+          }
+          return c !== 0 ? c : x[1] - y[1];
+        }).map(function (x) { return x[0]; });
+      }
+      inGroup.forEach(function (u) { rows.push(userRow(u)); });
     });
     $('usersBody').innerHTML = rows.length ? rows.join('') : empty(6, 'No users to show.');
   }
